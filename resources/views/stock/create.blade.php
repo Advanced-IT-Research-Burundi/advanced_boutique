@@ -1,18 +1,41 @@
 @extends('layouts.app')
 
-@section('title', 'Ajouter un stock')
+@section('title', 'Créer un Stock')
 
 @section('content')
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">Ajouter un nouveau stock</h5>
-                </div>
+<div class="container-fluid px-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a href="{{ route('dashboard') }}" class="text-decoration-none">
+                    <i class="bi bi-house"></i> Accueil
+                </a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="{{ route('stocks.index') }}" class="text-decoration-none">
+                    <i class="bi bi-boxes"></i> Stocks
+                </a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">
+                <i class="bi bi-plus-circle"></i> Nouveau Stock
+            </li>
+        </ol>
+    </nav>
 
+    <!-- Formulaire de création -->
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-plus-circle me-2"></i>
+                        Créer un nouveau stock
+                    </h5>
+                </div>
                 <div class="card-body">
-                    <form action="{{ route('stocks.store') }}" method="POST" autocomplete="off">
+                    <form action="{{ route('stocks.store') }}" method="POST">
+                        @csrf
                         @include('stock._form')
                     </form>
                 </div>
@@ -21,16 +44,3 @@
     </div>
 </div>
 @endsection
-
-@push('scripts')
-<script>
-    // Scripts spécifiques à la création si nécessaire
-    document.addEventListener('DOMContentLoaded', function() {
-        // Initialisation des sélecteurs avec Select2 si nécessaire
-        $('#agency_id, #user_id').select2({
-            theme: 'bootstrap-5',
-            width: '100%'
-        });
-    });
-</script>
-@endpush

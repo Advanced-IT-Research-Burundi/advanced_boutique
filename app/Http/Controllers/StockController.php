@@ -6,83 +6,132 @@ use App\Models\Stock;
 use App\Models\Agency;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\View\View;
-use Illuminate\Http\RedirectResponse;
-use App\Http\Requests\StockStoreRequest;
-use App\Http\Requests\StockUpdateRequest;
+use Illuminate\Support\Facades\Auth;
 
 class StockController extends Controller
 {
-    public function index(Request $request): View
+    /**
+     * Display a listing of the resource.
+     */
+    public function index(Request $request)
     {
-        $search = $request->input('search');
+        $query = Stock::with(['agency', 'createdBy', 'user']);
 
-        $stocks = Stock::with(['agency', 'user', 'creator'])
-            ->when($search, function($query) use ($search) {
-                return $query->where('name', 'like', "%{$search}%")
-                          ->orWhere('location', 'like', "%{$search}%")
-                          ->orWhere('description', 'like', "%{$search}%");
-            })
-            ->latest()
-            ->paginate(10);
+        // Filtres de recherche
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('location', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%");
+            });
+        }
 
-        return view('stock.index', compact('stocks', 'search'));
+        if ($request->filled('agency_id')) {
+            $query->where('agency_id', $request->agency_id);
+        }
+
+        if ($request->filled('created_by')) {
+            $query->where('created_by', $request->created_by);
+        }
+
+        if ($request->filled('user_id')) {
+            $query->where('user_id', $request->user_id);
+        }
+
+        // Tri par défaut
+        $query->orderBy('created_at', 'desc');
+
+        $stocks = $query->paginate(15)->withQueryString();
+
+        // Données pour les filtres
+        $agencies = Agency::latest()->get();
+        $creators = User::latest()->get();
+        $users = User::latest()->get();
+
+        return view('stock.index', compact('stocks', 'agencies', 'creators', 'users'));
     }
 
-    public function create(): View
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
     {
-        $agencies = Agency::pluck('name', 'id');
+        $agencies = Agency::latest()->get();
+        $users = User::latest()->get();
 
-
-        return view('stock.create', compact('agencies'));
+        return view('stock.create', compact('agencies', 'users'));
     }
 
-    public function store(StockStoreRequest $request): RedirectResponse
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
     {
-        $data = $request->validated();
-        $data['created_by'] = auth()->id();
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'location' => 'nullable|string|max:255',
+            'description' => 'nullable|string',
+            'agency_id' => 'nullable|exists:agencies,id',
+            'user_id' => 'nullable|exists:users,id',
+        ]);
 
-        $stock = Stock::create($data);
+        $validated['created_by'] = Auth::id();
 
-        return redirect()
-            ->route('stocks.show', $stock->id)
-            ->with('success', 'Le stock a été créé avec succès.');
+        Stock::create($validated);
+
+        return redirect()->route('stocks.index')
+                        ->with('success', 'Stock créé avec succès.');
     }
 
-    public function show(Stock $stock): View
+    /**
+     * Display the specified resource.
+     */
+    public function show(Stock $stock)
     {
-        $stock->load(['agency', 'user', 'creator']);
+        $stock->load(['agency', 'createdBy', 'user']);
+
         return view('stock.show', compact('stock'));
     }
 
-    public function edit(Stock $stock): View
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(Stock $stock)
     {
-        $agencies = Agency::pluck('name', 'id');
-        $users = User::pluck('name', 'id');
+        $agencies = Agency::latest()->get();
+        $users = User::latest()->get();
 
         return view('stock.edit', compact('stock', 'agencies', 'users'));
     }
 
-    public function update(StockUpdateRequest $request, Stock $stock): RedirectResponse
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, Stock $stock)
     {
-        $stock->update($request->validated());
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'location' => 'nullable|string|max:255',
+            'description' => 'nullable|string',
+            'agency_id' => 'nullable|exists:agencies,id',
+            'user_id' => 'nullable|exists:users,id',
+        ]);
 
-        return redirect()
-            ->route('stocks.show', $stock->id)
-            ->with('success', 'Le stock a été mis à jour avec succès.');
+        $stock->update($validated);
+
+        return redirect()->route('stocks.index')
+                        ->with('success', 'Stock mis à jour avec succès.');
     }
 
-    public function destroy(Stock $stock): RedirectResponse
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(Stock $stock)
     {
-        // Vérifier s'il y a des articles liés avant de supprimer
-        if ($stock->articles()->exists()) {
-            return back()->with('error', 'Impossible de supprimer ce stock car il contient des articles.');
-        }
-
         $stock->delete();
 
-        return redirect()
-            ->route('stocks.index')
-            ->with('success', 'Le stock a été supprimé avec succès.');
+        return redirect()->route('stocks.index')
+                        ->with('success', 'Stock supprimé avec succès.');
     }
 }

@@ -196,10 +196,10 @@
                                     @if($agency->createdBy)
                                         <div class="d-flex align-items-center">
                                             <div class="avatar-sm bg-secondary text-white rounded-circle me-2 d-flex align-items-center justify-content-center">
-                                                {{ strtoupper(substr($agency->createdBy->name, 0, 1)) }}
+                                                {{ strtoupper(substr($agency->createdBy->full_name, 0, 1)) }}
                                             </div>
                                             <div>
-                                                <div class="fw-medium">{{ $agency->createdBy->name }}</div>
+                                                <div class="fw-medium">{{ $agency->createdBy->full_name }}</div>
                                                 <small class="text-muted">{{ $agency->created_at->format('d/m/Y H:i') }}</small>
                                             </div>
                                         </div>
