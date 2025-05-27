@@ -210,7 +210,7 @@
                 </nav>
             @endif
 
-            <!-- Flash Messages -->
+            {{-- <!-- Flash Messages -->
             @if(session('success'))
                 <div class="alert alert-success alert-dismissible fade show" role="alert">
                     <i class="bi bi-check-circle me-2"></i>
@@ -241,7 +241,7 @@
                     {{ session('info') }}
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
-            @endif
+            @endif --}}
 
             <!-- Page Content -->
             @yield('content')
@@ -255,6 +255,250 @@
     @vite(['resources/js/app.js'])
 
     <script>
+        // Fonction améliorée pour afficher les notifications toast
+        function showToast(type, message, title = null, duration = 5000) {
+            let toastContainer = document.getElementById('toast-container');
+            if (!toastContainer) {
+                toastContainer = document.createElement('div');
+                toastContainer.id = 'toast-container';
+                toastContainer.className = 'toast-container position-fixed top-0 end-0 p-3';
+                toastContainer.style.zIndex = '9999';
+                document.body.appendChild(toastContainer);
+            }
+
+            // Déclencher la sonnerie si le type est 'info'
+            if (type === 'info') {
+                playAlarmSound();
+            }
+
+            const toastId = 'toast-' + Date.now();
+            const iconMap = {
+                'success': 'bi-check-circle-fill',
+                'warning': 'bi-exclamation-triangle-fill',
+                'danger': 'bi-x-circle-fill',
+                'error': 'bi-x-circle-fill',
+                'info': 'bi-info-circle-fill'
+            };
+            const titleMap = {
+                'success': 'Succès',
+                'warning': 'Attention',
+                'danger': 'Erreur',
+                'error': 'Erreur',
+                'info': 'Information'
+            };
+
+            const toast = document.createElement('div');
+            toast.id = toastId;
+            toast.className = `toast modern-toast toast-${type} align-items-center border-0 mb-2`;
+            toast.setAttribute('role', 'alert');
+            toast.style.minWidth = '300px';
+
+            const toastTitle = title || titleMap[type];
+            toast.innerHTML = `
+                <div class="d-flex w-100">
+                    <div class="toast-body text-white">
+                        <div class="d-flex align-items-start">
+                            <i class="bi ${iconMap[type]} me-3 mt-1 fs-5"></i>
+                            <div class="flex-grow-1">
+                                ${toastTitle ? `<div class="fw-semibold mb-1">${toastTitle}</div>` : ''}
+                                <div>${message}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>
+            `;
+
+            toastContainer.appendChild(toast);
+
+            const bsToast = new bootstrap.Toast(toast, {
+                delay: duration,
+                autohide: true
+            });
+
+            bsToast.show();
+
+            // Animation d'entrée
+            toast.style.transform = 'translateX(100%)';
+            toast.style.opacity = '0';
+            setTimeout(() => {
+                toast.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+                toast.style.transform = 'translateX(0)';
+                toast.style.opacity = '1';
+            }, 10);
+
+            toast.addEventListener('hidden.bs.toast', () => {
+                toast.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+                toast.style.transform = 'translateX(100%)';
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 300);
+            });
+        }
+        // Gestion des messages de session Laravel
+        document.addEventListener('DOMContentLoaded', function() {
+            @if(session('success'))
+                showToast('success', "{{ session('success') }}", 'Succès');
+            @endif
+
+            @if(session('error'))
+                showToast('error', "{{ session('error') }}", 'Erreur');
+            @endif
+
+            @if(session('warning'))
+                showToast('warning', "{{ session('warning') }}", 'Attention');
+            @endif
+
+            @if(session('info'))
+                showToast('info', "{{ session('info') }}", 'Information');
+            @endif
+
+            // Animation au scroll pour le header
+            let lastScrollTop = 0;
+            const header = document.querySelector('.modern-header');
+
+            window.addEventListener('scroll', function() {
+                let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+
+                if (scrollTop > lastScrollTop && scrollTop > 100) {
+                    // Scroll vers le bas
+                    header.style.transform = 'translateY(-100%)';
+                } else {
+                    // Scroll vers le haut
+                    header.style.transform = 'translateY(0)';
+                }
+                lastScrollTop = scrollTop;
+            });
+
+            // Gestion des dropdowns au hover sur desktop
+            if (window.innerWidth > 991) {
+                const dropdowns = document.querySelectorAll('.dropdown');
+
+                dropdowns.forEach(dropdown => {
+                    let timeout;
+
+                    dropdown.addEventListener('mouseenter', function() {
+                        clearTimeout(timeout);
+                        const dropdownToggle = this.querySelector('.dropdown-toggle');
+                        const dropdownMenu = this.querySelector('.dropdown-menu');
+
+                        if (dropdownToggle && dropdownMenu) {
+                            dropdownMenu.classList.add('show');
+                            dropdownToggle.classList.add('show');
+                            dropdownToggle.setAttribute('aria-expanded', 'true');
+                        }
+                    });
+
+                    dropdown.addEventListener('mouseleave', function() {
+                        const dropdownToggle = this.querySelector('.dropdown-toggle');
+                        const dropdownMenu = this.querySelector('.dropdown-menu');
+
+                        timeout = setTimeout(() => {
+                            if (dropdownToggle && dropdownMenu) {
+                                dropdownMenu.classList.remove('show');
+                                dropdownToggle.classList.remove('show');
+                                dropdownToggle.setAttribute('aria-expanded', 'false');
+                            }
+                        }, 300);
+                    });
+                });
+            }
+
+            // Animation des liens de navigation
+            const navLinks = document.querySelectorAll('.modern-nav-link');
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    // Créer un effet ripple
+                    const ripple = document.createElement('span');
+                    const rect = this.getBoundingClientRect();
+                    const size = Math.max(rect.width, rect.height);
+                    const x = e.clientX - rect.left - size / 2;
+                    const y = e.clientY - rect.top - size / 2;
+
+                    ripple.style.cssText = `
+                        position: absolute;
+                        width: ${size}px;
+                        height: ${size}px;
+                        left: ${x}px;
+                        top: ${y}px;
+                        background: rgba(255, 255, 255, 0.3);
+                        border-radius: 50%;
+                        transform: scale(0);
+                        animation: ripple 0.6s linear;
+                        pointer-events: none;
+                    `;
+
+                    this.style.position = 'relative';
+                    this.style.overflow = 'hidden';
+                    this.appendChild(ripple);
+
+                    setTimeout(() => ripple.remove(), 600);
+                });
+            });
+
+            // Notification en temps réel (WebSocket simulation)
+            function simulateRealTimeNotifications() {
+                const notifications = [
+                    { type: 'info', message: 'Nouveau rendez-vous programmé', title: 'Rendez-vous' },
+                    { type: 'warning', message: 'Stock faible détecté', title: 'Alerte Stock' },
+                    { type: 'success', message: 'Paiement reçu', title: 'Paiement' },
+                    { type: 'info', message: 'Nouveau patient enregistré', title: 'Patient' }
+                ];
+
+                // Simuler une notification toutes les 30 secondes (à des fins de démonstration)
+                setInterval(() => {
+                    if (Math.random() < 0.3) { // 30% de chance
+                        const randomNotif = notifications[Math.floor(Math.random() * notifications.length)];
+                        showToast(randomNotif.type, randomNotif.message, randomNotif.title);
+
+                        // Mettre à jour le badge de notification
+                        updateNotificationBadge();
+                    }
+                }, 30000);
+            }
+
+            function updateNotificationBadge() {
+                const badge = document.querySelector('.notification-badge');
+                if (badge) {
+                    let currentCount = parseInt(badge.textContent) || 0;
+                    badge.textContent = currentCount + 1;
+
+                    // Animation du badge
+                    badge.style.animation = 'none';
+                    badge.offsetHeight; // Trigger reflow
+                    badge.style.animation = 'pulse 2s infinite';
+                }
+            }
+
+            // Activer les notifications en temps réel (décommenter pour la production)
+            // simulateRealTimeNotifications();
+        });
+
+        // Fonction utilitaire pour les requêtes AJAX avec feedback
+        function makeAjaxRequest(url, options = {}) {
+            const defaultOptions = {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                }
+            };
+
+            const finalOptions = { ...defaultOptions, ...options };
+
+            return fetch(url, finalOptions)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .catch(error => {
+                    console.error('Ajax request failed:', error);
+                    showToast('error', 'Erreur de connexion au serveur', 'Erreur');
+                    throw error;
+                });
+        }
+
         // Sidebar Toggle for Mobile
         document.addEventListener('DOMContentLoaded', function() {
             const sidebarToggle = document.getElementById('sidebarToggle');
