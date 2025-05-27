@@ -1,7 +1,12 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use App\Models\Company;
+use App\Models\Agency;
+use App\Models\Category;
+use App\Models\User;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
 
 class ParametrageController extends Controller

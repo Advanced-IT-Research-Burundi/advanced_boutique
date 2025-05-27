@@ -14,11 +14,11 @@
             <a class="list-group-item list-group-item-action active d-flex align-items-center" id="company-tab" data-bs-toggle="list" href="#company" role="tab">
               <i class="bi bi-building me-2"></i> Informations entreprise
             </a>
-            <a class="list-group-item list-group-item-action d-flex align-items-center" id="dental-tab" data-bs-toggle="list" href="#dental" role="tab">
-              <i class="bi bi-clipboard2-pulse me-2"></i> Dentaire
+            <a class="list-group-item list-group-item-action d-flex align-items-center" id="commercial-tab" data-bs-toggle="list" href="#commercial" role="tab">
+              <i class="bi bi-briefcase me-2"></i> Commercial
             </a>
-            <a class="list-group-item list-group-item-action d-flex align-items-center" id="pharmacy-tab" data-bs-toggle="list" href="#pharmacy" role="tab">
-              <i class="bi bi-capsule me-2"></i> Pharmacie
+            <a class="list-group-item list-group-item-action d-flex align-items-center" id="products-tab" data-bs-toggle="list" href="#products" role="tab">
+              <i class="bi bi-box-seam me-2"></i> Produits & Services
             </a>
             <a class="list-group-item list-group-item-action d-flex align-items-center" id="notifications-tab" data-bs-toggle="list" href="#notifications" role="tab">
               <i class="bi bi-bell me-2"></i> Notifications
@@ -269,13 +269,13 @@
               </form>
             </div>
 
-            <!-- Dentaire -->
-            <div class="tab-pane fade" id="dental" role="tabpanel">
+            <!-- Commercial -->
+            <div class="tab-pane fade" id="commercial" role="tabpanel">
               <div class="d-flex justify-content-between align-items-center mb-4">
-                <h5 class="mb-0">Dentistes</h5>
+                <h5 class="mb-0">Agences commerciales</h5>
                 <a type="button" class="btn btn-sm btn-success"
                 href="{{ route('agencies.index') }}">
-                  <i class="bi bi-plus-circle"></i> Gérer les dentistes
+                  <i class="bi bi-plus-circle"></i> Gérer les agences
                 </a>
               </div>
 
@@ -283,106 +283,100 @@
                 <table class="table table-hover table-striped border">
                   <thead class="table-light">
                     <tr>
-                      <th>Nom</th>
-                      <th>Spécialité</th>
-                      <th>N° Licence</th>
-                      <th>Disponibilité</th>
-                      {{-- <th>Actions</th> --}}
+                      <th>Code</th>
+                      <th>Nom de l'agence</th>
+                      <th>Responsable</th>
+                      <th>Adresse</th>
+                      <th>Statut</th>
                     </tr>
                   </thead>
                   <tbody>
-                    @foreach($agencies as $dentist)
+                    @foreach($agencies as $agency)
                     <tr>
                       <td>
+                        <span class="badge bg-primary">{{ $agency->code }}</span>
+                      </td>
+                      <td>
                         <div class="d-flex align-items-center">
-                          <div class="flex-shrink-0" style="width: 30px; height: 30px; border-radius: 50%; background-color: {{ $dentist->calendar_color }}"></div>
-                          <div class="ms-2">{{ $dentist->user->name }}</div>
+                          <i class="bi bi-building me-2 text-primary"></i>
+                          <div>
+                            {{ $agency->name }}
+                            @if($agency->is_main_office)
+                              <span class="badge bg-warning text-dark ms-1">Siège</span>
+                            @endif
+                          </div>
                         </div>
                       </td>
-                      <td>{{ $dentist->specialty }}</td>
-                      <td>{{ $dentist->license_number }}</td>
+                      <td>
+                        @if($agency->manager)
+                          {{ $agency->manager->first_name }} {{ $agency->manager->last_name }}
+                        @else
+                          <span class="text-muted">Non assigné</span>
+                        @endif
+                      </td>
+                      <td>{{ $agency->adresse ?? 'Non renseignée' }}</td>
                       <td>
                         <div class="form-check form-switch">
-                          <input class="form-check-input dentist-availability" type="checkbox" id="dentist-available-{{ $dentist->id }}" data-id="{{ $dentist->id }}" {{ $dentist->available ? 'checked' : '' }}>
+                          <input class="form-check-input agency-status" type="checkbox" id="agency-status-{{ $agency->id }}" data-id="{{ $agency->id }}" {{ $agency->is_active ? 'checked' : '' }}>
                         </div>
                       </td>
-                      {{-- <td>
-                        <button class="btn btn-sm btn-outline-primary me-1" data-bs-toggle="modal" data-bs-target="#editDentistModal" data-dentist-id="{{ $dentist->id }}">
-                          <i class="bi bi-pencil"></i>
-                        </button>
-                        <button class="btn btn-sm btn-outline-danger delete-dentist" data-dentist-id="{{ $dentist->id }}">
-                          <i class="bi bi-trash"></i>
-                        </button>
-                      </td> --}}
                     </tr>
                     @endforeach
                   </tbody>
                 </table>
               </div>
 
-              <div class="mb-4">
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                <h5 class="mb-0">Types de traitements</h5>
-                <a type="button" class="btn btn-sm btn-success"
-                href="{{ route('settings.treatment-types.index') }}">
-                  <i class="bi bi-plus-circle"></i> Gérer les types de traitements
-                </a>
-              </div>
-                <div class="table-responsive">
-                  <table class="table table-hover border">
-                    <thead class="table-light">
-                      <tr>
-                        <th>Code</th>
-                        <th>Description</th>
-                        <th>Tarif par défaut</th>
-                        {{-- <th>Actions</th> --}}
-                      </tr>
-                    </thead>
-                    <tbody>
-
-                        {{-- @foreach ($types_traitements as $type)
-                            <tr>
-                                <td>{{ $type->name }}</td>
-                                <td>{{ $type->description }}</td>
-                                <td>{{ $type->base_price }}</td>
-                                <td>
-                                    <button class="btn btn-sm btn-outline-primary me-1" data-bs-toggle="modal" data-bs-target="#editTreatmentTypeModal" data-treatment-type-id="{{ $type->id }}">
-                                        <i class="bi bi-pencil"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-outline-danger delete-treatment-type" data-treatment-type-id="{{ $type->id }}">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-                                </td>
-                            </tr>
-
-                        @endforeach --}}
-
-                    </tbody>
-                  </table>
+              <div class="row mb-4">
+                <div class="col-md-6">
+                  <div class="card">
+                    <div class="card-header bg-light">
+                      <h6 class="mb-0">Paramètres commerciaux</h6>
+                    </div>
+                    <div class="card-body">
+                      <div class="mb-3">
+                        <label class="form-label">Durée de validité des devis (jours)</label>
+                        <select class="form-select" id="quote_validity">
+                          <option value="15">15 jours</option>
+                          <option value="30" selected>30 jours</option>
+                          <option value="45">45 jours</option>
+                          <option value="60">60 jours</option>
+                        </select>
+                      </div>
+                      <div class="mb-3">
+                        <label class="form-label">Objectif de vente mensuel par défaut</label>
+                        <div class="input-group">
+                          <input type="number" class="form-control" id="default_sales_target" value="100000" min="0">
+                          <span class="input-group-text">FC</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-
-              </div>
-
-              <div class="mb-3">
-                <h5 class="mb-3">Durée par défaut des RDV (minutes)</h5>
-                <div class="row">
-                  <div class="col-md-4">
-                    <select class="form-select">
-                      <option value="15">15 minutes</option>
-                      <option value="30" selected>30 minutes</option>
-                      <option value="45">45 minutes</option>
-                      <option value="60">60 minutes</option>
-                    </select>
+                <div class="col-md-6">
+                  <div class="card">
+                    <div class="card-header bg-light">
+                      <h6 class="mb-0">Commissions et remises</h6>
+                    </div>
+                    <div class="card-body">
+                      <div class="mb-3">
+                        <label class="form-label">Taux de commission par défaut (%)</label>
+                        <input type="number" class="form-control" id="default_commission_rate" value="5" min="0" max="100" step="0.1">
+                      </div>
+                      <div class="mb-3">
+                        <label class="form-label">Remise maximale autorisée (%)</label>
+                        <input type="number" class="form-control" id="max_discount_rate" value="10" min="0" max="100" step="0.1">
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
 
-            <!-- Pharmacie -->
-            <div class="tab-pane fade" id="pharmacy" role="tabpanel">
+            <!-- Produits & Services -->
+            <div class="tab-pane fade" id="products" role="tabpanel">
               <div class="mb-4">
                 <div class="d-flex justify-content-between align-items-center mb-3">
-                  <h5 class="mb-0">Catégories de médicaments</h5>
+                  <h5 class="mb-0">Catégories de produits</h5>
                   <a class="btn btn-sm btn-success" href="{{ route('categories.index') }}">
                     <i class="bi bi-plus-circle"></i> Gérer les catégories
                   </a>
@@ -391,26 +385,24 @@
                   <table class="table table-hover border">
                     <thead class="table-light">
                       <tr>
-                        <th>Code</th>
                         <th>Nom</th>
                         <th>Description</th>
-                        {{-- <th>Actions</th> --}}
+                        <th>Nombre de produits</th>
                       </tr>
                     </thead>
                     <tbody>
                       @foreach($categories as $category)
                       <tr>
-                        <td>{{ $category->code ?? '-' }}</td>
-                        <td>{{ $category->name }}</td>
-                        <td>{{ $category->description }}</td>
-                        {{-- <td>
-                          <button class="btn btn-sm btn-outline-primary me-1" data-bs-toggle="modal" data-bs-target="#editCategoryModal" data-category-id="{{ $category->id }}">
-                            <i class="bi bi-pencil"></i>
-                          </button>
-                          <button class="btn btn-sm btn-outline-danger delete-category" data-category-id="{{ $category->id }}">
-                            <i class="bi bi-trash"></i>
-                          </button>
-                        </td> --}}
+                        <td>
+                          <div class="d-flex align-items-center">
+                            <i class="bi bi-tag me-2 text-primary"></i>
+                            {{ $category->name }}
+                          </div>
+                        </td>
+                        <td>{{ $category->description ?? 'Aucune description' }}</td>
+                        <td>
+                          <span class="badge bg-info">{{ $category->products_count ?? 0 }}</span>
+                        </td>
                       </tr>
                       @endforeach
                     </tbody>
@@ -422,15 +414,19 @@
                 <div class="col-md-6">
                   <div class="card">
                     <div class="card-header bg-light">
-                      <h6 class="mb-0">Seuil d'alerte pour stock bas</h6>
+                      <h6 class="mb-0">Gestion des stocks</h6>
                     </div>
                     <div class="card-body">
                       <div class="mb-3">
-                        <label class="form-label">Valeur globale par défaut</label>
+                        <label class="form-label">Seuil d'alerte stock minimum</label>
                         <div class="input-group">
                           <input type="number" class="form-control" id="default_stock_alert" value="10" min="1">
                           <span class="input-group-text">unités</span>
                         </div>
+                      </div>
+                      <div class="form-check form-switch mb-2">
+                        <input class="form-check-input" type="checkbox" id="auto_reorder" checked>
+                        <label class="form-check-label" for="auto_reorder">Réapprovisionnement automatique</label>
                       </div>
                     </div>
                   </div>
@@ -438,16 +434,16 @@
                 <div class="col-md-6">
                   <div class="card">
                     <div class="card-header bg-light">
-                      <h6 class="mb-0">Notifications de stock</h6>
+                      <h6 class="mb-0">Tarification</h6>
                     </div>
                     <div class="card-body">
-                      <div class="form-check form-switch mb-2">
-                        <input class="form-check-input" type="checkbox" id="stock_alert_email" checked>
-                        <label class="form-check-label" for="stock_alert_email">Alertes par email</label>
+                      <div class="mb-3">
+                        <label class="form-label">Marge bénéficiaire par défaut (%)</label>
+                        <input type="number" class="form-control" id="default_profit_margin" value="25" min="0" step="0.1">
                       </div>
                       <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" id="stock_alert_system" checked>
-                        <label class="form-check-label" for="stock_alert_system">Alertes système</label>
+                        <input class="form-check-input" type="checkbox" id="dynamic_pricing" checked>
+                        <label class="form-check-label" for="dynamic_pricing">Tarification dynamique</label>
                       </div>
                     </div>
                   </div>
@@ -477,12 +473,16 @@
                         </div>
                       </div>
                       <div class="mb-3">
-                        <label for="reminderTime" class="form-label">Rappel de RDV (heures avant)</label>
-                        <select class="form-select" id="reminderTime">
-                          <option value="24" selected>24 heures</option>
-                          <option value="48">48 heures</option>
-                          <option value="72">72 heures</option>
-                        </select>
+                        <div class="form-check form-switch">
+                          <input class="form-check-input" type="checkbox" id="stockAlerts" checked>
+                          <label class="form-check-label" for="stockAlerts">Alertes de stock</label>
+                        </div>
+                      </div>
+                      <div class="mb-3">
+                        <div class="form-check form-switch">
+                          <input class="form-check-input" type="checkbox" id="salesTargetAlerts" checked>
+                          <label class="form-check-label" for="salesTargetAlerts">Alertes objectifs de vente</label>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -490,19 +490,19 @@
                 <div class="col-md-6">
                   <div class="card mb-4">
                     <div class="card-header bg-light">
-                      <h6 class="mb-0">Message de rappel par défaut</h6>
+                      <h6 class="mb-0">Messages de notification par défaut</h6>
                     </div>
                     <div class="card-body">
                       <div class="alert alert-info small mb-3">
-                        <i class="bi bi-info-circle me-1"></i> Utilisez les balises suivantes qui seront remplacées automatiquement: [Nom], [Date], [Heure], [Dentiste], [Téléphone]
+                        <i class="bi bi-info-circle me-1"></i> Utilisez les balises suivantes: [Nom], [Produit], [Quantité], [Prix], [Date], [Agence]
                       </div>
                       <div class="mb-3">
-                        <label class="form-label">Message Email</label>
-                        <textarea class="form-control" rows="4">Bonjour [Nom], nous vous rappelons votre rendez-vous le [Date] à [Heure] avec Dr. [Dentiste]. Veuillez nous contacter au [Téléphone] pour confirmer ou modifier votre RDV.</textarea>
+                        <label class="form-label">Message confirmation de commande</label>
+                        <textarea class="form-control" rows="3">Bonjour [Nom], votre commande de [Produit] (Qté: [Quantité]) d'un montant de [Prix] FC a été confirmée. Livraison prévue le [Date].</textarea>
                       </div>
                       <div class="mb-3">
-                        <label class="form-label">Message SMS</label>
-                        <textarea class="form-control" rows="3">Rappel: RDV le [Date] à [Heure] avec Dr. [Dentiste]. Pour confirmer/modifier: [Téléphone]</textarea>
+                        <label class="form-label">Message alerte de stock</label>
+                        <textarea class="form-control" rows="3">Alerte: Le stock de [Produit] dans l'agence [Agence] est critique ([Quantité] unités restantes).</textarea>
                       </div>
                     </div>
                   </div>

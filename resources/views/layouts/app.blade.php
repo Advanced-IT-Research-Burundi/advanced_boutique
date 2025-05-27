@@ -175,7 +175,7 @@
                             </a>
                         </li>
                         <li>
-                            <a class="dropdown-item" href="#">
+                            <a class="dropdown-item" href="{{ route('parametres')  }}">
                                 <i class="bi bi-gear me-2"></i>Paramètres
                             </a>
                         </li>
