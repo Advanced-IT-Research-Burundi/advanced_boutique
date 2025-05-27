@@ -1,0 +1,178 @@
+created:
+    - app/Http/Controllers/CompanyController.php
+    - app/Http/Controllers/StockController.php
+    - app/Http/Controllers/CategoryController.php
+    - app/Http/Controllers/ProductController.php
+    - app/Http/Controllers/ClientController.php
+    - app/Http/Controllers/SupplierController.php
+    - app/Http/Controllers/PurchaseController.php
+    - app/Http/Controllers/SaleController.php
+    - app/Http/Controllers/CashRegisterController.php
+    - app/Http/Controllers/CashTransactionController.php
+    - app/Http/Controllers/ExpenseController.php
+    - app/Http/Controllers/ExpenseTypeController.php
+    - database/factories/CompanyFactory.php
+    - database/factories/StockFactory.php
+    - database/factories/UserStockFactory.php
+    - database/factories/CategoryFactory.php
+    - database/factories/ProductFactory.php
+    - database/factories/StockProductFactory.php
+    - database/factories/ClientFactory.php
+    - database/factories/SupplierFactory.php
+    - database/factories/PurchaseFactory.php
+    - database/factories/PurchaseItemFactory.php
+    - database/factories/SaleFactory.php
+    - database/factories/SaleItemFactory.php
+    - database/factories/PaymentFactory.php
+    - database/factories/StockTransferFactory.php
+    - database/factories/StockTransferItemFactory.php
+    - database/factories/CashRegisterFactory.php
+    - database/factories/CashTransactionFactory.php
+    - database/factories/ExpenseFactory.php
+    - database/factories/ExpenseTypeFactory.php
+    - database/migrations/2025_05_27_031534_create_companies_table.php
+    - database/migrations/2025_05_27_031535_create_stocks_table.php
+    - database/migrations/2025_05_27_031536_create_user_stocks_table.php
+    - database/migrations/2025_05_27_031537_create_categories_table.php
+    - database/migrations/2025_05_27_031538_create_products_table.php
+    - database/migrations/2025_05_27_031539_create_stock_products_table.php
+    - database/migrations/2025_05_27_031540_create_clients_table.php
+    - database/migrations/2025_05_27_031541_create_suppliers_table.php
+    - database/migrations/2025_05_27_031542_create_purchases_table.php
+    - database/migrations/2025_05_27_031543_create_purchase_items_table.php
+    - database/migrations/2025_05_27_031544_create_sales_table.php
+    - database/migrations/2025_05_27_031545_create_sale_items_table.php
+    - database/migrations/2025_05_27_031546_create_payments_table.php
+    - database/migrations/2025_05_27_031547_create_stock_transfers_table.php
+    - database/migrations/2025_05_27_031548_create_stock_transfer_items_table.php
+    - database/migrations/2025_05_27_031549_create_cash_registers_table.php
+    - database/migrations/2025_05_27_031550_create_cash_transactions_table.php
+    - database/migrations/2025_05_27_031551_create_expenses_table.php
+    - database/migrations/2025_05_27_031552_create_expense_types_table.php
+    - app/Models/Company.php
+    - app/Models/Stock.php
+    - app/Models/UserStock.php
+    - app/Models/Category.php
+    - app/Models/Product.php
+    - app/Models/StockProduct.php
+    - app/Models/Client.php
+    - app/Models/Supplier.php
+    - app/Models/Purchase.php
+    - app/Models/PurchaseItem.php
+    - app/Models/Sale.php
+    - app/Models/SaleItem.php
+    - app/Models/Payment.php
+    - app/Models/StockTransfer.php
+    - app/Models/StockTransferItem.php
+    - app/Models/CashRegister.php
+    - app/Models/CashTransaction.php
+    - app/Models/Expense.php
+    - app/Models/ExpenseType.php
+    - database/seeders/UserCompanyStockCategoryProductClientSupplierPurchasePurchaseItemSaleSaleItemPaymentStockTransferStockTransferItemCashRegisterCashTransactionExpenseExpenseTypeSeeder.php
+    - tests/Feature/Http/Controllers/CompanyControllerTest.php
+    - tests/Feature/Http/Controllers/StockControllerTest.php
+    - tests/Feature/Http/Controllers/CategoryControllerTest.php
+    - tests/Feature/Http/Controllers/ProductControllerTest.php
+    - tests/Feature/Http/Controllers/ClientControllerTest.php
+    - tests/Feature/Http/Controllers/SupplierControllerTest.php
+    - tests/Feature/Http/Controllers/PurchaseControllerTest.php
+    - tests/Feature/Http/Controllers/SaleControllerTest.php
+    - tests/Feature/Http/Controllers/CashRegisterControllerTest.php
+    - tests/Feature/Http/Controllers/CashTransactionControllerTest.php
+    - tests/Feature/Http/Controllers/ExpenseControllerTest.php
+    - tests/Feature/Http/Controllers/ExpenseTypeControllerTest.php
+    - app/Http/Requests/CompanyStoreRequest.php
+    - app/Http/Requests/CompanyUpdateRequest.php
+    - app/Http/Requests/StockStoreRequest.php
+    - app/Http/Requests/StockUpdateRequest.php
+    - app/Http/Requests/CategoryStoreRequest.php
+    - app/Http/Requests/CategoryUpdateRequest.php
+    - app/Http/Requests/ProductStoreRequest.php
+    - app/Http/Requests/ProductUpdateRequest.php
+    - app/Http/Requests/ClientStoreRequest.php
+    - app/Http/Requests/ClientUpdateRequest.php
+    - app/Http/Requests/SupplierStoreRequest.php
+    - app/Http/Requests/SupplierUpdateRequest.php
+    - app/Http/Requests/PurchaseStoreRequest.php
+    - app/Http/Requests/PurchaseUpdateRequest.php
+    - app/Http/Requests/SaleStoreRequest.php
+    - app/Http/Requests/SaleUpdateRequest.php
+    - app/Http/Requests/CashRegisterStoreRequest.php
+    - app/Http/Requests/CashRegisterUpdateRequest.php
+    - app/Http/Requests/CashTransactionStoreRequest.php
+    - app/Http/Requests/CashTransactionUpdateRequest.php
+    - app/Http/Requests/ExpenseStoreRequest.php
+    - app/Http/Requests/ExpenseUpdateRequest.php
+    - app/Http/Requests/ExpenseTypeStoreRequest.php
+    - app/Http/Requests/ExpenseTypeUpdateRequest.php
+    - resources/views/company/index.blade.php
+    - resources/views/company/create.blade.php
+    - resources/views/company/show.blade.php
+    - resources/views/company/edit.blade.php
+    - resources/views/stock/index.blade.php
+    - resources/views/stock/create.blade.php
+    - resources/views/stock/show.blade.php
+    - resources/views/stock/edit.blade.php
+    - resources/views/category/index.blade.php
+    - resources/views/category/create.blade.php
+    - resources/views/category/show.blade.php
+    - resources/views/category/edit.blade.php
+    - resources/views/product/index.blade.php
+    - resources/views/product/create.blade.php
+    - resources/views/product/show.blade.php
+    - resources/views/product/edit.blade.php
+    - resources/views/client/index.blade.php
+    - resources/views/client/create.blade.php
+    - resources/views/client/show.blade.php
+    - resources/views/client/edit.blade.php
+    - resources/views/supplier/index.blade.php
+    - resources/views/supplier/create.blade.php
+    - resources/views/supplier/show.blade.php
+    - resources/views/supplier/edit.blade.php
+    - resources/views/purchase/index.blade.php
+    - resources/views/purchase/create.blade.php
+    - resources/views/purchase/show.blade.php
+    - resources/views/purchase/edit.blade.php
+    - resources/views/sale/index.blade.php
+    - resources/views/sale/create.blade.php
+    - resources/views/sale/show.blade.php
+    - resources/views/sale/edit.blade.php
+    - resources/views/cashRegister/index.blade.php
+    - resources/views/cashRegister/create.blade.php
+    - resources/views/cashRegister/show.blade.php
+    - resources/views/cashRegister/edit.blade.php
+    - resources/views/cashTransaction/index.blade.php
+    - resources/views/cashTransaction/create.blade.php
+    - resources/views/cashTransaction/show.blade.php
+    - resources/views/cashTransaction/edit.blade.php
+    - resources/views/expense/index.blade.php
+    - resources/views/expense/create.blade.php
+    - resources/views/expense/show.blade.php
+    - resources/views/expense/edit.blade.php
+    - resources/views/expenseType/index.blade.php
+    - resources/views/expenseType/create.blade.php
+    - resources/views/expenseType/show.blade.php
+    - resources/views/expenseType/edit.blade.php
+updated:
+    - routes/web.php
+models:
+    User: { name: string, email: string, email_verified_at: 'timestamp nullable default:NULL', password: string, remember_token: 'string:100 nullable default:NULL' }
+    Company: { tp_name: string, tp_type: string, tp_TIN: string, tp_trade_number: 'string nullable', tp_postal_number: 'string nullable', tp_phone_number: 'string nullable', tp_address_province: 'string nullable', tp_address_commune: 'string nullable', tp_address_quartier: 'string nullable', tp_address_avenue: 'string nullable', tp_address_rue: 'string nullable', tp_address_number: 'string nullable', vat_taxpayer: 'string nullable', ct_taxpayer: 'string nullable', tl_taxpayer: 'string nullable', tp_fiscal_center: 'string nullable', tp_activity_sector: 'string nullable', tp_legal_form: 'string nullable', payment_type: 'string nullable', is_actif: 'boolean default:true', created_by: 'id foreign:users', timestamps: timestamps, softdeletes: softDeletes }
+    Stock: { name: string, location: 'string nullable', description: 'text nullable', created_by: 'id foreign:users', timestamps: timestamps, softdeletes: softDeletes }
+    UserStock: { user_id: 'id foreign:users', stock_id: 'id foreign:stocks', created_by: 'id foreign:users', timestamps: timestamps, softdeletes: softDeletes }
+    Category: { name: string, description: 'text nullable', created_by: 'id foreign:users', timestamps: timestamps, softdeletes: softDeletes }
+    Product: { name: string, description: 'text nullable', category_id: 'id foreign:categories', purchase_price: decimal, sale_price: decimal, unit: string, alert_quantity: float, created_by: 'id foreign:users', timestamps: timestamps, softdeletes: softDeletes }
+    StockProduct: { stock_id: 'id foreign:stocks', product_id: 'id foreign:products', quantity: float, timestamps: timestamps, softdeletes: softDeletes }
+    Client: { name: string, phone: 'string nullable', email: 'string nullable', address: 'text nullable', balance: 'decimal default:0', nif: 'text nullable', created_by: 'id foreign:users', timestamps: timestamps, softdeletes: softDeletes }
+    Supplier: { name: string, phone: 'string nullable', email: 'string nullable', address: 'text nullable', created_by: 'id foreign:users', timestamps: timestamps, softdeletes: softDeletes }
+    Purchase: { supplier_id: 'id foreign:suppliers', stock_id: 'id foreign:stocks', total_amount: decimal, paid_amount: decimal, due_amount: decimal, purchase_date: datetime, created_by: 'id foreign:users', timestamps: timestamps, softdeletes: softDeletes }
+    PurchaseItem: { purchase_id: 'id foreign:purchases', product_id: 'id foreign:products', quantity: integer, purchase_price: decimal, subtotal: decimal, created_by: 'id foreign:users', timestamps: timestamps, softdeletes: softDeletes }
+    Sale: { client_id: 'id foreign:clients', stock_id: 'id foreign:stocks', user_id: 'id foreign:users', total_amount: decimal, paid_amount: decimal, due_amount: decimal, sale_date: datetime, created_by: 'id foreign:users', timestamps: timestamps, softdeletes: softDeletes }
+    SaleItem: { sale_id: 'id foreign:sales', product_id: 'id foreign:products', quantity: integer, sale_price: decimal, discount: decimal, subtotal: decimal, created_by: 'id foreign:users', timestamps: timestamps, softdeletes: softDeletes }
+    Payment: { payment_type: string, reference_id: integer, amount: decimal, payment_method: string, payment_date: datetime, created_by: 'id foreign:users', timestamps: timestamps, softdeletes: softDeletes }
+    StockTransfer: { from_stock_id: 'id foreign:stocks', to_stock_id: 'id foreign:stocks', user_id: 'id foreign:users', transfer_date: datetime, note: text, created_by: 'id foreign:users', timestamps: timestamps, softdeletes: softDeletes }
+    StockTransferItem: { stock_transfer_id: 'id foreign:stock_transfers', product_id: 'id foreign:products', quantity: integer, created_by: 'id foreign:users', timestamps: timestamps, softdeletes: softDeletes }
+    CashRegister: { user_id: 'id foreign:users', stock_id: 'id foreign:stocks', opening_balance: decimal, closing_balance: decimal, status: string, opened_at: datetime, closed_at: datetime, created_by: 'id foreign:users', timestamps: timestamps, softdeletes: softDeletes }
+    CashTransaction: { cash_register_id: 'id foreign:cash_registers', type: string, reference_id: integer, amount: decimal, description: text, created_by: 'id foreign:users', timestamps: timestamps, softdeletes: softDeletes }
+    Expense: { stock_id: 'id foreign:stocks', user_id: 'id foreign:users', expense_type_id: 'id foreign:expense_types', amount: decimal, description: text, expense_date: datetime, created_by: 'id foreign:users', timestamps: timestamps, softdeletes: softDeletes }
+    ExpenseType: { name: 'string unique', description: text, created_by: 'id foreign:users', timestamps: timestamps, softdeletes: softDeletes }

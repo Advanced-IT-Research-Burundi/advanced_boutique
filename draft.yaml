@@ -1,0 +1,247 @@
+models:
+
+  Company:
+    tp_name: string
+    tp_type: string
+    tp_TIN: string
+    tp_trade_number: string nullable
+    tp_postal_number: string nullable
+    tp_phone_number: string nullable
+    tp_address_province: string nullable
+    tp_address_commune: string nullable
+    tp_address_quartier: string nullable
+    tp_address_avenue: string nullable
+    tp_address_rue: string nullable
+    tp_address_number: string nullable
+    vat_taxpayer: string nullable
+    ct_taxpayer: string nullable
+    tl_taxpayer: string nullable
+    tp_fiscal_center: string nullable
+    tp_activity_sector: string nullable
+    tp_legal_form: string nullable
+    payment_type: string nullable
+    is_actif: boolean default:true
+    created_by: id foreign:users
+    timestamps: true
+    softDeletes: true
+
+  Stock:
+    name: string
+    location: string nullable
+    description: text nullable
+    created_by: id foreign:users
+    timestamps: true
+    softDeletes: true
+
+  UserStock:
+    user_id: id foreign:users
+    stock_id: id foreign:stocks
+    created_by: id foreign:users
+    timestamps: true
+    softDeletes: true
+
+  Category:
+    name: string
+    description: text nullable
+    created_by: id foreign:users
+    timestamps: true
+    softDeletes: true
+
+  Product:
+    name: string
+    description: text nullable
+    category_id: id foreign:categories
+    purchase_price: decimal
+    sale_price: decimal
+    unit: string
+    alert_quantity: float
+    created_by: id foreign:users
+    timestamps: true
+    softDeletes: true
+
+
+  StockProduct:
+    stock_id: id foreign:stocks
+    product_id: id foreign:products
+    quantity: float
+    timestamps: true
+    softDeletes: true
+
+  Client:
+    name: string
+    phone: string nullable
+    email: string nullable
+    address: text nullable
+    balance: decimal default:0
+    nif: text nullable
+    created_by: id foreign:users
+    timestamps: true
+    softDeletes: true
+
+  Supplier:
+    name: string
+    phone: string nullable
+    email: string nullable
+    address: text nullable
+    created_by: id foreign:users
+    timestamps: true
+    softDeletes: true
+
+  Purchase:
+    supplier_id: id foreign:suppliers
+    stock_id: id foreign:stocks
+    total_amount: decimal
+    paid_amount: decimal
+    due_amount: decimal
+    purchase_date: datetime
+    created_by: id foreign:users
+    timestamps: true
+    softDeletes: true
+
+  PurchaseItem:
+    purchase_id: id foreign:purchases
+    product_id: id foreign:products
+    quantity: integer
+    purchase_price: decimal
+    subtotal: decimal
+    created_by: id foreign:users
+    timestamps: true
+    softDeletes: true
+
+  Sale:
+    client_id: id foreign:clients
+    stock_id: id foreign:stocks
+    user_id: id foreign:users
+    total_amount: decimal
+    paid_amount: decimal
+    due_amount: decimal
+    sale_date: datetime
+    created_by: id foreign:users
+    timestamps: true
+    softDeletes: true
+
+  SaleItem:
+    sale_id: id foreign:sales
+    product_id: id foreign:products
+    quantity: integer
+    sale_price: decimal
+    discount: decimal
+    subtotal: decimal
+    created_by: id foreign:users
+    timestamps: true
+    softDeletes: true
+
+  Payment:
+    payment_type: string
+    reference_id: integer
+    amount: decimal
+    payment_method: string
+    payment_date: datetime
+    created_by: id foreign:users
+    timestamps: true
+    softDeletes: true
+
+  StockTransfer:
+    from_stock_id: id foreign:stocks
+    to_stock_id: id foreign:stocks
+    user_id: id foreign:users
+    transfer_date: datetime
+    note: text
+    created_by: id foreign:users
+    timestamps: true
+    softDeletes: true
+
+  StockTransferItem:
+    stock_transfer_id: id foreign:stock_transfers
+    product_id: id foreign:products
+    quantity: integer
+    created_by: id foreign:users
+    timestamps: true
+    softDeletes: true
+
+  CashRegister:
+    user_id: id foreign:users
+    stock_id: id foreign:stocks
+    opening_balance: decimal
+    closing_balance: decimal
+    status: string
+    opened_at: datetime
+    closed_at: datetime
+    created_by: id foreign:users
+    timestamps: true
+    softDeletes: true
+
+  CashTransaction:
+    cash_register_id: id foreign:cash_registers
+    type: string
+    reference_id: integer
+    amount: decimal
+    description: text
+    created_by: id foreign:users
+    timestamps: true
+    softDeletes: true
+
+  Expense:
+    stock_id: id foreign:stocks
+    user_id: id foreign:users
+    expense_type_id: id foreign:expense_types
+    amount: decimal
+    description: text
+    expense_date: datetime
+    created_by: id foreign:users
+    timestamps: true
+    softDeletes: true
+
+  ExpenseType:
+    name: string unique
+    description: text
+    created_by: id foreign:users
+    timestamps: true
+    softDeletes: true
+
+controllers:
+    Company :
+      resource: web
+    Stock :
+      resource: web
+    Category :
+      resource: web
+    Product :
+      resource : web
+    Client :
+      resource: web
+    Supplier :
+      resource: web
+    Purchase :
+      resource: web
+    Sale :
+      resource: web
+    CashRegister :
+      resource: web
+    CashTransaction :
+      resource: web
+    Expense :
+      resource: web
+    ExpenseType :
+      resource: web
+
+
+seeders:
+  - User
+  - Company
+  - Stock
+  - Category
+  - Product
+  - Client
+  - Supplier
+  - Purchase
+  - PurchaseItem
+  - Sale
+  - SaleItem
+  - Payment
+  - StockTransfer
+  - StockTransferItem
+  - CashRegister
+  - CashTransaction
+  - Expense
+  - ExpenseType

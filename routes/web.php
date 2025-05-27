@@ -29,3 +29,28 @@ Route::middleware('auth')->group(function () {
 });
 
 require __DIR__.'/auth.php';
+
+
+Route::resource('companies', App\Http\Controllers\CompanyController::class);
+
+Route::resource('stocks', App\Http\Controllers\StockController::class);
+
+Route::resource('categories', App\Http\Controllers\CategoryController::class);
+
+Route::resource('products', App\Http\Controllers\ProductController::class);
+
+Route::resource('clients', App\Http\Controllers\ClientController::class);
+
+Route::resource('suppliers', App\Http\Controllers\SupplierController::class);
+
+Route::resource('purchases', App\Http\Controllers\PurchaseController::class);
+
+Route::resource('sales', App\Http\Controllers\SaleController::class);
+
+Route::resource('cash-registers', App\Http\Controllers\CashRegisterController::class);
+
+Route::resource('cash-transactions', App\Http\Controllers\CashTransactionController::class);
+
+Route::resource('expenses', App\Http\Controllers\ExpenseController::class);
+
+Route::resource('expense-types', App\Http\Controllers\ExpenseTypeController::class);
