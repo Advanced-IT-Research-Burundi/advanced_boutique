@@ -4,13 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Company extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory,SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -24,10 +22,10 @@ class Company extends Model
         'tp_trade_number',
         'tp_postal_number',
         'tp_phone_number',
-        'tp_address_province',
-        'tp_address_commune',
-        'tp_address_quartier',
+        'tp_address_privonce',
         'tp_address_avenue',
+        'tp_address_quartier',
+        'tp_address_commune',
         'tp_address_rue',
         'tp_address_number',
         'vat_taxpayer',
@@ -39,79 +37,39 @@ class Company extends Model
         'payment_type',
         'is_actif',
         'user_id',
+        'tp_email',
+        'tp_website',
+        'tp_logo',
+        'tp_bank',
+        'tp_account_number',
+        'tp_facebook',
+        'tp_twitter',
+        'tp_instagram',
+        'tp_youtube',
+        'tp_whatsapp',
+        'tp_address',
     ];
 
     /**
-     * Get the attributes that should be cast.
+     * The attributes that should be cast to native types.
      *
-     * @return array<string, string>
+     * @var array
      */
-    protected function casts(): array
-    {
-        return [
-            'id' => 'integer',
-            'is_actif' => 'boolean',
-            'user_id' => 'integer',
-        ];
-    }
+    protected $casts = [
+        'id' => 'integer',
+        'is_actif' => 'boolean',
+        'created_at' => 'timestamp',
+        'updated_at' => 'timestamp',
+        'deleted_at' => 'timestamp',
+    ];
 
-    public function user(): BelongsTo
+    /**
+     * Get the current active company.
+     *
+     * @return \App\Models\Company
+     */
+    public static function current()
     {
-        return $this->belongsTo(User::class);
-    }
-
-    public function agencies(): HasMany
-    {
-        return $this->hasMany(Agency::class);
-    }
-
-    public function stocks(): HasMany
-    {
-        return $this->hasMany(Stock::class);
-    }
-
-    public function categories(): HasMany
-    {
-        return $this->hasMany(Category::class);
-    }
-
-    public function products(): HasMany
-    {
-        return $this->hasMany(Product::class);
-    }
-
-    public function clients(): HasMany
-    {
-        return $this->hasMany(Client::class);
-    }
-
-    public function suppliers(): HasMany
-    {
-        return $this->hasMany(Supplier::class);
-    }
-
-    public function purchases(): HasMany
-    {
-        return $this->hasMany(Purchase::class);
-    }
-
-    public function sales(): HasMany
-    {
-        return $this->hasMany(Sale::class);
-    }
-
-    public function cashRegisters(): HasMany
-    {
-        return $this->hasMany(CashRegister::class);
-    }
-
-    public function expenses(): HasMany
-    {
-        return $this->hasMany(Expense::class);
-    }
-
-    public function expenseTypes(): HasMany
-    {
-        return $this->hasMany(ExpenseType::class);
+        return self::where('is_actif', true)->first();
     }
 }
