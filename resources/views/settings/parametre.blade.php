@@ -636,6 +636,35 @@
 
 @push('scripts')
 <script>
+    // Gestion de l'aperçu du logo
+    document.addEventListener('DOMContentLoaded', function () {
+        const logoInput = document.getElementById('tp_logo');
+        const preview = document.getElementById('logo-preview');
+
+        if (logoInput && preview) {
+            logoInput.addEventListener('change', function () {
+            if (this.files && this.files[0]) {
+                const file = this.files[0];
+
+                if (!file.type.startsWith('image/')) {
+                alert('Veuillez sélectionner un fichier image.');
+                return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                preview.src = e.target.result;
+                preview.classList.remove('d-none');
+                };
+                reader.onerror = function () {
+                alert("Erreur lors du chargement de l'image.");
+                };
+                reader.readAsDataURL(file);
+            }
+            });
+        }
+    });
+
     // Sauvegarde des paramètres
     document.getElementById('save-settings').addEventListener('click', function() {
       const activeTab = document.querySelector('.tab-pane.active');
@@ -651,5 +680,6 @@
         }
       }
     });
+
 </script>
 @endpush
