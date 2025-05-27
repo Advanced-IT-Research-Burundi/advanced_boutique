@@ -18,7 +18,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained();
             $table->foreignId('stock_id')->constrained();
             $table->foreignId('agency_id')->nullable()->constrained();
-            $table->foreignId('created_by')->constrained('users', 'by');
+            $table->foreignId('created_by')->constrained('users');
             $table->timestamps();
             $table->softDeletes();
         });

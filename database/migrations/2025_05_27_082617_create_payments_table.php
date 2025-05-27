@@ -21,7 +21,7 @@ return new class extends Migration
             $table->string('payment_method');
             $table->dateTime('payment_date');
             $table->foreignId('agency_id')->nullable()->constrained();
-            $table->foreignId('created_by')->constrained('users', 'by');
+            $table->foreignId('created_by')->constrained('users');
             $table->foreignId('user_id');
             $table->timestamps();
             $table->softDeletes();

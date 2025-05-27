@@ -19,7 +19,7 @@ return new class extends Migration
             $table->foreignId('product_id')->constrained();
             $table->integer('quantity');
             $table->foreignId('agency_id')->nullable()->constrained();
-            $table->foreignId('created_by')->constrained('users', 'by');
+            $table->foreignId('created_by')->constrained('users');
             $table->foreignId('user_id');
             $table->timestamps();
             $table->softDeletes();

@@ -22,7 +22,7 @@ return new class extends Migration
             $table->foreignId('manager_id')->nullable()->constrained('users');
             $table->foreignId('parent_agency_id')->nullable()->constrained('agencies');
             $table->boolean('is_main_office')->default(false);
-            $table->foreignId('created_by')->constrained('users', 'by');
+            $table->foreignId('created_by')->constrained('users');
             $table->foreignId('user_id');
             $table->foreignId('agency_id');
             $table->timestamps();

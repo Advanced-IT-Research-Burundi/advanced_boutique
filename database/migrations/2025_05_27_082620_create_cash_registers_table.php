@@ -23,7 +23,7 @@ return new class extends Migration
             $table->dateTime('opened_at');
             $table->dateTime('closed_at');
             $table->foreignId('agency_id')->nullable()->constrained();
-            $table->foreignId('created_by')->constrained('users', 'by');
+            $table->foreignId('created_by')->constrained('users');
             $table->timestamps();
             $table->softDeletes();
         });

@@ -22,7 +22,7 @@ return new class extends Migration
             $table->text('description');
             $table->dateTime('expense_date');
             $table->foreignId('agency_id')->nullable()->constrained();
-            $table->foreignId('created_by')->constrained('users', 'by');
+            $table->foreignId('created_by')->constrained('users');
             $table->timestamps();
             $table->softDeletes();
         });

@@ -21,8 +21,8 @@ class ParametrageController extends Controller
             $company->save();
         }
 
-        // Récupération des dentistes
-        $dentists = Dentist::with('user')->get();
+        // Récupération des Agencies
+        $agencies = Agency::with('stock')->get();
 
         // Récupération des catégories pour la pharmacie
         $categories = Category::all();
@@ -30,18 +30,21 @@ class ParametrageController extends Controller
         // Récupération des utilisateurs pour l'onglet utilisateurs
         $users = User::all();
 
-        // Liste des utilisateurs pour l'ajout de dentiste
-        $usersList = User::whereDoesntHave('dentist')->get();
-        $types_traitements = TreatmentType::take(10)->get();
+        // Liste des utilisateurs responsables de l'agence
+        $usersList = User::whereIn('id', function($query) {
+                        $query->select('manager_id')
+                            ->from('agencies')
+                            ->whereNotNull('manager_id');
+                    })
+                    ->get();
 
-        return view('admin.parametrage', compact(
+
+        return view('settings.parametre', compact(
             'company',
-            'dentists',
+            'agencies',
             'categories',
             'users',
             'usersList',
-            'types_traitements'
-
         ));
     }
 

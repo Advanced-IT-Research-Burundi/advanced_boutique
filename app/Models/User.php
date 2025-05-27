@@ -19,7 +19,7 @@ class User extends Model
      * @var array
      */
     protected $fillable = [
-        'first_name',
+        'name',
         'last_name',
         'email',
         'email_verified_at',
@@ -76,6 +76,10 @@ class User extends Model
         ];
     }
 
+    public function getNameAttribute(): string
+    {
+        return "{$this->first_name} {$this->last_name}";
+    }
     public function company(): BelongsTo
     {
         return $this->belongsTo(Company::class);
@@ -110,6 +114,7 @@ class User extends Model
     {
         return $this->hasMany(Stock::class);
     }
+
 
     public function userStocks(): HasMany
     {
@@ -181,8 +186,4 @@ class User extends Model
         return $this->hasMany(User::class);
     }
 
-    public function stocks(): BelongsToMany
-    {
-        return $this->belongsToMany(Stock::class);
-    }
 }

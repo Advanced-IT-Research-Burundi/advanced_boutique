@@ -17,29 +17,35 @@ class DatabaseSeeder extends Seeder
         // trancate database
         \DB::statement('SET FOREIGN_KEY_CHECKS=0');
         \DB::statement('TRUNCATE TABLE users');
+        \DB::statement('TRUNCATE TABLE companies');
         \DB::statement('SET FOREIGN_KEY_CHECKS=1');
 
-        \App\Models\User::factory()->create([
-            'name' => 'Jean Lionel',
+        \App\Models\User::create([
+            'last_name' => 'Jean',
+            'first_name' => 'Lionel',
             'email' => 'jeanlionel@gmail.com',
             'password' => Hash::make('password'),
         ]);
 
-        \App\Models\Company::factory(1)->create();
-        \App\Models\Stock::factory(1)->create();
-        \App\Models\Product::factory(200)->create();
-        \App\Models\Client::factory(10)->create();
-        \App\Models\Supplier::factory(10)->create();
-        \App\Models\Purchase::factory(1)->create();
-        \App\Models\PurchaseItem::factory(1)->create();
-        \App\Models\Sale::factory(1)->create();
-        \App\Models\SaleItem::factory(1)->create();
-        \App\Models\Payment::factory(1)->create();
-        \App\Models\StockTransfer::factory(1)->create();
-        \App\Models\StockTransferItem::factory(1)->create();
-        \App\Models\CashRegister::factory(1)->create();
-        \App\Models\CashTransaction::factory(1)->create();
-        \App\Models\Expense::factory(1)->create();
-        \App\Models\ExpenseType::factory(1)->create();
+         $this->call([
+            CompanySeeder::class,
+        ]);
+
+        // \App\Models\Company::factory(1)->create();
+        // \App\Models\Stock::factory(1)->create();
+        // \App\Models\Product::factory(200)->create();
+        // \App\Models\Client::factory(10)->create();
+        // \App\Models\Supplier::factory(10)->create();
+        // \App\Models\Purchase::factory(1)->create();
+        // \App\Models\PurchaseItem::factory(1)->create();
+        // \App\Models\Sale::factory(1)->create();
+        // \App\Models\SaleItem::factory(1)->create();
+        // \App\Models\Payment::factory(1)->create();
+        // \App\Models\StockTransfer::factory(1)->create();
+        // \App\Models\StockTransferItem::factory(1)->create();
+        // \App\Models\CashRegister::factory(1)->create();
+        // \App\Models\CashTransaction::factory(1)->create();
+        // \App\Models\Expense::factory(1)->create();
+        // \App\Models\ExpenseType::factory(1)->create();
     }
 }

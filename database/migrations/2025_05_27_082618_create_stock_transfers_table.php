@@ -21,7 +21,7 @@ return new class extends Migration
             $table->dateTime('transfer_date');
             $table->text('note');
             $table->foreignId('agency_id')->nullable()->constrained();
-            $table->foreignId('created_by')->constrained('users', 'by');
+            $table->foreignId('created_by')->constrained('users');
             $table->foreignId('stock_id');
             $table->timestamps();
             $table->softDeletes();

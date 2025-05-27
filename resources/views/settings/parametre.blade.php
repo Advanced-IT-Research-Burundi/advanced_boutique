@@ -274,7 +274,7 @@
               <div class="d-flex justify-content-between align-items-center mb-4">
                 <h5 class="mb-0">Dentistes</h5>
                 <a type="button" class="btn btn-sm btn-success"
-                href="{{ route('dentists.index') }}">
+                href="{{ route('agencies.index') }}">
                   <i class="bi bi-plus-circle"></i> Gérer les dentistes
                 </a>
               </div>
@@ -291,7 +291,7 @@
                     </tr>
                   </thead>
                   <tbody>
-                    @foreach($dentists as $dentist)
+                    @foreach($agencies as $dentist)
                     <tr>
                       <td>
                         <div class="d-flex align-items-center">
@@ -340,22 +340,22 @@
                     </thead>
                     <tbody>
 
-                        @foreach ($types_traitements as $type)
+                        {{-- @foreach ($types_traitements as $type)
                             <tr>
                                 <td>{{ $type->name }}</td>
                                 <td>{{ $type->description }}</td>
                                 <td>{{ $type->base_price }}</td>
-                                {{-- <td>
+                                <td>
                                     <button class="btn btn-sm btn-outline-primary me-1" data-bs-toggle="modal" data-bs-target="#editTreatmentTypeModal" data-treatment-type-id="{{ $type->id }}">
                                         <i class="bi bi-pencil"></i>
                                     </button>
                                     <button class="btn btn-sm btn-outline-danger delete-treatment-type" data-treatment-type-id="{{ $type->id }}">
                                         <i class="bi bi-trash"></i>
                                     </button>
-                                </td> --}}
+                                </td>
                             </tr>
 
-                        @endforeach
+                        @endforeach --}}
 
                     </tbody>
                   </table>
@@ -652,7 +652,7 @@
         if (this.classList.contains('delete-category')) {
           route = '/categories/' + this.dataset.categoryId;
         } else if (this.classList.contains('delete-dentist')) {
-          route = '/dentists/' + this.dataset.dentistId;
+          route = '/agencies/' + this.dataset.dentistId;
         } else if (this.classList.contains('delete-user')) {
           route = '/users/' + this.dataset.userId;
         }
@@ -723,7 +723,7 @@
         const dentistId = this.dataset.id;
         const isAvailable = this.checked;
 
-        fetch('/api/dentists/' + dentistId + '/availability', {
+        fetch('/api/agencies/' + dentistId + '/availability', {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
