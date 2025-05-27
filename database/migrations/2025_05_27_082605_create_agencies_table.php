@@ -24,7 +24,6 @@ return new class extends Migration
             $table->boolean('is_main_office')->default(false);
             $table->foreignId('created_by')->constrained('users');
             $table->foreignId('user_id');
-            $table->foreignId('agency_id');
             $table->timestamps();
             $table->softDeletes();
         });

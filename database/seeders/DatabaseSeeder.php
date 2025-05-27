@@ -1,6 +1,7 @@
 <?php
 
 namespace Database\Seeders;
+use App\Models\User;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -20,16 +21,32 @@ class DatabaseSeeder extends Seeder
         \DB::statement('TRUNCATE TABLE companies');
         \DB::statement('SET FOREIGN_KEY_CHECKS=1');
 
-        \App\Models\User::create([
-            'last_name' => 'Jean',
-            'first_name' => 'Lionel',
-            'email' => 'jeanlionel@gmail.com',
-            'password' => Hash::make('password'),
-        ]);
-
          $this->call([
             CompanySeeder::class,
         ]);
+
+        $user = new User();
+        $user->id = 1;
+        $user->last_name = 'Lionel';
+        $user->first_name = 'Jean';
+        $user->email = 'jeanlionel@gmail.com';
+        $user->password = Hash::make('password');
+        $user->save();
+
+        $agency = \App\Models\Agency::create([
+            'company_id' => 1,
+            'code' => 'AGC001',
+            'name' => 'Agence Principale',
+            'adresse' => '123 Rue de l\'Exemple, Paris',
+            'manager_id' => $user->id,
+            'user_id' => $user->id,
+            'is_main_office' => true,
+            'created_by' => $user->id,
+        ]);
+
+        $user->agency_id = $agency->id;
+        $user->save();
+
 
         // \App\Models\Company::factory(1)->create();
         // \App\Models\Stock::factory(1)->create();
