@@ -27,7 +27,6 @@ class Agency extends Model
         'is_main_office',
         'created_by',
         'user_id',
-        'agency_id',
     ];
 
     /**
@@ -61,27 +60,27 @@ class Agency extends Model
 
     public function agency(): BelongsTo
     {
-        return $this->belongsTo(Agency::class);
+        return $this->belongsTo(Agency::class, 'parent_agency_id');
     }
 
     public function manager(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'manager_id');
     }
 
     public function parentAgency(): BelongsTo
     {
-        return $this->belongsTo(Agency::class);
+        return $this->belongsTo(Agency::class, 'parent_agency_id');
     }
 
     public function createdBy(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'created_by');
     }
 
     public function agencies(): HasMany
     {
-        return $this->hasMany(Agency::class);
+        return $this->hasMany(Agency::class, 'parent_agency_id');
     }
 
     public function stocks(): HasMany
