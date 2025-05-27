@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
+use App\Models\Agency;
 use App\Models\Product;
 use App\Models\Purchase;
 use App\Models\PurchaseItem;
@@ -29,7 +30,9 @@ class PurchaseItemFactory extends Factory
             'quantity' => fake()->numberBetween(-10000, 10000),
             'purchase_price' => fake()->randomFloat(0, 0, 9999999999.),
             'subtotal' => fake()->randomFloat(0, 0, 9999999999.),
-            'created_by' => User::factory()->create()->id,
+            'agency_id' => Agency::factory(),
+            'created_by' => User::factory()->create()->created_by,
+            'user_id' => User::factory(),
         ];
     }
 }

@@ -3,7 +3,7 @@
 namespace Tests\Feature\Http\Controllers;
 
 use App\Models\Company;
-use App\Models\CreatedBy;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use JMac\Testing\Traits\AdditionalAssertions;
@@ -57,14 +57,14 @@ final class CompanyControllerTest extends TestCase
         $tp_type = fake()->word();
         $tp_TIN = fake()->word();
         $is_actif = fake()->boolean();
-        $created_by = CreatedBy::factory()->create();
+        $user = User::factory()->create();
 
         $response = $this->post(route('companies.store'), [
             'tp_name' => $tp_name,
             'tp_type' => $tp_type,
             'tp_TIN' => $tp_TIN,
             'is_actif' => $is_actif,
-            'created_by' => $created_by->id,
+            'user_id' => $user->id,
         ]);
 
         $companies = Company::query()
@@ -72,7 +72,7 @@ final class CompanyControllerTest extends TestCase
             ->where('tp_type', $tp_type)
             ->where('tp_TIN', $tp_TIN)
             ->where('is_actif', $is_actif)
-            ->where('created_by', $created_by->id)
+            ->where('user_id', $user->id)
             ->get();
         $this->assertCount(1, $companies);
         $company = $companies->first();
@@ -126,14 +126,14 @@ final class CompanyControllerTest extends TestCase
         $tp_type = fake()->word();
         $tp_TIN = fake()->word();
         $is_actif = fake()->boolean();
-        $created_by = CreatedBy::factory()->create();
+        $user = User::factory()->create();
 
         $response = $this->put(route('companies.update', $company), [
             'tp_name' => $tp_name,
             'tp_type' => $tp_type,
             'tp_TIN' => $tp_TIN,
             'is_actif' => $is_actif,
-            'created_by' => $created_by->id,
+            'user_id' => $user->id,
         ]);
 
         $company->refresh();
@@ -145,7 +145,7 @@ final class CompanyControllerTest extends TestCase
         $this->assertEquals($tp_type, $company->tp_type);
         $this->assertEquals($tp_TIN, $company->tp_TIN);
         $this->assertEquals($is_actif, $company->is_actif);
-        $this->assertEquals($created_by->id, $company->created_by);
+        $this->assertEquals($user->id, $company->user_id);
     }
 
 

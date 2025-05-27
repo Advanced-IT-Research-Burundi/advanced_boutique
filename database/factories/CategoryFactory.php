@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
+use App\Models\Agency;
 use App\Models\Category;
 use App\Models\User;
 
@@ -24,7 +25,9 @@ class CategoryFactory extends Factory
         return [
             'name' => fake()->name(),
             'description' => fake()->text(),
-            'created_by' => User::factory()->create()->id,
+            'agency_id' => Agency::factory(),
+            'created_by' => User::factory()->create()->created_by,
+            'user_id' => User::factory(),
         ];
     }
 }

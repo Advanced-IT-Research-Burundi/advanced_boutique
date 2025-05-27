@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
+use App\Models\Agency;
 use App\Models\Product;
 use App\Models\Stock;
 use App\Models\StockProduct;
@@ -26,6 +27,7 @@ class StockProductFactory extends Factory
             'stock_id' => Stock::factory(),
             'product_id' => Product::factory(),
             'quantity' => fake()->randomFloat(0, 0, 9999999999.),
+            'agency_id' => Agency::factory(),
         ];
     }
 }

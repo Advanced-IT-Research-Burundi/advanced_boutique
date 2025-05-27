@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
+use App\Models\Agency;
 use App\Models\Client;
 use App\Models\User;
 
@@ -28,7 +29,9 @@ class ClientFactory extends Factory
             'address' => fake()->text(),
             'balance' => fake()->randomFloat(0, 0, 9999999999.),
             'nif' => fake()->text(),
-            'created_by' => User::factory()->create()->id,
+            'agency_id' => Agency::factory(),
+            'created_by' => User::factory()->create()->created_by,
+            'user_id' => User::factory(),
         ];
     }
 }

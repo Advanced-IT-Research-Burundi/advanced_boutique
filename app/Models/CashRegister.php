@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class CashRegister extends Model
@@ -24,6 +25,7 @@ class CashRegister extends Model
         'status',
         'opened_at',
         'closed_at',
+        'agency_id',
         'created_by',
     ];
 
@@ -42,6 +44,7 @@ class CashRegister extends Model
             'closing_balance' => 'decimal',
             'opened_at' => 'datetime',
             'closed_at' => 'datetime',
+            'agency_id' => 'integer',
             'created_by' => 'integer',
         ];
     }
@@ -56,8 +59,23 @@ class CashRegister extends Model
         return $this->belongsTo(Stock::class);
     }
 
+    public function agency(): BelongsTo
+    {
+        return $this->belongsTo(Agency::class);
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
     public function createdBy(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function cashTransactions(): HasMany
+    {
+        return $this->hasMany(CashTransaction::class);
     }
 }

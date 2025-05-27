@@ -6,6 +6,7 @@ use App\Models\CreatedBy;
 use App\Models\Purchase;
 use App\Models\Stock;
 use App\Models\Supplier;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Carbon;
@@ -63,6 +64,7 @@ final class PurchaseControllerTest extends TestCase
         $due_amount = fake()->randomFloat(/** decimal_attributes **/);
         $purchase_date = Carbon::parse(fake()->dateTime());
         $created_by = CreatedBy::factory()->create();
+        $user = User::factory()->create();
 
         $response = $this->post(route('purchases.store'), [
             'supplier_id' => $supplier->id,
@@ -72,6 +74,7 @@ final class PurchaseControllerTest extends TestCase
             'due_amount' => $due_amount,
             'purchase_date' => $purchase_date->toDateTimeString(),
             'created_by' => $created_by->id,
+            'user_id' => $user->id,
         ]);
 
         $purchases = Purchase::query()
@@ -82,6 +85,7 @@ final class PurchaseControllerTest extends TestCase
             ->where('due_amount', $due_amount)
             ->where('purchase_date', $purchase_date)
             ->where('created_by', $created_by->id)
+            ->where('user_id', $user->id)
             ->get();
         $this->assertCount(1, $purchases);
         $purchase = $purchases->first();
@@ -138,6 +142,7 @@ final class PurchaseControllerTest extends TestCase
         $due_amount = fake()->randomFloat(/** decimal_attributes **/);
         $purchase_date = Carbon::parse(fake()->dateTime());
         $created_by = CreatedBy::factory()->create();
+        $user = User::factory()->create();
 
         $response = $this->put(route('purchases.update', $purchase), [
             'supplier_id' => $supplier->id,
@@ -147,6 +152,7 @@ final class PurchaseControllerTest extends TestCase
             'due_amount' => $due_amount,
             'purchase_date' => $purchase_date->toDateTimeString(),
             'created_by' => $created_by->id,
+            'user_id' => $user->id,
         ]);
 
         $purchase->refresh();
@@ -161,6 +167,7 @@ final class PurchaseControllerTest extends TestCase
         $this->assertEquals($due_amount, $purchase->due_amount);
         $this->assertEquals($purchase_date, $purchase->purchase_date);
         $this->assertEquals($created_by->id, $purchase->created_by);
+        $this->assertEquals($user->id, $purchase->user_id);
     }
 
 

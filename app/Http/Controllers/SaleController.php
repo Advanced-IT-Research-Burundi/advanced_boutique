@@ -11,7 +11,7 @@ use Illuminate\View\View;
 
 class SaleController extends Controller
 {
-    public function index(Request $request): Response
+    public function index(Request $request): View
     {
         $sales = Sale::all();
 
@@ -20,12 +20,12 @@ class SaleController extends Controller
         ]);
     }
 
-    public function create(Request $request): Response
+    public function create(Request $request): View
     {
         return view('sale.create');
     }
 
-    public function store(SaleStoreRequest $request): Response
+    public function store(SaleStoreRequest $request): RedirectResponse
     {
         $sale = Sale::create($request->validated());
 
@@ -34,21 +34,21 @@ class SaleController extends Controller
         return redirect()->route('sales.index');
     }
 
-    public function show(Request $request, Sale $sale): Response
+    public function show(Request $request, Sale $sale): View
     {
         return view('sale.show', [
             'sale' => $sale,
         ]);
     }
 
-    public function edit(Request $request, Sale $sale): Response
+    public function edit(Request $request, Sale $sale): View
     {
         return view('sale.edit', [
             'sale' => $sale,
         ]);
     }
 
-    public function update(SaleUpdateRequest $request, Sale $sale): Response
+    public function update(SaleUpdateRequest $request, Sale $sale): RedirectResponse
     {
         $sale->update($request->validated());
 
@@ -57,7 +57,7 @@ class SaleController extends Controller
         return redirect()->route('sales.index');
     }
 
-    public function destroy(Request $request, Sale $sale): Response
+    public function destroy(Request $request, Sale $sale): RedirectResponse
     {
         $sale->delete();
 

@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
+use App\Models\Agency;
 use App\Models\Payment;
 use App\Models\User;
 
@@ -27,7 +28,9 @@ class PaymentFactory extends Factory
             'amount' => fake()->randomFloat(0, 0, 9999999999.),
             'payment_method' => fake()->word(),
             'payment_date' => fake()->dateTime(),
-            'created_by' => User::factory()->create()->id,
+            'agency_id' => Agency::factory(),
+            'created_by' => User::factory()->create()->created_by,
+            'user_id' => User::factory(),
         ];
     }
 }

@@ -4,6 +4,7 @@ namespace Tests\Feature\Http\Controllers;
 
 use App\Models\CreatedBy;
 use App\Models\ExpenseType;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use JMac\Testing\Traits\AdditionalAssertions;
@@ -56,17 +57,20 @@ final class ExpenseTypeControllerTest extends TestCase
         $name = fake()->name();
         $description = fake()->text();
         $created_by = CreatedBy::factory()->create();
+        $user = User::factory()->create();
 
         $response = $this->post(route('expense-types.store'), [
             'name' => $name,
             'description' => $description,
             'created_by' => $created_by->id,
+            'user_id' => $user->id,
         ]);
 
         $expenseTypes = ExpenseType::query()
             ->where('name', $name)
             ->where('description', $description)
             ->where('created_by', $created_by->id)
+            ->where('user_id', $user->id)
             ->get();
         $this->assertCount(1, $expenseTypes);
         $expenseType = $expenseTypes->first();
@@ -119,11 +123,13 @@ final class ExpenseTypeControllerTest extends TestCase
         $name = fake()->name();
         $description = fake()->text();
         $created_by = CreatedBy::factory()->create();
+        $user = User::factory()->create();
 
         $response = $this->put(route('expense-types.update', $expenseType), [
             'name' => $name,
             'description' => $description,
             'created_by' => $created_by->id,
+            'user_id' => $user->id,
         ]);
 
         $expenseType->refresh();
@@ -134,6 +140,7 @@ final class ExpenseTypeControllerTest extends TestCase
         $this->assertEquals($name, $expenseType->name);
         $this->assertEquals($description, $expenseType->description);
         $this->assertEquals($created_by->id, $expenseType->created_by);
+        $this->assertEquals($user->id, $expenseType->user_id);
     }
 
 

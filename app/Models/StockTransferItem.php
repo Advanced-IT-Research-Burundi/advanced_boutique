@@ -20,7 +20,9 @@ class StockTransferItem extends Model
         'stock_transfer_id',
         'product_id',
         'quantity',
+        'agency_id',
         'created_by',
+        'user_id',
     ];
 
     /**
@@ -34,7 +36,9 @@ class StockTransferItem extends Model
             'id' => 'integer',
             'stock_transfer_id' => 'integer',
             'product_id' => 'integer',
+            'agency_id' => 'integer',
             'created_by' => 'integer',
+            'user_id' => 'integer',
         ];
     }
 
@@ -46,6 +50,16 @@ class StockTransferItem extends Model
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
+    }
+
+    public function agency(): BelongsTo
+    {
+        return $this->belongsTo(Agency::class);
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 
     public function createdBy(): BelongsTo

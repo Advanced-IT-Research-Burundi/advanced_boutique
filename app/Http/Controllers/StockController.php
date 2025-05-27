@@ -11,7 +11,7 @@ use Illuminate\View\View;
 
 class StockController extends Controller
 {
-    public function index(Request $request): Response
+    public function index(Request $request): View
     {
         $stocks = Stock::all();
 
@@ -20,12 +20,12 @@ class StockController extends Controller
         ]);
     }
 
-    public function create(Request $request): Response
+    public function create(Request $request): View
     {
         return view('stock.create');
     }
 
-    public function store(StockStoreRequest $request): Response
+    public function store(StockStoreRequest $request): RedirectResponse
     {
         $stock = Stock::create($request->validated());
 
@@ -34,21 +34,21 @@ class StockController extends Controller
         return redirect()->route('stocks.index');
     }
 
-    public function show(Request $request, Stock $stock): Response
+    public function show(Request $request, Stock $stock): View
     {
         return view('stock.show', [
             'stock' => $stock,
         ]);
     }
 
-    public function edit(Request $request, Stock $stock): Response
+    public function edit(Request $request, Stock $stock): View
     {
         return view('stock.edit', [
             'stock' => $stock,
         ]);
     }
 
-    public function update(StockUpdateRequest $request, Stock $stock): Response
+    public function update(StockUpdateRequest $request, Stock $stock): RedirectResponse
     {
         $stock->update($request->validated());
 
@@ -57,7 +57,7 @@ class StockController extends Controller
         return redirect()->route('stocks.index');
     }
 
-    public function destroy(Request $request, Stock $stock): Response
+    public function destroy(Request $request, Stock $stock): RedirectResponse
     {
         $stock->delete();
 

@@ -11,7 +11,7 @@ use Illuminate\View\View;
 
 class ExpenseController extends Controller
 {
-    public function index(Request $request): Response
+    public function index(Request $request): View
     {
         $expenses = Expense::all();
 
@@ -20,12 +20,12 @@ class ExpenseController extends Controller
         ]);
     }
 
-    public function create(Request $request): Response
+    public function create(Request $request): View
     {
         return view('expense.create');
     }
 
-    public function store(ExpenseStoreRequest $request): Response
+    public function store(ExpenseStoreRequest $request): RedirectResponse
     {
         $expense = Expense::create($request->validated());
 
@@ -34,21 +34,21 @@ class ExpenseController extends Controller
         return redirect()->route('expenses.index');
     }
 
-    public function show(Request $request, Expense $expense): Response
+    public function show(Request $request, Expense $expense): View
     {
         return view('expense.show', [
             'expense' => $expense,
         ]);
     }
 
-    public function edit(Request $request, Expense $expense): Response
+    public function edit(Request $request, Expense $expense): View
     {
         return view('expense.edit', [
             'expense' => $expense,
         ]);
     }
 
-    public function update(ExpenseUpdateRequest $request, Expense $expense): Response
+    public function update(ExpenseUpdateRequest $request, Expense $expense): RedirectResponse
     {
         $expense->update($request->validated());
 
@@ -57,7 +57,7 @@ class ExpenseController extends Controller
         return redirect()->route('expenses.index');
     }
 
-    public function destroy(Request $request, Expense $expense): Response
+    public function destroy(Request $request, Expense $expense): RedirectResponse
     {
         $expense->delete();
 

@@ -22,7 +22,9 @@ class Payment extends Model
         'amount',
         'payment_method',
         'payment_date',
+        'agency_id',
         'created_by',
+        'user_id',
     ];
 
     /**
@@ -36,8 +38,20 @@ class Payment extends Model
             'id' => 'integer',
             'amount' => 'decimal',
             'payment_date' => 'datetime',
+            'agency_id' => 'integer',
             'created_by' => 'integer',
+            'user_id' => 'integer',
         ];
+    }
+
+    public function agency(): BelongsTo
+    {
+        return $this->belongsTo(Agency::class);
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 
     public function createdBy(): BelongsTo

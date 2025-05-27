@@ -11,7 +11,7 @@ use Illuminate\View\View;
 
 class SupplierController extends Controller
 {
-    public function index(Request $request): Response
+    public function index(Request $request): View
     {
         $suppliers = Supplier::all();
 
@@ -20,12 +20,12 @@ class SupplierController extends Controller
         ]);
     }
 
-    public function create(Request $request): Response
+    public function create(Request $request): View
     {
         return view('supplier.create');
     }
 
-    public function store(SupplierStoreRequest $request): Response
+    public function store(SupplierStoreRequest $request): RedirectResponse
     {
         $supplier = Supplier::create($request->validated());
 
@@ -34,21 +34,21 @@ class SupplierController extends Controller
         return redirect()->route('suppliers.index');
     }
 
-    public function show(Request $request, Supplier $supplier): Response
+    public function show(Request $request, Supplier $supplier): View
     {
         return view('supplier.show', [
             'supplier' => $supplier,
         ]);
     }
 
-    public function edit(Request $request, Supplier $supplier): Response
+    public function edit(Request $request, Supplier $supplier): View
     {
         return view('supplier.edit', [
             'supplier' => $supplier,
         ]);
     }
 
-    public function update(SupplierUpdateRequest $request, Supplier $supplier): Response
+    public function update(SupplierUpdateRequest $request, Supplier $supplier): RedirectResponse
     {
         $supplier->update($request->validated());
 
@@ -57,7 +57,7 @@ class SupplierController extends Controller
         return redirect()->route('suppliers.index');
     }
 
-    public function destroy(Request $request, Supplier $supplier): Response
+    public function destroy(Request $request, Supplier $supplier): RedirectResponse
     {
         $supplier->delete();
 

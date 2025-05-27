@@ -11,7 +11,7 @@ use Illuminate\View\View;
 
 class CompanyController extends Controller
 {
-    public function index(Request $request): Response
+    public function index(Request $request): View
     {
         $companies = Company::all();
 
@@ -20,12 +20,12 @@ class CompanyController extends Controller
         ]);
     }
 
-    public function create(Request $request): Response
+    public function create(Request $request): View
     {
         return view('company.create');
     }
 
-    public function store(CompanyStoreRequest $request): Response
+    public function store(CompanyStoreRequest $request): RedirectResponse
     {
         $company = Company::create($request->validated());
 
@@ -34,21 +34,21 @@ class CompanyController extends Controller
         return redirect()->route('companies.index');
     }
 
-    public function show(Request $request, Company $company): Response
+    public function show(Request $request, Company $company): View
     {
         return view('company.show', [
             'company' => $company,
         ]);
     }
 
-    public function edit(Request $request, Company $company): Response
+    public function edit(Request $request, Company $company): View
     {
         return view('company.edit', [
             'company' => $company,
         ]);
     }
 
-    public function update(CompanyUpdateRequest $request, Company $company): Response
+    public function update(CompanyUpdateRequest $request, Company $company): RedirectResponse
     {
         $company->update($request->validated());
 
@@ -57,7 +57,7 @@ class CompanyController extends Controller
         return redirect()->route('companies.index');
     }
 
-    public function destroy(Request $request, Company $company): Response
+    public function destroy(Request $request, Company $company): RedirectResponse
     {
         $company->delete();
 

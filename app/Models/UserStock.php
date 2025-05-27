@@ -19,6 +19,7 @@ class UserStock extends Model
     protected $fillable = [
         'user_id',
         'stock_id',
+        'agency_id',
         'created_by',
     ];
 
@@ -33,6 +34,7 @@ class UserStock extends Model
             'id' => 'integer',
             'user_id' => 'integer',
             'stock_id' => 'integer',
+            'agency_id' => 'integer',
             'created_by' => 'integer',
         ];
     }
@@ -45,6 +47,16 @@ class UserStock extends Model
     public function stock(): BelongsTo
     {
         return $this->belongsTo(Stock::class);
+    }
+
+    public function agency(): BelongsTo
+    {
+        return $this->belongsTo(Agency::class);
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 
     public function createdBy(): BelongsTo

@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Supplier extends Model
@@ -21,7 +22,9 @@ class Supplier extends Model
         'phone',
         'email',
         'address',
+        'agency_id',
         'created_by',
+        'user_id',
     ];
 
     /**
@@ -33,12 +36,29 @@ class Supplier extends Model
     {
         return [
             'id' => 'integer',
+            'agency_id' => 'integer',
             'created_by' => 'integer',
+            'user_id' => 'integer',
         ];
+    }
+
+    public function agency(): BelongsTo
+    {
+        return $this->belongsTo(Agency::class);
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 
     public function createdBy(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function purchases(): HasMany
+    {
+        return $this->hasMany(Purchase::class);
     }
 }

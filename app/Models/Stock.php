@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Stock extends Model
@@ -20,7 +22,9 @@ class Stock extends Model
         'name',
         'location',
         'description',
+        'agency_id',
         'created_by',
+        'user_id',
     ];
 
     /**
@@ -32,12 +36,69 @@ class Stock extends Model
     {
         return [
             'id' => 'integer',
+            'agency_id' => 'integer',
             'created_by' => 'integer',
+            'user_id' => 'integer',
         ];
+    }
+
+    public function agency(): BelongsTo
+    {
+        return $this->belongsTo(Agency::class);
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 
     public function createdBy(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function userStocks(): HasMany
+    {
+        return $this->hasMany(UserStock::class);
+    }
+
+    public function stockProducts(): HasMany
+    {
+        return $this->hasMany(StockProduct::class);
+    }
+
+    public function purchases(): HasMany
+    {
+        return $this->hasMany(Purchase::class);
+    }
+
+    public function sales(): HasMany
+    {
+        return $this->hasMany(Sale::class);
+    }
+
+    public function stockTransfers(): HasMany
+    {
+        return $this->hasMany(StockTransfer::class);
+    }
+
+    public function cashRegisters(): HasMany
+    {
+        return $this->hasMany(CashRegister::class);
+    }
+
+    public function expenses(): HasMany
+    {
+        return $this->hasMany(Expense::class);
+    }
+
+    public function users(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class);
+    }
+
+    public function products(): BelongsToMany
+    {
+        return $this->belongsToMany(Product::class);
     }
 }

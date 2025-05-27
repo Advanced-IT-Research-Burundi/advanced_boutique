@@ -4,6 +4,7 @@ namespace Tests\Feature\Http\Controllers;
 
 use App\Models\Category;
 use App\Models\CreatedBy;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use JMac\Testing\Traits\AdditionalAssertions;
@@ -55,15 +56,18 @@ final class CategoryControllerTest extends TestCase
     {
         $name = fake()->name();
         $created_by = CreatedBy::factory()->create();
+        $user = User::factory()->create();
 
         $response = $this->post(route('categories.store'), [
             'name' => $name,
             'created_by' => $created_by->id,
+            'user_id' => $user->id,
         ]);
 
         $categories = Category::query()
             ->where('name', $name)
             ->where('created_by', $created_by->id)
+            ->where('user_id', $user->id)
             ->get();
         $this->assertCount(1, $categories);
         $category = $categories->first();
@@ -115,10 +119,12 @@ final class CategoryControllerTest extends TestCase
         $category = Category::factory()->create();
         $name = fake()->name();
         $created_by = CreatedBy::factory()->create();
+        $user = User::factory()->create();
 
         $response = $this->put(route('categories.update', $category), [
             'name' => $name,
             'created_by' => $created_by->id,
+            'user_id' => $user->id,
         ]);
 
         $category->refresh();
@@ -128,6 +134,7 @@ final class CategoryControllerTest extends TestCase
 
         $this->assertEquals($name, $category->name);
         $this->assertEquals($created_by->id, $category->created_by);
+        $this->assertEquals($user->id, $category->user_id);
     }
 
 

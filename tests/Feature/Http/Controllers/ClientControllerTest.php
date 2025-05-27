@@ -4,6 +4,7 @@ namespace Tests\Feature\Http\Controllers;
 
 use App\Models\Client;
 use App\Models\CreatedBy;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use JMac\Testing\Traits\AdditionalAssertions;
@@ -56,17 +57,20 @@ final class ClientControllerTest extends TestCase
         $name = fake()->name();
         $balance = fake()->randomFloat(/** decimal_attributes **/);
         $created_by = CreatedBy::factory()->create();
+        $user = User::factory()->create();
 
         $response = $this->post(route('clients.store'), [
             'name' => $name,
             'balance' => $balance,
             'created_by' => $created_by->id,
+            'user_id' => $user->id,
         ]);
 
         $clients = Client::query()
             ->where('name', $name)
             ->where('balance', $balance)
             ->where('created_by', $created_by->id)
+            ->where('user_id', $user->id)
             ->get();
         $this->assertCount(1, $clients);
         $client = $clients->first();
@@ -119,11 +123,13 @@ final class ClientControllerTest extends TestCase
         $name = fake()->name();
         $balance = fake()->randomFloat(/** decimal_attributes **/);
         $created_by = CreatedBy::factory()->create();
+        $user = User::factory()->create();
 
         $response = $this->put(route('clients.update', $client), [
             'name' => $name,
             'balance' => $balance,
             'created_by' => $created_by->id,
+            'user_id' => $user->id,
         ]);
 
         $client->refresh();
@@ -134,6 +140,7 @@ final class ClientControllerTest extends TestCase
         $this->assertEquals($name, $client->name);
         $this->assertEquals($balance, $client->balance);
         $this->assertEquals($created_by->id, $client->created_by);
+        $this->assertEquals($user->id, $client->user_id);
     }
 
 

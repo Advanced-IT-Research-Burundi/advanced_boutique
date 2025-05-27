@@ -5,6 +5,7 @@ namespace Tests\Feature\Http\Controllers;
 use App\Models\Category;
 use App\Models\CreatedBy;
 use App\Models\Product;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use JMac\Testing\Traits\AdditionalAssertions;
@@ -61,6 +62,7 @@ final class ProductControllerTest extends TestCase
         $unit = fake()->word();
         $alert_quantity = fake()->randomFloat(/** float_attributes **/);
         $created_by = CreatedBy::factory()->create();
+        $user = User::factory()->create();
 
         $response = $this->post(route('products.store'), [
             'name' => $name,
@@ -70,6 +72,7 @@ final class ProductControllerTest extends TestCase
             'unit' => $unit,
             'alert_quantity' => $alert_quantity,
             'created_by' => $created_by->id,
+            'user_id' => $user->id,
         ]);
 
         $products = Product::query()
@@ -80,6 +83,7 @@ final class ProductControllerTest extends TestCase
             ->where('unit', $unit)
             ->where('alert_quantity', $alert_quantity)
             ->where('created_by', $created_by->id)
+            ->where('user_id', $user->id)
             ->get();
         $this->assertCount(1, $products);
         $product = $products->first();
@@ -136,6 +140,7 @@ final class ProductControllerTest extends TestCase
         $unit = fake()->word();
         $alert_quantity = fake()->randomFloat(/** float_attributes **/);
         $created_by = CreatedBy::factory()->create();
+        $user = User::factory()->create();
 
         $response = $this->put(route('products.update', $product), [
             'name' => $name,
@@ -145,6 +150,7 @@ final class ProductControllerTest extends TestCase
             'unit' => $unit,
             'alert_quantity' => $alert_quantity,
             'created_by' => $created_by->id,
+            'user_id' => $user->id,
         ]);
 
         $product->refresh();
@@ -159,6 +165,7 @@ final class ProductControllerTest extends TestCase
         $this->assertEquals($unit, $product->unit);
         $this->assertEquals($alert_quantity, $product->alert_quantity);
         $this->assertEquals($created_by->id, $product->created_by);
+        $this->assertEquals($user->id, $product->user_id);
     }
 
 

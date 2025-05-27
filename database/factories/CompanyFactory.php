@@ -42,7 +42,7 @@ class CompanyFactory extends Factory
             'tp_legal_form' => fake()->word(),
             'payment_type' => fake()->word(),
             'is_actif' => fake()->boolean(),
-            'created_by' => User::factory()->create()->id,
+            'user_id' => User::factory(),
         ];
     }
 }

@@ -11,7 +11,7 @@ use Illuminate\View\View;
 
 class ExpenseTypeController extends Controller
 {
-    public function index(Request $request): Response
+    public function index(Request $request): View
     {
         $expenseTypes = ExpenseType::all();
 
@@ -20,12 +20,12 @@ class ExpenseTypeController extends Controller
         ]);
     }
 
-    public function create(Request $request): Response
+    public function create(Request $request): View
     {
         return view('expenseType.create');
     }
 
-    public function store(ExpenseTypeStoreRequest $request): Response
+    public function store(ExpenseTypeStoreRequest $request): RedirectResponse
     {
         $expenseType = ExpenseType::create($request->validated());
 
@@ -34,21 +34,21 @@ class ExpenseTypeController extends Controller
         return redirect()->route('expenseTypes.index');
     }
 
-    public function show(Request $request, ExpenseType $expenseType): Response
+    public function show(Request $request, ExpenseType $expenseType): View
     {
         return view('expenseType.show', [
             'expenseType' => $expenseType,
         ]);
     }
 
-    public function edit(Request $request, ExpenseType $expenseType): Response
+    public function edit(Request $request, ExpenseType $expenseType): View
     {
         return view('expenseType.edit', [
             'expenseType' => $expenseType,
         ]);
     }
 
-    public function update(ExpenseTypeUpdateRequest $request, ExpenseType $expenseType): Response
+    public function update(ExpenseTypeUpdateRequest $request, ExpenseType $expenseType): RedirectResponse
     {
         $expenseType->update($request->validated());
 
@@ -57,7 +57,7 @@ class ExpenseTypeController extends Controller
         return redirect()->route('expenseTypes.index');
     }
 
-    public function destroy(Request $request, ExpenseType $expenseType): Response
+    public function destroy(Request $request, ExpenseType $expenseType): RedirectResponse
     {
         $expenseType->delete();
 

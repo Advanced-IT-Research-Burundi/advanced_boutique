@@ -1,8 +1,31 @@
 models:
   Company:
+    tp_name: string
+    tp_type: string
+    tp_TIN: string
+    tp_trade_number: string nullable
+    tp_postal_number: string nullable
+    tp_phone_number: string nullable
+    tp_address_province: string nullable
+    tp_address_commune: string nullable
+    tp_address_quartier: string nullable
+    tp_address_avenue: string nullable
+    tp_address_rue: string nullable
+    tp_address_number: string nullable
+    vat_taxpayer: string nullable
+    ct_taxpayer: string nullable
+    tl_taxpayer: string nullable
+    tp_fiscal_center: string nullable
+    tp_activity_sector: string nullable
+    tp_legal_form: string nullable
+    payment_type: string nullable
+    is_actif: boolean default:true
+    user_id: id foreign:users
+    timestamps: true
+    softDeletes: true
     relationships:
       belongsTo: User
-      hasMany: [Agency, Stock, Category, Product, Client, Supplier, Purchase, Sale, CashRegister, Expense, ExpenseType]
+      hasMany: Agency, Stock, Category, Product, Client, Supplier, Purchase, Sale, CashRegister, Expense, ExpenseType
 
   Agency:
     company_id: id foreign:companies
@@ -16,8 +39,8 @@ models:
     timestamps: true
     softDeletes: true
     relationships:
-      belongsTo: [Company, User as Manager, User as Creator, Agency as ParentAgency]
-      hasMany: [Agency as ChildAgencies, Stock, Category, Product, Client, Supplier, Purchase, Sale, CashRegister, Expense, ExpenseType, UserStock, StockTransfer, CashTransaction]
+      belongsTo: Company, User, Agency, User
+      hasMany: Agency, Stock, Category, Product, Client, Supplier, Purchase, Sale, CashRegister, Expense, ExpenseType, UserStock, StockTransfer, CashTransaction
 
   Stock:
     name: string
@@ -28,9 +51,9 @@ models:
     timestamps: true
     softDeletes: true
     relationships:
-      belongsTo: [Agency, User as Creator]
-      hasMany: [UserStock, StockProduct, Purchase, Sale, StockTransfer as FromStock, StockTransfer as ToStock, CashRegister, Expense]
-      belongsToMany: [User through UserStock, Product through StockProduct]
+      belongsTo: Agency, User
+      hasMany: UserStock, StockProduct, Purchase, Sale, StockTransfer, CashRegister, Expense
+      belongsToMany: User, Product
 
   UserStock:
     user_id: id foreign:users
@@ -40,7 +63,7 @@ models:
     timestamps: true
     softDeletes: true
     relationships:
-      belongsTo: [User, Stock, Agency, User as Creator]
+      belongsTo: User, Stock, Agency, User
 
   Category:
     name: string
@@ -50,7 +73,7 @@ models:
     timestamps: true
     softDeletes: true
     relationships:
-      belongsTo: [Agency, User as Creator]
+      belongsTo: Agency, User
       hasMany: Product
 
   Product:
@@ -66,9 +89,9 @@ models:
     timestamps: true
     softDeletes: true
     relationships:
-      belongsTo: [Category, Agency, User as Creator]
-      hasMany: [StockProduct, PurchaseItem, SaleItem, StockTransferItem]
-      belongsToMany: [Stock through StockProduct]
+      belongsTo: Category, Agency, User
+      hasMany: StockProduct, PurchaseItem, SaleItem, StockTransferItem
+      belongsToMany: Stock
 
   StockProduct:
     stock_id: id foreign:stocks
@@ -78,7 +101,7 @@ models:
     timestamps: true
     softDeletes: true
     relationships:
-      belongsTo: [Stock, Product, Agency]
+      belongsTo: Stock, Product, Agency
 
   Client:
     name: string
@@ -92,7 +115,7 @@ models:
     timestamps: true
     softDeletes: true
     relationships:
-      belongsTo: [Agency, User as Creator]
+      belongsTo: Agency, User
       hasMany: Sale
 
   Supplier:
@@ -105,7 +128,7 @@ models:
     timestamps: true
     softDeletes: true
     relationships:
-      belongsTo: [Agency, User as Creator]
+      belongsTo: Agency, User
       hasMany: Purchase
 
   Purchase:
@@ -120,8 +143,8 @@ models:
     timestamps: true
     softDeletes: true
     relationships:
-      belongsTo: [Supplier, Stock, Agency, User as Creator]
-      hasMany: [PurchaseItem, Payment as PurchasePayments]
+      belongsTo: Supplier, Stock, Agency, User
+      hasMany: PurchaseItem, Payment
 
   PurchaseItem:
     purchase_id: id foreign:purchases
@@ -134,7 +157,7 @@ models:
     timestamps: true
     softDeletes: true
     relationships:
-      belongsTo: [Purchase, Product, Agency, User as Creator]
+      belongsTo: Purchase, Product, Agency, User
 
   Sale:
     client_id: id foreign:clients
@@ -149,8 +172,8 @@ models:
     timestamps: true
     softDeletes: true
     relationships:
-      belongsTo: [Client, Stock, User, Agency, User as Creator]
-      hasMany: [SaleItem, Payment as SalePayments]
+      belongsTo: Client, Stock, User, Agency, User
+      hasMany: SaleItem, Payment
 
   SaleItem:
     sale_id: id foreign:sales
@@ -164,7 +187,7 @@ models:
     timestamps: true
     softDeletes: true
     relationships:
-      belongsTo: [Sale, Product, Agency, User as Creator]
+      belongsTo: Sale, Product, Agency, User
 
   Payment:
     payment_type: string
@@ -177,9 +200,7 @@ models:
     timestamps: true
     softDeletes: true
     relationships:
-      belongsTo: [Agency, User as Creator]
-      # Relation polymorphe basée sur payment_type et reference_id
-      morphTo: [Purchase, Sale]
+      belongsTo: Agency, User
 
   StockTransfer:
     from_stock_id: id foreign:stocks
@@ -192,7 +213,7 @@ models:
     timestamps: true
     softDeletes: true
     relationships:
-      belongsTo: [Stock as FromStock, Stock as ToStock, User, Agency, User as Creator]
+      belongsTo: Stock, Stock, User, Agency, User
       hasMany: StockTransferItem
 
   StockTransferItem:
@@ -204,7 +225,7 @@ models:
     timestamps: true
     softDeletes: true
     relationships:
-      belongsTo: [StockTransfer, Product, Agency, User as Creator]
+      belongsTo: StockTransfer, Product, Agency, User
 
   CashRegister:
     user_id: id foreign:users
@@ -219,7 +240,7 @@ models:
     timestamps: true
     softDeletes: true
     relationships:
-      belongsTo: [User, Stock, Agency, User as Creator]
+      belongsTo: User, Stock, Agency, User
       hasMany: CashTransaction
 
   CashTransaction:
@@ -233,9 +254,7 @@ models:
     timestamps: true
     softDeletes: true
     relationships:
-      belongsTo: [CashRegister, Agency, User as Creator]
-      # Relation polymorphe basée sur type et reference_id
-      morphTo: [Sale, Purchase, Expense]
+      belongsTo: CashRegister, Agency, User
 
   Expense:
     stock_id: id foreign:stocks
@@ -249,8 +268,8 @@ models:
     timestamps: true
     softDeletes: true
     relationships:
-      belongsTo: [Stock, User, ExpenseType, Agency, User as Creator]
-      hasMany: [Payment as ExpensePayments, CashTransaction]
+      belongsTo: Stock, User, ExpenseType, Agency, User
+      hasMany: Payment, CashTransaction
 
   ExpenseType:
     name: string unique
@@ -260,18 +279,45 @@ models:
     timestamps: true
     softDeletes: true
     relationships:
-      belongsTo: [Agency, User as Creator]
+      belongsTo: Agency, User
       hasMany: Expense
 
   User:
+    first_name: string
+    last_name: string
+    email: string unique
+    email_verified_at: timestamp nullable
+    password: string
+    phone: string nullable
+    address: text nullable
+    date_of_birth: date nullable
+    gender: enum[male,female,other] nullable
+    profile_photo: string nullable
+    status: enum[active,inactive,suspended] default:active
+    role: enum[super_admin,company_admin,agency_manager,cashier,salesperson,accountant,stock_manager] default:salesperson
+    permissions: json nullable
+    last_login_at: timestamp nullable
+    must_change_password: boolean default:false
+    two_factor_enabled: boolean default:false
+    two_factor_secret: string nullable
+    recovery_codes: json nullable
+    company_id: id foreign:companies nullable
+    agency_id: id foreign:agencies nullable
+    created_by: id foreign:users nullable
+    remember_token: string nullable
+    timestamps: true
+    softDeletes: true
     relationships:
-      hasMany: [Company, Agency as ManagedAgencies, Stock as CreatedStocks, UserStock, Category as CreatedCategories, Product as CreatedProducts, Client as CreatedClients, Supplier as CreatedSuppliers, Purchase as CreatedPurchases, Sale as CreatedSales, Sale as SalesUser, CashRegister as UserCashRegisters, CashTransaction as CreatedCashTransactions, Expense as UserExpenses, ExpenseType as CreatedExpenseTypes]
-      belongsToMany: [Stock through UserStock]
+      belongsTo: Company, Agency, User
+      hasMany: Company, Agency, Stock, UserStock, Category, Product, Client, Supplier, Purchase, Sale, CashRegister, CashTransaction, Expense, ExpenseType, StockTransfer, Payment, User
+      belongsToMany: Stock
 
 controllers:
   Company:
     resource: web
   Agency:
+    resource: web
+  User:
     resource: web
   Stock:
     resource: web

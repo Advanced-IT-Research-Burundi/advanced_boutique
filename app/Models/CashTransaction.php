@@ -22,7 +22,9 @@ class CashTransaction extends Model
         'reference_id',
         'amount',
         'description',
+        'agency_id',
         'created_by',
+        'user_id',
     ];
 
     /**
@@ -36,13 +38,25 @@ class CashTransaction extends Model
             'id' => 'integer',
             'cash_register_id' => 'integer',
             'amount' => 'decimal',
+            'agency_id' => 'integer',
             'created_by' => 'integer',
+            'user_id' => 'integer',
         ];
     }
 
     public function cashRegister(): BelongsTo
     {
         return $this->belongsTo(CashRegister::class);
+    }
+
+    public function agency(): BelongsTo
+    {
+        return $this->belongsTo(Agency::class);
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 
     public function createdBy(): BelongsTo

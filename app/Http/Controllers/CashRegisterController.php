@@ -11,7 +11,7 @@ use Illuminate\View\View;
 
 class CashRegisterController extends Controller
 {
-    public function index(Request $request): Response
+    public function index(Request $request): View
     {
         $cashRegisters = CashRegister::all();
 
@@ -20,12 +20,12 @@ class CashRegisterController extends Controller
         ]);
     }
 
-    public function create(Request $request): Response
+    public function create(Request $request): View
     {
         return view('cashRegister.create');
     }
 
-    public function store(CashRegisterStoreRequest $request): Response
+    public function store(CashRegisterStoreRequest $request): RedirectResponse
     {
         $cashRegister = CashRegister::create($request->validated());
 
@@ -34,21 +34,21 @@ class CashRegisterController extends Controller
         return redirect()->route('cashRegisters.index');
     }
 
-    public function show(Request $request, CashRegister $cashRegister): Response
+    public function show(Request $request, CashRegister $cashRegister): View
     {
         return view('cashRegister.show', [
             'cashRegister' => $cashRegister,
         ]);
     }
 
-    public function edit(Request $request, CashRegister $cashRegister): Response
+    public function edit(Request $request, CashRegister $cashRegister): View
     {
         return view('cashRegister.edit', [
             'cashRegister' => $cashRegister,
         ]);
     }
 
-    public function update(CashRegisterUpdateRequest $request, CashRegister $cashRegister): Response
+    public function update(CashRegisterUpdateRequest $request, CashRegister $cashRegister): RedirectResponse
     {
         $cashRegister->update($request->validated());
 
@@ -57,7 +57,7 @@ class CashRegisterController extends Controller
         return redirect()->route('cashRegisters.index');
     }
 
-    public function destroy(Request $request, CashRegister $cashRegister): Response
+    public function destroy(Request $request, CashRegister $cashRegister): RedirectResponse
     {
         $cashRegister->delete();
 

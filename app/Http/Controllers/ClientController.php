@@ -11,7 +11,7 @@ use Illuminate\View\View;
 
 class ClientController extends Controller
 {
-    public function index(Request $request): Response
+    public function index(Request $request): View
     {
         $clients = Client::all();
 
@@ -20,12 +20,12 @@ class ClientController extends Controller
         ]);
     }
 
-    public function create(Request $request): Response
+    public function create(Request $request): View
     {
         return view('client.create');
     }
 
-    public function store(ClientStoreRequest $request): Response
+    public function store(ClientStoreRequest $request): RedirectResponse
     {
         $client = Client::create($request->validated());
 
@@ -34,21 +34,21 @@ class ClientController extends Controller
         return redirect()->route('clients.index');
     }
 
-    public function show(Request $request, Client $client): Response
+    public function show(Request $request, Client $client): View
     {
         return view('client.show', [
             'client' => $client,
         ]);
     }
 
-    public function edit(Request $request, Client $client): Response
+    public function edit(Request $request, Client $client): View
     {
         return view('client.edit', [
             'client' => $client,
         ]);
     }
 
-    public function update(ClientUpdateRequest $request, Client $client): Response
+    public function update(ClientUpdateRequest $request, Client $client): RedirectResponse
     {
         $client->update($request->validated());
 
@@ -57,7 +57,7 @@ class ClientController extends Controller
         return redirect()->route('clients.index');
     }
 
-    public function destroy(Request $request, Client $client): Response
+    public function destroy(Request $request, Client $client): RedirectResponse
     {
         $client->delete();
 

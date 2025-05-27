@@ -4,6 +4,7 @@ namespace Tests\Feature\Http\Controllers;
 
 use App\Models\CreatedBy;
 use App\Models\Supplier;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use JMac\Testing\Traits\AdditionalAssertions;
@@ -55,15 +56,18 @@ final class SupplierControllerTest extends TestCase
     {
         $name = fake()->name();
         $created_by = CreatedBy::factory()->create();
+        $user = User::factory()->create();
 
         $response = $this->post(route('suppliers.store'), [
             'name' => $name,
             'created_by' => $created_by->id,
+            'user_id' => $user->id,
         ]);
 
         $suppliers = Supplier::query()
             ->where('name', $name)
             ->where('created_by', $created_by->id)
+            ->where('user_id', $user->id)
             ->get();
         $this->assertCount(1, $suppliers);
         $supplier = $suppliers->first();
@@ -115,10 +119,12 @@ final class SupplierControllerTest extends TestCase
         $supplier = Supplier::factory()->create();
         $name = fake()->name();
         $created_by = CreatedBy::factory()->create();
+        $user = User::factory()->create();
 
         $response = $this->put(route('suppliers.update', $supplier), [
             'name' => $name,
             'created_by' => $created_by->id,
+            'user_id' => $user->id,
         ]);
 
         $supplier->refresh();
@@ -128,6 +134,7 @@ final class SupplierControllerTest extends TestCase
 
         $this->assertEquals($name, $supplier->name);
         $this->assertEquals($created_by->id, $supplier->created_by);
+        $this->assertEquals($user->id, $supplier->user_id);
     }
 
 

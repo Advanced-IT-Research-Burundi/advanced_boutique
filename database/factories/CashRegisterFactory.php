@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
+use App\Models\Agency;
 use App\Models\CashRegister;
 use App\Models\Stock;
 use App\Models\User;
@@ -30,7 +31,8 @@ class CashRegisterFactory extends Factory
             'status' => fake()->word(),
             'opened_at' => fake()->dateTime(),
             'closed_at' => fake()->dateTime(),
-            'created_by' => User::factory()->create()->id,
+            'agency_id' => Agency::factory(),
+            'created_by' => User::factory()->create()->created_by,
         ];
     }
 }

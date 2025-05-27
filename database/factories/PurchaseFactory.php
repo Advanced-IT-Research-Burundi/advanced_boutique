@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
+use App\Models\Agency;
 use App\Models\Purchase;
 use App\Models\Stock;
 use App\Models\Supplier;
@@ -30,7 +31,9 @@ class PurchaseFactory extends Factory
             'paid_amount' => fake()->randomFloat(0, 0, 9999999999.),
             'due_amount' => fake()->randomFloat(0, 0, 9999999999.),
             'purchase_date' => fake()->dateTime(),
-            'created_by' => User::factory()->create()->id,
+            'agency_id' => Agency::factory(),
+            'created_by' => User::factory()->create()->created_by,
+            'user_id' => User::factory(),
         ];
     }
 }

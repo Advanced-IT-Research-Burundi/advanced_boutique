@@ -20,6 +20,7 @@ class StockProduct extends Model
         'stock_id',
         'product_id',
         'quantity',
+        'agency_id',
     ];
 
     /**
@@ -34,6 +35,7 @@ class StockProduct extends Model
             'stock_id' => 'integer',
             'product_id' => 'integer',
             'quantity' => 'float',
+            'agency_id' => 'integer',
         ];
     }
 
@@ -45,5 +47,10 @@ class StockProduct extends Model
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
+    }
+
+    public function agency(): BelongsTo
+    {
+        return $this->belongsTo(Agency::class);
     }
 }

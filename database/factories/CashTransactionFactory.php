@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
+use App\Models\Agency;
 use App\Models\CashRegister;
 use App\Models\CashTransaction;
 use App\Models\User;
@@ -28,7 +29,9 @@ class CashTransactionFactory extends Factory
             'reference_id' => fake()->numberBetween(-10000, 10000),
             'amount' => fake()->randomFloat(0, 0, 9999999999.),
             'description' => fake()->text(),
-            'created_by' => User::factory()->create()->id,
+            'agency_id' => Agency::factory(),
+            'created_by' => User::factory()->create()->created_by,
+            'user_id' => User::factory(),
         ];
     }
 }

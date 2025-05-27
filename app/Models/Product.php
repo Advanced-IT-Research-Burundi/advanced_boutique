@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Product extends Model
@@ -24,7 +26,9 @@ class Product extends Model
         'sale_price',
         'unit',
         'alert_quantity',
+        'agency_id',
         'created_by',
+        'user_id',
     ];
 
     /**
@@ -40,7 +44,9 @@ class Product extends Model
             'purchase_price' => 'decimal',
             'sale_price' => 'decimal',
             'alert_quantity' => 'float',
+            'agency_id' => 'integer',
             'created_by' => 'integer',
+            'user_id' => 'integer',
         ];
     }
 
@@ -49,8 +55,43 @@ class Product extends Model
         return $this->belongsTo(Category::class);
     }
 
+    public function agency(): BelongsTo
+    {
+        return $this->belongsTo(Agency::class);
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
     public function createdBy(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function stockProducts(): HasMany
+    {
+        return $this->hasMany(StockProduct::class);
+    }
+
+    public function purchaseItems(): HasMany
+    {
+        return $this->hasMany(PurchaseItem::class);
+    }
+
+    public function saleItems(): HasMany
+    {
+        return $this->hasMany(SaleItem::class);
+    }
+
+    public function stockTransferItems(): HasMany
+    {
+        return $this->hasMany(StockTransferItem::class);
+    }
+
+    public function stocks(): BelongsToMany
+    {
+        return $this->belongsToMany(Stock::class);
     }
 }

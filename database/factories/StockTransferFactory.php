@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
+use App\Models\Agency;
 use App\Models\Stock;
 use App\Models\StockTransfer;
 use App\Models\User;
@@ -28,7 +29,9 @@ class StockTransferFactory extends Factory
             'user_id' => User::factory(),
             'transfer_date' => fake()->dateTime(),
             'note' => fake()->text(),
-            'created_by' => User::factory()->create()->id,
+            'agency_id' => Agency::factory(),
+            'created_by' => User::factory()->create()->created_by,
+            'stock_id' => Stock::factory(),
         ];
     }
 }

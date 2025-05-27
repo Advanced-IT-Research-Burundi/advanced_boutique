@@ -4,6 +4,7 @@ namespace Tests\Feature\Http\Controllers;
 
 use App\Models\CreatedBy;
 use App\Models\Stock;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use JMac\Testing\Traits\AdditionalAssertions;
@@ -55,15 +56,18 @@ final class StockControllerTest extends TestCase
     {
         $name = fake()->name();
         $created_by = CreatedBy::factory()->create();
+        $user = User::factory()->create();
 
         $response = $this->post(route('stocks.store'), [
             'name' => $name,
             'created_by' => $created_by->id,
+            'user_id' => $user->id,
         ]);
 
         $stocks = Stock::query()
             ->where('name', $name)
             ->where('created_by', $created_by->id)
+            ->where('user_id', $user->id)
             ->get();
         $this->assertCount(1, $stocks);
         $stock = $stocks->first();
@@ -115,10 +119,12 @@ final class StockControllerTest extends TestCase
         $stock = Stock::factory()->create();
         $name = fake()->name();
         $created_by = CreatedBy::factory()->create();
+        $user = User::factory()->create();
 
         $response = $this->put(route('stocks.update', $stock), [
             'name' => $name,
             'created_by' => $created_by->id,
+            'user_id' => $user->id,
         ]);
 
         $stock->refresh();
@@ -128,6 +134,7 @@ final class StockControllerTest extends TestCase
 
         $this->assertEquals($name, $stock->name);
         $this->assertEquals($created_by->id, $stock->created_by);
+        $this->assertEquals($user->id, $stock->user_id);
     }
 
 

@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Purchase extends Model
@@ -23,7 +24,9 @@ class Purchase extends Model
         'paid_amount',
         'due_amount',
         'purchase_date',
+        'agency_id',
         'created_by',
+        'user_id',
     ];
 
     /**
@@ -41,7 +44,9 @@ class Purchase extends Model
             'paid_amount' => 'decimal',
             'due_amount' => 'decimal',
             'purchase_date' => 'datetime',
+            'agency_id' => 'integer',
             'created_by' => 'integer',
+            'user_id' => 'integer',
         ];
     }
 
@@ -55,8 +60,28 @@ class Purchase extends Model
         return $this->belongsTo(Stock::class);
     }
 
+    public function agency(): BelongsTo
+    {
+        return $this->belongsTo(Agency::class);
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
     public function createdBy(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function purchaseItems(): HasMany
+    {
+        return $this->hasMany(PurchaseItem::class);
+    }
+
+    public function payments(): HasMany
+    {
+        return $this->hasMany(Payment::class);
     }
 }

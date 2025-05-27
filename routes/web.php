@@ -31,7 +31,11 @@ Route::middleware('auth')->group(function () {
 require __DIR__.'/auth.php';
 
 
+
 Route::resource('companies', App\Http\Controllers\CompanyController::class);
+
+Route::resource('agencies', App\Http\Controllers\AgencyController::class);
+
 Route::resource('users', App\Http\Controllers\UserController::class);
 
 Route::resource('stocks', App\Http\Controllers\StockController::class);
@@ -55,3 +59,9 @@ Route::resource('cash-transactions', App\Http\Controllers\CashTransactionControl
 Route::resource('expenses', App\Http\Controllers\ExpenseController::class);
 
 Route::resource('expense-types', App\Http\Controllers\ExpenseTypeController::class);
+
+Route::resource('stock-transfers', App\Http\Controllers\StockTransferController::class);
+
+Route::resource('payments', App\Http\Controllers\PaymentController::class);
+
+Route::resource('user-stocks', App\Http\Controllers\UserStockController::class);

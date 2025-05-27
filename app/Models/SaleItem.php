@@ -23,7 +23,9 @@ class SaleItem extends Model
         'sale_price',
         'discount',
         'subtotal',
+        'agency_id',
         'created_by',
+        'user_id',
     ];
 
     /**
@@ -40,7 +42,9 @@ class SaleItem extends Model
             'sale_price' => 'decimal',
             'discount' => 'decimal',
             'subtotal' => 'decimal',
+            'agency_id' => 'integer',
             'created_by' => 'integer',
+            'user_id' => 'integer',
         ];
     }
 
@@ -52,6 +56,16 @@ class SaleItem extends Model
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
+    }
+
+    public function agency(): BelongsTo
+    {
+        return $this->belongsTo(Agency::class);
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 
     public function createdBy(): BelongsTo

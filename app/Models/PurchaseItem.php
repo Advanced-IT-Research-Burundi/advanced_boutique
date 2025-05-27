@@ -22,7 +22,9 @@ class PurchaseItem extends Model
         'quantity',
         'purchase_price',
         'subtotal',
+        'agency_id',
         'created_by',
+        'user_id',
     ];
 
     /**
@@ -38,7 +40,9 @@ class PurchaseItem extends Model
             'product_id' => 'integer',
             'purchase_price' => 'decimal',
             'subtotal' => 'decimal',
+            'agency_id' => 'integer',
             'created_by' => 'integer',
+            'user_id' => 'integer',
         ];
     }
 
@@ -50,6 +54,16 @@ class PurchaseItem extends Model
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
+    }
+
+    public function agency(): BelongsTo
+    {
+        return $this->belongsTo(Agency::class);
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 
     public function createdBy(): BelongsTo

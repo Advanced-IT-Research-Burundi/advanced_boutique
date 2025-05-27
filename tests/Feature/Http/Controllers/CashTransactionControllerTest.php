@@ -5,6 +5,7 @@ namespace Tests\Feature\Http\Controllers;
 use App\Models\CashRegister;
 use App\Models\CashTransaction;
 use App\Models\CreatedBy;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use JMac\Testing\Traits\AdditionalAssertions;
@@ -60,6 +61,7 @@ final class CashTransactionControllerTest extends TestCase
         $amount = fake()->randomFloat(/** decimal_attributes **/);
         $description = fake()->text();
         $created_by = CreatedBy::factory()->create();
+        $user = User::factory()->create();
 
         $response = $this->post(route('cash-transactions.store'), [
             'cash_register_id' => $cash_register->id,
@@ -68,6 +70,7 @@ final class CashTransactionControllerTest extends TestCase
             'amount' => $amount,
             'description' => $description,
             'created_by' => $created_by->id,
+            'user_id' => $user->id,
         ]);
 
         $cashTransactions = CashTransaction::query()
@@ -77,6 +80,7 @@ final class CashTransactionControllerTest extends TestCase
             ->where('amount', $amount)
             ->where('description', $description)
             ->where('created_by', $created_by->id)
+            ->where('user_id', $user->id)
             ->get();
         $this->assertCount(1, $cashTransactions);
         $cashTransaction = $cashTransactions->first();
@@ -132,6 +136,7 @@ final class CashTransactionControllerTest extends TestCase
         $amount = fake()->randomFloat(/** decimal_attributes **/);
         $description = fake()->text();
         $created_by = CreatedBy::factory()->create();
+        $user = User::factory()->create();
 
         $response = $this->put(route('cash-transactions.update', $cashTransaction), [
             'cash_register_id' => $cash_register->id,
@@ -140,6 +145,7 @@ final class CashTransactionControllerTest extends TestCase
             'amount' => $amount,
             'description' => $description,
             'created_by' => $created_by->id,
+            'user_id' => $user->id,
         ]);
 
         $cashTransaction->refresh();
@@ -153,6 +159,7 @@ final class CashTransactionControllerTest extends TestCase
         $this->assertEquals($amount, $cashTransaction->amount);
         $this->assertEquals($description, $cashTransaction->description);
         $this->assertEquals($created_by->id, $cashTransaction->created_by);
+        $this->assertEquals($user->id, $cashTransaction->user_id);
     }
 
 
