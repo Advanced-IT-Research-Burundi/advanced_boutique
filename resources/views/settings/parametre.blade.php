@@ -1,40 +1,51 @@
 @extends('layouts.app')
 @section('content')
-<div class="container-fluid py-4">
-  <div class="row">
-    <div class="col-md-3">
-      <div class="card shadow-sm mb-4">
+<div class="container-fluid">
+  <div class="col">
+    <div class="col-md-12">
+    <div class="card shadow-sm mb-4">
         <div class="card-header bg-primary text-white">
-          <h5 class="mb-0">
+        <h5 class="mb-0">
             <i class="bi bi-sliders"></i> Paramétrage
-          </h5>
+        </h5>
         </div>
         <div class="card-body p-0">
-          <div class="list-group list-group-flush" id="parametrage-menu" role="tablist">
-            <a class="list-group-item list-group-item-action active d-flex align-items-center" id="company-tab" data-bs-toggle="list" href="#company" role="tab">
-              <i class="bi bi-building me-2"></i> Informations entreprise
+        <ul class="nav nav-tabs px-3 pt-3" id="parametrage-menu" role="tablist">
+            <li class="nav-item" role="presentation">
+            <a class="nav-link active d-flex align-items-center" id="company-tab" data-bs-toggle="tab" href="#company" role="tab">
+                <i class="bi bi-building me-2"></i> Informations entreprise
             </a>
-            <a class="list-group-item list-group-item-action d-flex align-items-center" id="commercial-tab" data-bs-toggle="list" href="#commercial" role="tab">
-              <i class="bi bi-briefcase me-2"></i> Commercial
+            </li>
+            <li class="nav-item" role="presentation">
+            <a class="nav-link d-flex align-items-center" id="commercial-tab" data-bs-toggle="tab" href="#commercial" role="tab">
+                <i class="bi bi-briefcase me-2"></i> Commercial
             </a>
-            <a class="list-group-item list-group-item-action d-flex align-items-center" id="products-tab" data-bs-toggle="list" href="#products" role="tab">
-              <i class="bi bi-box-seam me-2"></i> Produits & Services
+            </li>
+            <li class="nav-item" role="presentation">
+            <a class="nav-link d-flex align-items-center" id="products-tab" data-bs-toggle="tab" href="#products" role="tab">
+                <i class="bi bi-box-seam me-2"></i> Produits & Services
             </a>
-            <a class="list-group-item list-group-item-action d-flex align-items-center" id="notifications-tab" data-bs-toggle="list" href="#notifications" role="tab">
-              <i class="bi bi-bell me-2"></i> Notifications
+            </li>
+            <li class="nav-item" role="presentation">
+            <a class="nav-link d-flex align-items-center" id="notifications-tab" data-bs-toggle="tab" href="#notifications" role="tab">
+                <i class="bi bi-bell me-2"></i> Notifications
             </a>
-            <a class="list-group-item list-group-item-action d-flex align-items-center" id="users-tab" data-bs-toggle="list" href="#users" role="tab">
-              <i class="bi bi-people me-2"></i> Utilisateurs
+            </li>
+            <li class="nav-item" role="presentation">
+            <a class="nav-link d-flex align-items-center" id="users-tab" data-bs-toggle="tab" href="#users" role="tab">
+                <i class="bi bi-people me-2"></i> Utilisateurs
             </a>
-            <a class="list-group-item list-group-item-action d-flex align-items-center text-danger" id="danger-zone-tab" data-bs-toggle="list" href="#danger-zone" role="tab">
-              <i class="bi bi-exclamation-triangle me-2"></i> Zone sensible
+            </li>
+            <li class="nav-item" role="presentation">
+            <a class="nav-link d-flex align-items-center text-danger" id="danger-zone-tab" data-bs-toggle="tab" href="#danger-zone" role="tab">
+                <i class="bi bi-exclamation-triangle me-2"></i> Zone sensible
             </a>
-          </div>
+            </li>
+        </ul>
         </div>
-      </div>
     </div>
-
-    <div class="col-md-9">
+    </div>
+    <div class="col-md-12">
       <div class="card shadow-sm mb-4">
         <div class="card-header d-flex justify-content-between align-items-center">
           <h5 class="mb-0" id="section-title">Paramètres de l'entreprise</h5>
@@ -56,12 +67,18 @@
                   <div class="col-md-3 text-center">
                     <div class="position-relative mb-3">
                       <div class="company-logo-container rounded bg-light d-flex align-items-center justify-content-center mb-2" style="width: 150px; height: 150px; margin: 0 auto;">
-                        @if($company->tp_logo)
-                          <img src="{{ asset('storage/'.$company->tp_logo) }}" class="img-fluid" alt="Logo entreprise" id="logo-preview">
-                        @else
-                          <i class="bi bi-building text-muted" style="font-size: 3rem;"></i>
+                        <img
+                            src="{{ $company->tp_logo ? asset('storage/'.$company->tp_logo) : '#' }}"
+                            class="img-fluid {{ $company->tp_logo ? '' : 'd-none' }}"
+                            alt="Logo entreprise"
+                            id="logo-preview"
+                            style="max-height: 100%; max-width: 100%;"
+                        >
+                        @if(!$company->tp_logo)
+                            <i class="bi bi-building text-muted" style="font-size: 3rem;" id="logo-placeholder"></i>
                         @endif
-                      </div>
+                        </div>
+
                       <div class="d-grid">
                         <label for="tp_logo" class="btn btn-outline-primary btn-sm">
                           <i class="bi bi-upload"></i> Changer le logo
@@ -619,123 +636,6 @@
 
 @push('scripts')
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
-    // Gestion du menu de navigation
-    document.querySelectorAll('#parametrage-menu a').forEach(function(navLink) {
-      navLink.addEventListener('click', function() {
-        document.getElementById('section-title').textContent = this.textContent.trim();
-      });
-    });
-
-    // Preview du logo lors du changement
-    const logoInput = document.getElementById('tp_logo');
-    if (logoInput) {
-      logoInput.addEventListener('change', function() {
-        if (this.files && this.files[0]) {
-          const reader = new FileReader();
-          reader.onload = function(e) {
-            document.getElementById('logo-preview').src = e.target.result;
-          };
-          reader.readAsDataURL(this.files[0]);
-        }
-      });
-    }
-
-    // Gestion de la confirmation pour la suppression
-    document.querySelectorAll('.delete-category, .delete-dentist, .delete-user').forEach(function(btn) {
-      btn.addEventListener('click', function() {
-        const modal = document.getElementById('confirmDeleteModal');
-        const bsModal = new bootstrap.Modal(modal);
-        const form = document.getElementById('confirmDeleteForm');
-
-        let route = '';
-        if (this.classList.contains('delete-category')) {
-          route = '/categories/' + this.dataset.categoryId;
-        } else if (this.classList.contains('delete-dentist')) {
-          route = '/agencies/' + this.dataset.dentistId;
-        } else if (this.classList.contains('delete-user')) {
-          route = '/users/' + this.dataset.userId;
-        }
-
-        form.action = route;
-        bsModal.show();
-      });
-    });
-
-    // Gestion du modal d'édition des catégories
-    const editCategoryModal = document.getElementById('editCategoryModal');
-    if (editCategoryModal) {
-      editCategoryModal.addEventListener('show.bs.modal', function(event) {
-        const button = event.relatedTarget;
-        const categoryId = button.getAttribute('data-category-id');
-        const form = document.getElementById('editCategoryForm');
-
-        // Fetch category data using AJAX
-        fetch('/api/categories/' + categoryId)
-          .then(response => response.json())
-          .then(data => {
-            document.getElementById('editCategoryName').value = data.name;
-            document.getElementById('editCategoryCode').value = data.code || '';
-            document.getElementById('editCategoryDescription').value = data.description || '';
-            form.action = '/categories/' + categoryId;
-          });
-      });
-    }
-
-    // Gestion de la confirmation pour réinitialiser les données
-    const resetConfirmation = document.getElementById('resetConfirmation');
-    const confirmResetBtn = document.getElementById('confirmResetBtn');
-
-    if (resetConfirmation && confirmResetBtn) {
-      resetConfirmation.addEventListener('input', function() {
-        confirmResetBtn.disabled = this.value !== 'RÉINITIALISER';
-      });
-
-      confirmResetBtn.addEventListener('click', function() {
-        if (resetConfirmation.value === 'RÉINITIALISER') {
-          // Submit form to reset data
-          const form = document.createElement('form');
-          form.method = 'POST';
-          form.action = '/parametrage/reset-data';
-          form.style.display = 'none';
-
-          const csrfToken = document.createElement('input');
-          csrfToken.type = 'hidden';
-          csrfToken.name = '_token';
-          csrfToken.value = document.querySelector('meta[name="csrf-token"]').content;
-
-          const methodField = document.createElement('input');
-          methodField.type = 'hidden';
-          methodField.name = '_method';
-          methodField.value = 'POST';
-
-          form.appendChild(csrfToken);
-          form.appendChild(methodField);
-          document.body.appendChild(form);
-          form.submit();
-        }
-      });
-    }
-
-    // Toggle disponibilité dentiste
-    document.querySelectorAll('.dentist-availability').forEach(function(toggle) {
-      toggle.addEventListener('change', function() {
-        const dentistId = this.dataset.id;
-        const isAvailable = this.checked;
-
-        fetch('/api/agencies/' + dentistId + '/availability', {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-          },
-          body: JSON.stringify({
-            available: isAvailable
-          })
-        });
-      });
-    });
-
     // Sauvegarde des paramètres
     document.getElementById('save-settings').addEventListener('click', function() {
       const activeTab = document.querySelector('.tab-pane.active');
@@ -751,6 +651,5 @@
         }
       }
     });
-  });
 </script>
 @endpush
