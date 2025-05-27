@@ -17,7 +17,7 @@ Système de gestion multi-stocks avec suivi des ventes, achats, transferts et ca
 ## 👥 Équipe
 - **Jean Lionel** : Fullstack / Leader
 - **Bienvenue** : Backend Laravel
-- **Chriss** : Backend (partiel)
+- **Chriss** : Backend 
 - **Shamah** : Frontend Design
 - **Brice** : Blade Integration & Junior Dev
 

@@ -51,6 +51,10 @@ class Stock extends Model
     {
         return $this->belongsTo(User::class);
     }
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by', 'id');
+    }
 
     public function createdBy(): BelongsTo
     {

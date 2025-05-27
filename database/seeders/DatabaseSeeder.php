@@ -37,15 +37,15 @@ class DatabaseSeeder extends Seeder
         // \App\Models\Client::factory(10)->create();
         // \App\Models\Supplier::factory(10)->create();
         // \App\Models\Purchase::factory(1)->create();
-        // \App\Models\PurchaseItem::factory(1)->create();
-        // \App\Models\Sale::factory(1)->create();
-        // \App\Models\SaleItem::factory(1)->create();
-        // \App\Models\Payment::factory(1)->create();
-        // \App\Models\StockTransfer::factory(1)->create();
-        // \App\Models\StockTransferItem::factory(1)->create();
-        // \App\Models\CashRegister::factory(1)->create();
-        // \App\Models\CashTransaction::factory(1)->create();
-        // \App\Models\Expense::factory(1)->create();
-        // \App\Models\ExpenseType::factory(1)->create();
+        // // \App\Models\PurchaseItem::factory(1)->create();
+        // // \App\Models\Sale::factory(1)->create();
+        // // \App\Models\SaleItem::factory(1)->create();
+        // // \App\Models\Payment::factory(1)->create();
+        // // \App\Models\StockTransfer::factory(1)->create();
+        // // \App\Models\StockTransferItem::factory(1)->create();
+        // // \App\Models\CashRegister::factory(1)->create();
+        // // \App\Models\CashTransaction::factory(1)->create();
+        // // \App\Models\Expense::factory(1)->create();
+        // // \App\Models\ExpenseType::factory(1)->create();
     }
 }
