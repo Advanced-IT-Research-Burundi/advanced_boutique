@@ -32,6 +32,7 @@ require __DIR__.'/auth.php';
 
 
 Route::resource('companies', App\Http\Controllers\CompanyController::class);
+Route::resource('users', App\Http\Controllers\UserController::class);
 
 Route::resource('stocks', App\Http\Controllers\StockController::class);
 
