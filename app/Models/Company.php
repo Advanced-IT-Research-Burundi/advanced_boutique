@@ -23,10 +23,10 @@ class Company extends Model
         'tp_trade_number',
         'tp_postal_number',
         'tp_phone_number',
-        'tp_address_province',
-        'tp_address_commune',
-        'tp_address_quartier',
+        'tp_address_privonce',
         'tp_address_avenue',
+        'tp_address_quartier',
+        'tp_address_commune',
         'tp_address_rue',
         'tp_address_number',
         'vat_taxpayer',
@@ -37,25 +37,48 @@ class Company extends Model
         'tp_legal_form',
         'payment_type',
         'is_actif',
-        'created_by',
+        'user_id',
+        'tp_email',
+        'tp_website',
+        'tp_logo',
+        'tp_bank',
+        'tp_account_number',
+        'tp_facebook',
+        'tp_twitter',
+        'tp_instagram',
+        'tp_youtube',
+        'tp_whatsapp',
+        'tp_address',
     ];
 
     /**
-     * Get the attributes that should be cast.
+     * The attributes that should be cast to native types.
      *
-     * @return array<string, string>
+     * @var array
      */
-    protected function casts(): array
+    protected $casts = [
+        'id' => 'integer',
+        'is_actif' => 'boolean',
+        'created_at' => 'timestamp',
+        'updated_at' => 'timestamp',
+        'deleted_at' => 'timestamp',
+    ];
+
+    /**
+     * Get the current active company.
+     *
+     * @return \App\Models\Company
+     */
+    public static function current()
     {
-        return [
-            'id' => 'integer',
-            'is_actif' => 'boolean',
-            'created_by' => 'integer',
-        ];
+        return self::where('is_actif', true)->first();
     }
 
-    public function createdBy(): BelongsTo
+
+    public function createdBy()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'user_id');
     }
+
+
 }
