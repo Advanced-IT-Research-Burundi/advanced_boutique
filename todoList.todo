@@ -1,0 +1,34 @@
+
+Bienvenue
+
+-> Gestion du company
+-> Creer le stock assossier ,
+-> Cretion du produits
+->  Assossier les produits dans le stock
+-> Gestion des  des ventes
+-> Gestion des  des achat
+-> Créer le Stock associé
+
+Description : CRUD sur les dépôts (Stock), gestion des emplacements, association des utilisateurs aux stocks (UserStock).
+
+Responsable : Jean Lionel / Bienvenue
+
+Complexité : Moyenne
+
+3. Création des Produits
+Résumé : Implémenter la gestion des produits et catégories
+
+Description : CRUD des catégories et produits, gestion des prix, unités et seuil d’alerte.
+
+Responsable : Bienvenue / Brice
+
+Complexité : Moyenne
+
+4. Associer les produits dans le stock
+Résumé : Gérer l’inventaire des produits dans chaque dépôt
+
+Description : Lier les produits au stock via StockProduct, gestion des quantités et alertes.
+
+Responsable : Bienvenue / Brice
+
+Complexité : Moyenne

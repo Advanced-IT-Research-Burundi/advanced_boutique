@@ -27,8 +27,8 @@ class StockFactory extends Factory
             'location' => fake()->word(),
             'description' => fake()->text(),
             'agency_id' => Agency::factory(),
-            'created_by' => User::factory()->create()->created_by,
-            'user_id' => User::factory(),
+            'created_by' => User::factory()->create()->id,
+            'user_id' => User::factory()->create()->id,
         ];
     }
 }
