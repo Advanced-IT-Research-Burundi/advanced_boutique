@@ -31,8 +31,7 @@ class StockController extends Controller
 
     public function create(): View
     {
-        $agencies = Agency::pluck('name', 'id');
-
+        $agencies = Agency::all();
 
         return view('stock.create', compact('agencies'));
     }
