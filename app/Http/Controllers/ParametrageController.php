@@ -27,7 +27,7 @@ class ParametrageController extends Controller
         }
 
         // Récupération des Agencies
-        $agencies = Agency::with('stock')->get();
+        $agencies = Agency::with('stocks')->get();
 
         // Récupération des catégories pour la pharmacie
         $categories = Category::all();

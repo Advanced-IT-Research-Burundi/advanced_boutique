@@ -37,7 +37,7 @@ class DatabaseSeeder extends Seeder
             'company_id' => 1,
             'code' => 'AGC001',
             'name' => 'Agence Principale',
-            'adresse' => '123 Rue de l\'Exemple, Paris',
+            'adresse' => 'Bujumbura,Rohero , Avenue du Mwaro no 13',
             'manager_id' => $user->id,
             'user_id' => $user->id,
             'is_main_office' => true,

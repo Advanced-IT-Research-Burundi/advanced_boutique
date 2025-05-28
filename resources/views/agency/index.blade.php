@@ -4,47 +4,34 @@
 
 @section('content')
 <div class="container-fluid px-4">
-    <!-- Header Section -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <h1 class="h3 mb-0 text-gray-800">
-                        <i class="bi bi-building text-primary me-2"></i>
-                        Gestion des Agences
-                    </h1>
-                    <p class="text-muted mb-0">Gérez toutes vos agences en un seul endroit</p>
-                </div>
-                <a href="{{ route('agencies.create') }}" class="btn btn-primary">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4 d-flex justify-between ">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a href="{{ route('dashboard') }}" class="text-decoration-none">
+                    <i class="bi bi-house"></i> Accueil
+                </a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="{{ route('agencies.index') }}" class="text-decoration-none">
+                    <i class="bi bi-building"></i> Agences
+                </a>
+            </li>
+
+        </ol>
+        <div class="ms-auto">
+            <a href="{{ route('agencies.create') }}" class="btn btn-primary">
                     <i class="bi bi-plus-circle me-2"></i>
                     Nouvelle Agence
                 </a>
-            </div>
         </div>
-    </div>
-
-    <!-- Alerts -->
-    @if(session('success'))
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <i class="bi bi-check-circle me-2"></i>
-            {{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    @endif
-
-    @if(session('error'))
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <i class="bi bi-exclamation-triangle me-2"></i>
-            {{ session('error') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    @endif
+    </nav>
 
     <!-- Accordion Filters -->
     <div class="accordion mb-4" id="filterAccordion">
         <div class="accordion-item shadow-sm">
             <h2 class="accordion-header" id="headingFilters">
-                <button class="accordion-button bg-light" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFilters" aria-expanded="true" aria-controls="collapseFilters">
+                <button class="accordion-button bg-light" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFilters" aria-expanded="false" aria-controls="collapseFilters">
                     <i class="bi bi-funnel me-2"></i> Filtres de recherche
                 </button>
             </h2>

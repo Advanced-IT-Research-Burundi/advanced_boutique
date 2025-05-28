@@ -1,21 +1,45 @@
 @extends('layouts.app')
 
-@section('title', 'Modifier le stock')
+@section('title', 'Modifier le Stock')
 
 @section('content')
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">Modifier le stock : {{ $stock->name }}</h5>
-                    <a href="{{ route('stocks.show', $stock->id) }}" class="btn btn-sm btn-outline-secondary">
-                        <i class="fas fa-times"></i> Annuler
-                    </a>
-                </div>
+<div class="container-fluid px-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a href="{{ route('dashboard') }}" class="text-decoration-none">
+                    <i class="bi bi-house"></i> Accueil
+                </a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="{{ route('stocks.index') }}" class="text-decoration-none">
+                    <i class="bi bi-boxes"></i> Stocks
+                </a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="{{ route('stocks.show', $stock) }}" class="text-decoration-none">
+                    {{ $stock->name }}
+                </a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">
+                <i class="bi bi-pencil"></i> Modifier
+            </li>
+        </ol>
+    </nav>
 
+    <!-- Formulaire de modification -->
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-pencil me-2"></i>
+                        Modifier le stock: {{ $stock->name }}
+                    </h5>
+                </div>
                 <div class="card-body">
-                    <form action="{{ route('stocks.update', $stock->id) }}" method="POST">
+                    <form action="{{ route('stocks.update', $stock) }}" method="POST">
                         @csrf
                         @method('PUT')
                         @include('stock._form')
@@ -26,24 +50,3 @@
     </div>
 </div>
 @endsection
-
-@push('styles')
-<!-- Styles spécifiques à l'édition -->
-<style>
-    /* Ajoutez vos styles personnalisés ici si nécessaire */
-</style>
-@endpush
-
-@push('scripts')
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Initialisation des sélecteurs avec Select2 si nécessaire
-        $('#agency_id, #user_id').select2({
-            theme: 'bootstrap-5',
-            width: '100%'
-        });
-
-        // Autres scripts spécifiques à l'édition
-    });
-</script>
-@endpush

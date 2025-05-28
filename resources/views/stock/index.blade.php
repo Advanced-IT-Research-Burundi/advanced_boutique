@@ -1,106 +1,245 @@
 @extends('layouts.app')
-@section('title', 'Stock')
-@section('page-title', 'Stock')
 
-@section('breadcrumb')
-<li class="breadcrumb-item active">Stock</li>
-@endsection
+@section('title', 'Gestion des Stocks')
+
 @section('content')
-<div class="container">
-    <div class="mb-4 row justify-content-between">
-        <div class="col-md-8">
-            <h2>Liste des Stocks</h2>
-        </div>
-        <div class="col-md-4 text-end">
+<div class="container-fluid px-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4 d-flex justify-between">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a href="{{ route('dashboard') }}" class="text-decoration-none">
+                    <i class="bi bi-house"></i> Accueil
+                </a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="{{ route('stocks.index') }}" class="text-decoration-none">
+                    <i class="bi bi-boxes"></i> Stocks
+                </a>
+            </li>
+        </ol>
+        <div class="ms-auto">
             <a href="{{ route('stocks.create') }}" class="btn btn-primary">
-                <i class="fas fa-plus"></i> Nouveau Stock
+                <i class="bi bi-plus-circle me-2"></i>
+                Nouveau Stock
             </a>
         </div>
-    </div>
+    </nav>
 
-    <!-- Barre de recherche -->
-    <div class="mb-4 card">
-        <div class="card-body">
-            <form action="{{ route('stocks.index') }}" method="GET">
-                <div class="input-group">
-                    <input type="text" name="search" class="form-control" placeholder="Rechercher par nom, emplacement ou description..." value="{{ $search ?? '' }}">
-                    <button class="btn btn-outline-secondary" type="submit">
-                        <i class="fas fa-search"></i> Rechercher
-                    </button>
+    <!-- Accordion Filters -->
+    <div class="accordion mb-4" id="filterAccordion">
+        <div class="accordion-item shadow-sm">
+            <h2 class="accordion-header" id="headingFilters">
+                <button class="accordion-button bg-light" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFilters" aria-expanded="false" aria-controls="collapseFilters">
+                    <i class="bi bi-funnel me-2"></i> Filtres de recherche
+                </button>
+            </h2>
+            <div id="collapseFilters" class="accordion-collapse collapse show" aria-labelledby="headingFilters" data-bs-parent="#filterAccordion">
+                <div class="accordion-body">
+                    <form method="GET" action="{{ route('stocks.index') }}" class="row g-3">
+                        <div class="col-md-3">
+                            <label for="search" class="form-label">Recherche</label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="bi bi-search"></i>
+                                </span>
+                                <input type="text"
+                                    class="form-control"
+                                    id="search"
+                                    name="search"
+                                    value="{{ request('search') }}"
+                                    placeholder="Nom, localisation ou description...">
+                            </div>
+                        </div>
+
+                        <div class="col-md-2">
+                            <label for="agency_id" class="form-label">Agence</label>
+                            <select class="form-select" id="agency_id" name="agency_id">
+                                <option value="">Toutes</option>
+                                @foreach($agencies as $agency)
+                                    <option value="{{ $agency->id }}"
+                                            {{ request('agency_id') == $agency->id ? 'selected' : '' }}>
+                                        {{ $agency->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="col-md-2">
+                            <label for="created_by" class="form-label">Créé par</label>
+                            <select class="form-select" id="created_by" name="created_by">
+                                <option value="">Tous</option>
+                                @foreach($creators as $creator)
+                                    <option value="{{ $creator->id }}"
+                                            {{ request('created_by') == $creator->id ? 'selected' : '' }}>
+                                        {{ $creator->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="col-md-2">
+                            <label for="user_id" class="form-label">Assigné à</label>
+                            <select class="form-select" id="user_id" name="user_id">
+                                <option value="">Tous</option>
+                                @foreach($users as $user)
+                                    <option value="{{ $user->id }}"
+                                            {{ request('user_id') == $user->id ? 'selected' : '' }}>
+                                        {{ $user->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="col-md-1 d-flex align-items-end">
+                            <button type="submit" class="btn btn-outline-primary me-2">
+                                <i class="bi bi-search"></i>
+                            </button>
+                            <a href="{{ route('stocks.index') }}" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-clockwise"></i>
+                            </a>
+                        </div>
+                    </form>
                 </div>
-            </form>
+            </div>
         </div>
     </div>
 
-    <!-- Tableau des stocks -->
-    <div class="card">
-        <div class="p-0 card-body">
-            <div class="table-responsive">
-                <table class="table mb-0 table-hover">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Nom</th>
-                            <th>Emplacement</th>
-                            <th>Agence</th>
-                            <th>Créé par</th>
-                            <th>Responsable</th>
-                            <th class="text-end">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($stocks as $stock)
-                            <tr>
-                                <td>{{ $stock->name }}</td>
-                                <td>{{ $stock->location ?? 'N/A' }}</td>
-                                <td>{{ $stock->agency->name ?? 'N/A' }}</td>
-                                <td>{{ $stock->creator->name ?? 'N/A' }}</td>
-                                <td>{{ $stock->user->name ?? 'N/A' }}</td>
-                                <td class="text-end">
-                                    <a href="{{ route('stocks.show', $stock->id) }}" class="btn btn-sm btn-info">
-                                        <i class="fas fa-eye"></i>
-                                    </a>
-                                    <a href="{{ route('stocks.edit', $stock->id) }}" class="btn btn-sm btn-primary">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
-                                    <!-- Bouton de suppression avec confirmation -->
-                                    <form action="{{ route('stocks.destroy', $stock->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce stock ?');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-sm btn-danger">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </form>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="6" class="text-center">Aucun stock trouvé</td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
+    <!-- Results Card -->
+    <div class="card shadow-sm">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0">
+                <i class="bi bi-list-ul me-2"></i>
+                Liste des Stocks ({{ $stocks->total() }} résultats)
+            </h5>
         </div>
-        <!-- Pagination -->
-        @if($stocks->hasPages())
-            <div class="card-footer">
-                {{ $stocks->withQueryString()->links() }}
-            </div>
-        @endif
+        <div class="card-body p-0">
+            @if($stocks->count() > 0)
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Nom</th>
+                                <th>Localisation</th>
+                                <th>Description</th>
+                                <th>Agence</th>
+                                <th>Créé par</th>
+                                <th>Assigné à</th>
+                                <th>Créé le</th>
+                                <th class="text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($stocks as $stock)
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <i class="bi bi-box-fill text-primary me-2"></i>
+                                            <strong>{{ $stock->name }}</strong>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        @if($stock->location)
+                                            <i class="bi bi-geo-alt text-muted me-1"></i>
+                                            {{ $stock->location }}
+                                        @else
+                                            <span class="text-muted">Non spécifiée</span>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        @if($stock->description)
+                                            <span title="{{ $stock->description }}">
+                                                {{ Str::limit($stock->description, 50) }}
+                                            </span>
+                                        @else
+                                            <span class="text-muted">Aucune description</span>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        @if($stock->agency)
+                                            <div class="d-flex align-items-center">
+                                                <i class="bi bi-building text-info me-1"></i>
+                                                {{ $stock->agency->name }}
+                                            </div>
+                                        @else
+                                            <span class="text-muted">Non assigné</span>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <i class="bi bi-person-circle text-success me-1"></i>
+                                            {{ $stock->createdBy->full_name ?? 'N/A' }}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        @if($stock->user)
+                                            <div class="d-flex align-items-center">
+                                                <i class="bi bi-person-check text-warning me-1"></i>
+                                                {{ $stock->user->name }}
+                                            </div>
+                                        @else
+                                            <span class="text-muted">Non assigné</span>
+                                        @endif
+                                    </td>
+                                    <td class="text-muted">
+                                        <small>{{ $stock->created_at->format('d/m/Y H:i') }}</small>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a href="{{ route('stocks.show', $stock) }}"
+                                               class="btn btn-sm btn-outline-info"
+                                               title="Voir">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                            <a href="{{ route('stocks.edit', $stock) }}"
+                                               class="btn btn-sm btn-outline-warning"
+                                               title="Modifier">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <form action="{{ route('stocks.destroy', $stock) }}"
+                                                  method="POST"
+                                                  class="d-inline"
+                                                  onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce stock ?')">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit"
+                                                        class="btn btn-sm btn-outline-danger"
+                                                        title="Supprimer">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                @if($stocks->hasPages())
+                    <div class="card-footer bg-light">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="text-muted">
+                                Affichage de {{ $stocks->firstItem() }} à {{ $stocks->lastItem() }}
+                                sur {{ $stocks->total() }} résultats
+                            </div>
+                            {{ $stocks->links() }}
+                        </div>
+                    </div>
+                @endif
+            @else
+                <div class="text-center py-5">
+                    <i class="bi bi-inbox display-1 text-muted"></i>
+                    <h4 class="text-muted mt-3">Aucun stock trouvé</h4>
+                    <p class="text-muted">Essayez de modifier vos critères de recherche ou créez un nouveau stock.</p>
+                    <a href="{{ route('stocks.create') }}" class="btn btn-primary">
+                        <i class="bi bi-plus-circle me-2"></i>
+                        Créer le premier stock
+                    </a>
+                </div>
+            @endif
+        </div>
     </div>
 </div>
-
-<!-- Styles pour la pagination -->
-<style>
-    .pagination {
-        margin-bottom: 0;
-    }
-    .page-item.active .page-link {
-        background-color: #0d6efd;
-        border-color: #0d6efd;
-    }
-    .page-link {
-        color: #0d6efd;
-    }
-</style>
 @endsection

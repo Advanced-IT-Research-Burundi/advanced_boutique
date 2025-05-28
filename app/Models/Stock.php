@@ -105,4 +105,66 @@ class Stock extends Model
     {
         return $this->belongsToMany(Product::class);
     }
+
+
+    /**
+     * Scope pour filtrer par agence
+     */
+    public function scopeByAgency($query, $agencyId)
+    {
+        return $query->where('agency_id', $agencyId);
+    }
+
+    /**
+     * Scope pour filtrer par utilisateur créateur
+     */
+    public function scopeByCreator($query, $creatorId)
+    {
+        return $query->where('created_by', $creatorId);
+    }
+
+    /**
+     * Scope pour filtrer par utilisateur assigné
+     */
+    public function scopeByUser($query, $userId)
+    {
+        return $query->where('user_id', $userId);
+    }
+
+    /**
+     * Scope pour recherche globale
+     */
+    public function scopeSearch($query, $search)
+    {
+        return $query->where(function($q) use ($search) {
+            $q->where('name', 'like', "%{$search}%")
+              ->orWhere('location', 'like', "%{$search}%")
+              ->orWhere('description', 'like', "%{$search}%");
+        });
+    }
+
+    /**
+     * Accessor pour obtenir le nom complet avec localisation
+     */
+    public function getFullNameAttribute()
+    {
+        return $this->location ? "{$this->name} ({$this->location})" : $this->name;
+    }
+
+    /**
+     * Accessor pour vérifier si le stock est assigné
+     */
+    public function getIsAssignedAttribute()
+    {
+        return !is_null($this->user_id);
+    }
+
+    /**
+     * Accessor pour obtenir le statut d'assignation
+     */
+    public function getAssignmentStatusAttribute()
+    {
+        return $this->user_id ? 'Assigné' : 'Non assigné';
+    }
 }
+
