@@ -103,7 +103,7 @@ class User extends Authenticatable
 
     public function createdBy(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'created_by');
     }
 
     public function companies(): HasMany

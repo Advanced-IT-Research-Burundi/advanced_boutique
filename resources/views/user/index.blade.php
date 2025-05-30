@@ -59,7 +59,7 @@
                                 @foreach($companies as $company)
                                     <option value="{{ $company->id }}"
                                             {{ request('company_id') == $company->id ? 'selected' : '' }}>
-                                        {{ $company->name }}
+                                        {{ $company->tp_name }}
                                     </option>
                                 @endforeach
                             </select>
@@ -202,7 +202,7 @@
                                         @if($user->company)
                                             <div class="d-flex align-items-center">
                                                 <i class="bi bi-building text-info me-1"></i>
-                                                {{ $user->company->name }}
+                                                {{ $user->company->tp_name }}
                                             </div>
                                         @else
                                             <span class="text-muted">Non assigné</span>

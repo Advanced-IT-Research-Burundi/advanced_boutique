@@ -53,7 +53,7 @@ class UserController extends Controller
         // Données pour les filtres
         $companies = Company::all();
         $agencies = Agency::all();
-        $creators = User::whereHas('created_by')->distinct()->get();
+        $creators = User::whereHas('createdBy')->distinct()->get();
         $roles = ['admin', 'manager', 'salesperson', 'employee'];
         $statuses = ['active', 'inactive', 'suspended'];
 
@@ -66,7 +66,7 @@ class UserController extends Controller
         $agencies = Agency::all();
         $roles = ['admin', 'manager', 'salesperson', 'employee'];
 
-        return view('users.create', compact('companies', 'agencies', 'roles'));
+        return view('user.create', compact('companies', 'agencies', 'roles'));
     }
 
     public function store(Request $request)
@@ -102,7 +102,7 @@ class UserController extends Controller
     public function show(User $user)
     {
         $user->load(['company', 'agency', 'createdBy']);
-        return view('users.show', compact('user'));
+        return view('user.show', compact('user'));
     }
 
     public function edit(User $user)
@@ -111,7 +111,7 @@ class UserController extends Controller
         $agencies = Agency::all();
         $roles = ['admin', 'manager', 'salesperson', 'employee'];
 
-        return view('users.edit', compact('user', 'companies', 'agencies', 'roles'));
+        return view('user.edit', compact('user', 'companies', 'agencies', 'roles'));
     }
 
     public function update(Request $request, User $user)
