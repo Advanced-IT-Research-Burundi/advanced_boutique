@@ -77,7 +77,8 @@ class StockController extends Controller
         ]);
 
         $validated['created_by'] = Auth::id();
-
+        // $validated['agency_id'] = $request->agency_id ?: null;
+        // dd($validated);
         Stock::create($validated);
 
         return redirect()->route('stocks.index')
