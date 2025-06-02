@@ -89,7 +89,7 @@
                                 <tr>
                                     <td>{{ $type->name }}</td>
                                     <td>{{ $type->description }}</td>
-                                    <td>{{ $type->agency->label ?? '-' }}</td>
+                                    <td>{{ $type->agency->name ?? '-' }}</td>
                                     <td class="text-center">
                                         <a href="{{ route('expense-types.show', $type) }}" class="btn btn-sm btn-outline-info" title="Voir">
                                             <i class="bi bi-eye"></i>
