@@ -14,9 +14,14 @@ class StockController extends Controller
      * Display a listing of the resource.
      */
 
+    public function mouvement($stock)
+    {
+        dd($stock);
+        return view('stock.mouvement', compact('stock'));
+    }
+
     public function list(Stock $stock)
     {
-
         return view('stock.list', compact('stock'));
     }
     public function index(Request $request)

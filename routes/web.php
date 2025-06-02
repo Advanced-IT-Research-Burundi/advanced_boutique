@@ -29,6 +29,7 @@ Route::middleware('auth')->group(function () {
     Route::get('parametres', [App\Http\Controllers\ParametrageController::class, 'index'])->name('parametres');
     Route::put('/parametrage/company/update', [App\Http\Controllers\ParametrageController::class, 'updateCompany'])->name('parametrage.company.update');
     Route::get('stocks/{stock}/show', [App\Http\Controllers\StockController::class, 'list'])->name('stocks.list');
+    Route::get('stocks/{stock}/mouvement', [App\Http\Controllers\StockController::class, 'mouvement'])->name('stocks.mouvement');
 });
 
 require __DIR__.'/auth.php';

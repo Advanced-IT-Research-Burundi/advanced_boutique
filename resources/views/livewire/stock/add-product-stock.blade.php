@@ -39,7 +39,9 @@
                             <td>{{ $product->quantity }}</td>
                             <td>{{ \Carbon\Carbon::parse($product->created_at)->format('Y-m-d H:i:s') }}</td>
                             <td>
-                                <button wire:click="mouvementProduct({{ $product->id }})" class="btn btn-primary btn-sm"> <i class="bi bi-pencil"></i> Mouvement</button>
+
+                                <a href="{{ route('stocks.mouvement', $product->id) }}" class="btn btn-info btn-sm"> <i class="bi bi-eye"></i> Mouvement</a>
+
                                 <button wire:click="removeProduct({{ $product->id }})" class="btn btn-danger btn-sm"> <i class="bi bi-cart-x"></i> Supprimer</button>
                             </td>
                         </tr>
