@@ -68,7 +68,7 @@ class ExpenseTypeController extends Controller
         ]);
         $expensetype->update($data);
 
-        return redirect()->route('expenseType.index')->with('success', 'Type de dépense modifié avec succès.');
+        return redirect()->route('expense-types.index')->with('success', 'Type de dépense modifié avec succès.');
     }
 
     public function destroy(ExpenseType $expense_type): RedirectResponse
