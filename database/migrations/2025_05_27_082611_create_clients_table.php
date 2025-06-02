@@ -15,15 +15,20 @@ return new class extends Migration
 
         Schema::create('clients', function (Blueprint $table) {
             $table->id();
+            // 'physique' ou 'morale'
+            $table->string('patient_type')->default('physique');
+            $table->string('nif')->nullable();
+            $table->string('societe')->nullable();
+
             $table->string('name');
+            $table->string('first_name')->nullable();
+            $table->string('last_name')->nullable();
             $table->string('phone')->nullable();
             $table->string('email')->nullable();
             $table->text('address')->nullable();
             $table->decimal('balance')->default(0);
-            $table->text('nif')->nullable();
             $table->foreignId('agency_id')->nullable()->constrained();
             $table->foreignId('created_by')->constrained('users');
-            $table->foreignId('user_id');
             $table->timestamps();
             $table->softDeletes();
         });
