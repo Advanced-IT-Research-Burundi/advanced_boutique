@@ -2,65 +2,124 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\ClientStoreRequest;
-use App\Http\Requests\ClientUpdateRequest;
 use App\Models\Client;
-use Illuminate\Http\RedirectResponse;
+use App\Models\Agency;
+use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\View\View;
+use Illuminate\Support\Facades\Auth;
 
 class ClientController extends Controller
 {
-    public function index(Request $request): View
+    public function index(Request $request)
     {
-        $clients = Client::all();
+        $query = Client::with(['agency', 'createdBy']);
 
-        return view('client.index', [
-            'clients' => $clients,
+        // Recherche
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('first_name', 'like', "%{$search}%")
+                  ->orWhere('last_name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhere('phone', 'like', "%{$search}%")
+                  ->orWhere('societe', 'like', "%{$search}%")
+                  ->orWhere('nif', 'like', "%{$search}%");
+            });
+        }
+
+        // Filtre par type de patient
+        if ($request->filled('patient_type')) {
+            $query->where('patient_type', $request->patient_type);
+        }
+
+        // Filtre par agence
+        if ($request->filled('agency_id')) {
+            $query->where('agency_id', $request->agency_id);
+        }
+
+        // Filtre par créateur
+        if ($request->filled('created_by')) {
+            $query->where('created_by', $request->created_by);
+        }
+
+        $clients = $query->orderBy('created_at', 'desc')->paginate(15);
+        $agencies = Agency::all();
+        $creators = User::all();
+
+        return view('client.index', compact('clients', 'agencies', 'creators'));
+    }
+
+    public function create()
+    {
+        $agencies = Agency::all();
+        return view('client.create', compact('agencies'));
+    }
+
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'patient_type' => 'required|in:physique,morale',
+            'name' => 'required|string|max:255',
+            'first_name' => 'nullable|string|max:255',
+            'last_name' => 'nullable|string|max:255',
+            'nif' => 'nullable|string|max:255',
+            'societe' => 'nullable|string|max:255',
+            'phone' => 'nullable|string|max:255',
+            'email' => 'nullable|email|max:255',
+            'address' => 'nullable|string',
+            'balance' => 'nullable|numeric|min:0',
+            'agency_id' => 'nullable|exists:agencies,id',
         ]);
+
+        $validated['created_by'] = Auth::id();
+        $validated['balance'] = $validated['balance'] ?? 0;
+
+        Client::create($validated);
+
+        return redirect()->route('clients.index')
+            ->with('success', 'Client créé avec succès.');
     }
 
-    public function create(Request $request): View
+    public function show(Client $client)
     {
-        return view('client.create');
+        $client->load(['agency', 'createdBy']);
+        return view('client.show', compact('client'));
     }
 
-    public function store(ClientStoreRequest $request): RedirectResponse
+    public function edit(Client $client)
     {
-        $client = Client::create($request->validated());
-
-        $request->session()->flash('client.id', $client->id);
-
-        return redirect()->route('clients.index');
+        $agencies = Agency::all();
+        return view('client.edit', compact('client', 'agencies'));
     }
 
-    public function show(Request $request, Client $client): View
+    public function update(Request $request, Client $client)
     {
-        return view('client.show', [
-            'client' => $client,
+        $validated = $request->validate([
+            'patient_type' => 'required|in:physique,morale',
+            'name' => 'required|string|max:255',
+            'first_name' => 'nullable|string|max:255',
+            'last_name' => 'nullable|string|max:255',
+            'nif' => 'nullable|string|max:255',
+            'societe' => 'nullable|string|max:255',
+            'phone' => 'nullable|string|max:255',
+            'email' => 'nullable|email|max:255',
+            'address' => 'nullable|string',
+            'balance' => 'nullable|numeric|min:0',
+            'agency_id' => 'nullable|exists:agencies,id',
         ]);
+
+        $client->update($validated);
+
+        return redirect()->route('clients.index')
+            ->with('success', 'Client mis à jour avec succès.');
     }
 
-    public function edit(Request $request, Client $client): View
-    {
-        return view('client.edit', [
-            'client' => $client,
-        ]);
-    }
-
-    public function update(ClientUpdateRequest $request, Client $client): RedirectResponse
-    {
-        $client->update($request->validated());
-
-        $request->session()->flash('client.id', $client->id);
-
-        return redirect()->route('clients.index');
-    }
-
-    public function destroy(Request $request, Client $client): RedirectResponse
+    public function destroy(Client $client)
     {
         $client->delete();
 
-        return redirect()->route('clients.index');
+        return redirect()->route('clients.index')
+            ->with('success', 'Client supprimé avec succès.');
     }
 }
