@@ -24,7 +24,6 @@ class SupplierStoreRequest extends FormRequest
             'phone' => ['nullable', 'string'],
             'email' => ['nullable', 'email'],
             'address' => ['nullable', 'string'],
-            'created_by' => ['required'],
         ];
     }
 }

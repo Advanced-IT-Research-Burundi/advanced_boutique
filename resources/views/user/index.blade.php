@@ -30,7 +30,7 @@
     <div class="accordion mb-4" id="filterAccordion">
         <div class="accordion-item shadow-sm">
             <h2 class="accordion-header" id="headingFilters">
-                <button class="accordion-button bg-light" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFilters" aria-expanded="false" aria-controls="collapseFilters">
+                <button class="accordion-button bg-light" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFilters" aria-expanded="true" aria-controls="collapseFilters">
                     <i class="bi bi-funnel me-2"></i> Filtres de recherche
                 </button>
             </h2>
@@ -133,7 +133,7 @@
                         <thead class="table-light">
                             <tr>
                                 <th>Photo</th>
-                                <th>Nom Complet</th>
+                                <th>Nom</th>
                                 <th>Email</th>
                                 <th>Téléphone</th>
                                 <th>Rôle</th>
