@@ -24,6 +24,15 @@
         </div>
     </nav>
 
+    <ul class="nav nav-tabs">
+        <li class="nav-item">
+            <a class="nav-link actif" aria-current="page" href="#">Les Dépenses</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#">Types de dépenses</a>
+        </li>
+    </ul>
+
     <!-- Accordion Filters -->
     <div class="accordion mb-4" id="filterAccordion">
         <div class="accordion-item shadow-sm">
@@ -96,9 +105,7 @@
         </div>
     </div>
 
-    @if(session('success'))
-        <div class="alert alert-success">{{ session('success') }}</div>
-    @endif
+
 
     <div class="card shadow-sm">
         <div class="card-header bg-light d-flex align-items-center">
