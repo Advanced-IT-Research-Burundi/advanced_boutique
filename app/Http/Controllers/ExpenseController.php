@@ -79,7 +79,7 @@ class ExpenseController extends Controller
     public function edit(Expense $expense): View
     {
         $stocks = Stock::orderBy('name')->get();
-        $users = User::orderBy('name')->get();
+        $users = User::orderBy('first_name')->get();
         $expenseTypes = ExpenseType::orderBy('name')->get();
         $agencies = Agency::orderBy('name')->get();
 
