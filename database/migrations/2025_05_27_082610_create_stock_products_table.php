@@ -21,6 +21,8 @@ return new class extends Migration
             $table->foreignId('agency_id')->nullable()->constrained();
             $table->timestamps();
             $table->softDeletes();
+            $table->index(['stock_id', 'product_id']);
+            $table->unique(['stock_id', 'product_id', 'agency_id']);
         });
 
         Schema::enableForeignKeyConstraints();

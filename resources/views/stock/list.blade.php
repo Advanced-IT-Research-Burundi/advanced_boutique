@@ -18,8 +18,6 @@
         @livewire('stock.add-product-stock', ['stock' => $stock])
     </div>
 
-{{ $products }}
-
 </div>
 
 @endsection

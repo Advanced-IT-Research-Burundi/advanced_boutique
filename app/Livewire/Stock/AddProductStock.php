@@ -21,7 +21,13 @@ class AddProductStock extends Component
 
         $products = Product::all();
 
-        return view('livewire.stock.add-product-stock', compact('products'));
+        $stockProducts = StockProduct::with(['product'])->where('stock_id', $this->stock->id)->get();
+
+        $products = $products->filter(function ($product) use ($stockProducts) {
+            return !$stockProducts->contains('product_id', $product->id);
+        });
+
+        return view('livewire.stock.add-product-stock', compact('products' , 'stockProducts'));
     }
 
     public function addProduct($productId)
@@ -29,6 +35,8 @@ class AddProductStock extends Component
         $stockProduct = new StockProduct();
         $stockProduct->stock_id = $this->stock->id;
         $stockProduct->product_id = $productId;
+        $stockProduct->quantity = 0;
+        $stockProduct->agency_id = $this->stock->agency_id;
         $stockProduct->save();
 
         $this->dispatch('stock-product-added', stockId: $this->stock->id);
