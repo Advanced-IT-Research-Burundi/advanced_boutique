@@ -2,7 +2,7 @@
     {{-- Do your work, then step back. --}}
     <h1>Stock</h1>
     <div class="mt-2">
-        <input type="text" wire:model="search" placeholder="Rechercher un produit">
+        <input type="text" wire:model="search" wire:keyup="searchProduct" placeholder="Rechercher un produit">
         <ul>
             @foreach ($products as $product)
                 <li class=" d-flex justify-content-between align-items-center gap-2 mt-2 ">
