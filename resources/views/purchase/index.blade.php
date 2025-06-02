@@ -92,21 +92,21 @@
                                         </td>
                                         <td>
                                             <strong class="text-success">
-                                                {{ number_format($purchase->total_amount, 2) }} €
+                                                {{ number_format($purchase->total_amount, 2) }} FBU
                                             </strong>
                                         </td>
                                         <td>
                                             <span class="text-info">
-                                                {{ number_format($purchase->paid_amount, 2) }} €
+                                                {{ number_format($purchase->paid_amount, 2) }} Fbu
                                             </span>
                                         </td>
                                         <td>
                                             @if($purchase->due_amount > 0)
                                                 <span class="text-danger">
-                                                    {{ number_format($purchase->due_amount, 2) }} €
+                                                    {{ number_format($purchase->due_amount, 2) }} Fbu
                                                 </span>
                                             @else
-                                                <span class="text-success">0 €</span>
+                                                <span class="text-success">0 Fbu</span>
                                             @endif
                                         </td>
                                         <td>
@@ -187,8 +187,8 @@
                         <div class="col-md-3">
                             <div class="card bg-success text-white">
                                 <div class="card-body text-center">
-                                    <i class="bi bi-currency-euro display-4"></i>
-                                    <h4>{{ number_format($purchases->sum('total_amount'), 2) }}€</h4>
+                                    <i class="bi bi-cash-stack display-4"></i>
+                                    <h4>{{ number_format($purchases->sum('total_amount'), 2) }}Fbu</h4>
                                     <p class="mb-0">Montant Total</p>
                                 </div>
                             </div>

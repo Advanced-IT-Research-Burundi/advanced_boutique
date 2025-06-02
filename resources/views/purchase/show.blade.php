@@ -59,16 +59,16 @@
                             <table class="table table-sm">
                                 <tr>
                                     <td><strong>Montant total :</strong></td>
-                                    <td class="text-success"><strong>{{ number_format($purchase->total_amount, 2, ',', ' ') }} €</strong></td>
+                                    <td class="text-success"><strong>{{ number_format($purchase->total_amount, 2, ',', ' ') }} Fbu</strong></td>
                                 </tr>
                                 <tr>
                                     <td><strong>Montant payé :</strong></td>
-                                    <td class="text-info">{{ number_format($purchase->paid_amount, 2, ',', ' ') }} €</td>
+                                    <td class="text-info">{{ number_format($purchase->paid_amount, 2, ',', ' ') }} FBU</td>
                                 </tr>
                                 <tr>
                                     <td><strong>Reste à payer :</strong></td>
                                     <td class="{{ $purchase->due_amount > 0 ? 'text-danger' : 'text-success' }}">
-                                        <strong>{{ number_format($purchase->due_amount, 2, ',', ' ') }} €</strong>
+                                        <strong>{{ number_format($purchase->due_amount, 2, ',', ' ') }} </strong>
                                     </td>
                                 </tr>
                                 <tr>
@@ -105,8 +105,8 @@
                                         <td>{{ $loop->iteration }}</td>
                                         <td>{{ $item->product->name ?? '-' }}</td>
                                         <td>{{ $item->quantity }}</td>
-                                        <td>{{ number_format($item->purchase_price, 2, ',', ' ') }} €</td>
-                                        <td class="text-success"><strong>{{ number_format($item->subtotal, 2, ',', ' ') }} €</strong></td>
+                                        <td>{{ number_format($item->purchase_price, 2, ',', ' ') }} Fbu</td>
+                                        <td class="text-success"><strong>{{ number_format($item->subtotal, 2, ',', ' ') }} Fbu</strong></td>
                                     </tr>
                                 @endforeach
                             </tbody>

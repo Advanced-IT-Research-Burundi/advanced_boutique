@@ -216,9 +216,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 <div class="col-md-6">
                     <h6><i class="bi bi-calculator me-2"></i>Résumé financier</h6>
                     <table class="table table-sm">
-                        <tr><td><strong>Montant total:</strong></td><td class="text-success"><strong>${totalAmount.toFixed(2)} €</strong></td></tr>
-                        <tr><td><strong>Montant payé:</strong></td><td class="text-info">${parseFloat(paidAmount).toFixed(2)} €</td></tr>
-                        <tr><td><strong>Reste à payer:</strong></td><td class="${dueAmount > 0 ? 'text-danger' : 'text-success'}"><strong>${dueAmount.toFixed(2)} €</strong></td></tr>
+                        <tr><td><strong>Montant total:</strong></td><td class="text-success"><strong>${totalAmount.toFixed(2)} Fbu</strong></td></tr>
+                        <tr><td><strong>Montant payé:</strong></td><td class="text-info">${parseFloat(paidAmount).toFixed(2)} Fbu</td></tr>
+                        <tr><td><strong>Reste à payer:</strong></td><td class="${dueAmount > 0 ? 'text-danger' : 'text-success'}"><strong>${dueAmount.toFixed(2)} Fbu</strong></td></tr>
                     </table>
                 </div>
             </div>
@@ -242,8 +242,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 <tr>
                     <td>${product.name}</td>
                     <td>${product.quantity}</td>
-                    <td>${product.price.toFixed(2)} €</td>
-                    <td class="text-success"><strong>${product.subtotal.toFixed(2)} €</strong></td>
+                    <td>${product.price.toFixed(2)} Fbu</td>
+                    <td class="text-success"><strong>${product.subtotal.toFixed(2)} Fbu</strong></td>
                 </tr>
             `;
         });

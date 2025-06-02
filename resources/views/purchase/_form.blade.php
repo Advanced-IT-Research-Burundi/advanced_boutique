@@ -187,7 +187,7 @@
                     <div class="mb-3">
                         <label class="form-label fw-bold">Montant total</label>
                         <div class="input-group">
-                            <span class="input-group-text">€</span>
+                            <span class="input-group-text">Fbu</span>
                             <input type="number" name="paid_amount" id="paid_amount"
                                    class="form-control" min="0" step="0.01"
                                    value="{{ old('paid_amount', $purchase->paid_amount ?? 0) }}">
@@ -198,7 +198,7 @@
                     <div class="mb-3">
                         <label class="form-label fw-bold">Reste à payer</label>
                         <div class="input-group">
-                            <span class="input-group-text">€</span>
+                            <span class="input-group-text">Fbu</span>
                             <input type="text" id="dueAmount" class="form-control bg-light" readonly>
                         </div>
                     </div>
