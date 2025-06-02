@@ -19,13 +19,13 @@
                 </div>
 
                 <div class="card-body">
-                    @if(session('success'))
+                    {{-- @if(session('success'))
                         <div class="alert alert-success alert-dismissible fade show" role="alert">
                             <i class="bi bi-check-circle me-2"></i>
                             {{ session('success') }}
                             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                         </div>
-                    @endif
+                    @endif --}}
 
                     <!-- Filtres -->
                     <div class="row mb-3">
@@ -57,7 +57,7 @@
                     </div>
 
                     <!-- Tableau des achats -->
-                    <div class="table-responsive">
+                    <div class="table">
                         <table class="table table-hover" id="purchasesTable">
                             <thead class="table-dark">
                                 <tr>
@@ -130,7 +130,7 @@
                                                         type="button" data-bs-toggle="dropdown">
                                                     <i class="bi bi-three-dots"></i>
                                                 </button>
-                                                <ul class="dropdown-menu">
+                                                <ul  class="dropdown-menu">
                                                     <li>
                                                         <a class="dropdown-item" href="{{ route('purchases.show', $purchase) }}">
                                                             <i class="bi bi-eye me-2"></i>Voir

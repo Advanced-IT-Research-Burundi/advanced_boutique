@@ -177,15 +177,7 @@ document.addEventListener('DOMContentLoaded', function() {
         purchase_date: '{{ \Carbon\Carbon::parse($purchase->purchase_date)->format('Y-m-d') }}',
         paid_amount: {{ $purchase->paid_amount }},
         total_amount: {{ $purchase->total_amount }},
-        items: []
-        // items: @json($purchase->purchaseItems->map(function($item) {
-        //     return [
-        //         'product_id' => $item->product_id,
-        //         'quantity' => $item->quantity,
-        //         'purchase_price' => $item->purchase_price,
-        //         'subtotal' => $item->subtotal
-        //     ];
-        // })->toArray())
+        items: [],
     };
 
     // Validation en temps réel
