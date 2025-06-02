@@ -64,8 +64,9 @@ class StockController extends Controller
     public function create()
     {
         $agencies = Agency::all();
+        $users = User::latest()->get();
 
-        return view('stock.create', compact('agencies'));
+        return view('stock.create', compact(['agencies', 'users']));
     }
 
     /**
