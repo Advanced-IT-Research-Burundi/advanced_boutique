@@ -28,6 +28,12 @@
             </a>
         </div>
     </nav>
+    <div class="mb-4">
+        <a href="{{ route('stocks.list' , $stock) }}" class="btn btn-outline-secondary">
+            <i class="bi bi-boxes me-2"></i>
+            Liste des produits
+        </a>
+    </div>
 
     <div class="row">
         <!-- Informations principales -->

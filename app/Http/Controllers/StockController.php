@@ -13,6 +13,15 @@ class StockController extends Controller
     /**
      * Display a listing of the resource.
      */
+
+    public function list(Stock $stock)
+    {
+        $stock->load(['agency', 'createdBy', 'user']);
+
+        $products = $stock->products()->paginate(15);
+
+        return view('stock.list', compact('stock', 'products'));
+    }
     public function index(Request $request)
     {
         $query = Stock::with(['agency', 'createdBy', 'user']);
