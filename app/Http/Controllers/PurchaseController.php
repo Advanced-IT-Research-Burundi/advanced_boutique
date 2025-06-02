@@ -96,7 +96,8 @@ class PurchaseController extends Controller
 
     public function edit(Purchase $purchase)
     {
-        $purchase->load('purchaseItems.product');
+        // dd($purchase->purchaseItems);
+        // $purchase->load('purchaseItems.product');
         $suppliers = Supplier::all();
         $stocks = Stock::all();
         $products = Product::with('category')->get();

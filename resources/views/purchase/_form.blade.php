@@ -53,7 +53,8 @@
                 </label>
                 <input type="date" name="purchase_date" id="purchase_date"
                        class="form-control @error('purchase_date') is-invalid @enderror"
-                       value="{{ old('purchase_date', isset($purchase) ? $purchase->purchase_date->format('Y-m-d') : date('Y-m-d')) }}"
+                       value="{{ old('purchase_date', isset($purchase) ? \Carbon\Carbon::parse($purchase->purchase_date)->format('Y-m-d') : date('Y-m-d')) }}"
+
                        required>
                 @error('purchase_date')
                     <div class="invalid-feedback">{{ $message }}</div>
