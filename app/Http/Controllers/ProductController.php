@@ -74,11 +74,12 @@ class ProductController extends Controller
             'alert_quantity' => 'required|numeric|min:0',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'agency_id' => 'nullable|exists:agencies,id',
-            'user_id' => 'nullable|exists:users,id',
+
         ]);
 
         $data = $request->all();
         $data['created_by'] = Auth::id();
+        $data['user_id'] = Auth::id();
 
         // Gestion de l'upload d'image
         if ($request->hasFile('image')) {
