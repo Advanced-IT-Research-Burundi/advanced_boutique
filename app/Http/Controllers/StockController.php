@@ -16,11 +16,8 @@ class StockController extends Controller
 
     public function list(Stock $stock)
     {
-        $stock->load(['agency', 'createdBy', 'user']);
 
-        $products = $stock->products()->paginate(15);
-
-        return view('stock.list', compact('stock', 'products'));
+        return view('stock.list', compact('stock'));
     }
     public function index(Request $request)
     {
