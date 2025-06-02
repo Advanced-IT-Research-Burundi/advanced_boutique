@@ -25,6 +25,7 @@ class Product extends Model
         'purchase_price',
         'sale_price',
         'unit',
+        'image',
         'alert_quantity',
         'agency_id',
         'created_by',
@@ -67,7 +68,7 @@ class Product extends Model
 
     public function createdBy(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class,'created_by');
     }
 
     public function stockProducts(): HasMany
