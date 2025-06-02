@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Http\Requests\CategoryStoreRequest;
 use App\Http\Requests\CategoryUpdateRequest;
 use App\Models\Category;
+use App\Models\Agency;
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -13,25 +15,68 @@ class CategoryController extends Controller
 {
     public function index(Request $request): View
     {
-        $categories = Category::all();
 
-        return view('category.index', [
-            'categories' => $categories,
-        ]);
+        $query = Category::with(['agency', 'createdBy', 'user']);
+
+        // Filtres de recherche
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('agency_id')) {
+            $query->where('agency_id', $request->agency_id);
+        }
+
+        if ($request->filled('created_by')) {
+            $query->where('created_by', $request->created_by);
+        }
+
+        if ($request->filled('user_id')) {
+            $query->where('user_id', $request->user_id);
+        }
+
+        // Tri par défaut
+        $query->orderBy('created_at', 'desc');
+
+        $categories = $query->paginate(15)->withQueryString();
+
+        // Données pour les filtres
+        $agencies = Agency::latest()->get();
+        $creators = User::latest()->get();
+
+
+        return view('category.index', compact('categories', 'agencies', 'creators'));
+        // $categories = Category::all();
+
+        // return view('category.index', [
+        //     'categories' => $categories,
+        // ]);
     }
 
     public function create(Request $request): View
     {
-        return view('category.create');
+        $agencies = Agency::latest()->get();
+        return view('category.create',compact('agencies'));
     }
 
-    public function store(CategoryStoreRequest $request): RedirectResponse
+    public function store(Request $request)
     {
-        $category = Category::create($request->validated());
+        $request->validate([
+            'name' => 'required',
+        ]);
+        $data = $request->all();
+        $data['created_by'] = auth()->user()->id;
+        $data['user_id'] = auth()->user()->id;
 
-        $request->session()->flash('category.id', $category->id);
+        $category = Category::create($data);
 
-        return redirect()->route('categories.index');
+        // Redirect with message success message en francais
+        return redirect()->route('categories.index')->with('success', 'Categorie cree avec success');
+
     }
 
     public function show(Request $request, Category $category): View
@@ -43,18 +88,29 @@ class CategoryController extends Controller
 
     public function edit(Request $request, Category $category): View
     {
+        $agencies = Agency::latest()->get();
         return view('category.edit', [
             'category' => $category,
+            'agencies' => $agencies
         ]);
     }
 
-    public function update(CategoryUpdateRequest $request, Category $category): RedirectResponse
+    public function update(Request $request, Category $category)
     {
-        $category->update($request->validated());
 
-        $request->session()->flash('category.id', $category->id);
+        $request->validate([
+            'name' => 'required',
+        ]);
 
-        return redirect()->route('categories.index');
+
+        $data = $request->all();
+        $data['created_by'] = auth()->user()->id;
+        $data['user_id'] = auth()->user()->id;
+
+        $category->update($data);
+
+        return redirect()->route('categories.index')->with('success', 'Categorie mis a jour avec success');
+
     }
 
     public function destroy(Request $request, Category $category): RedirectResponse

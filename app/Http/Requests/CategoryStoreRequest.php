@@ -22,7 +22,8 @@ class CategoryStoreRequest extends FormRequest
         return [
             'name' => ['required', 'string'],
             'description' => ['nullable', 'string'],
-            'created_by' => ['required'],
+            'agency_id' => ['required']
+            // 'created_by' => ['required'],
         ];
     }
 }

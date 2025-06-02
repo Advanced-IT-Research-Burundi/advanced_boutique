@@ -82,6 +82,10 @@ class User extends Authenticatable
     {
         return "{$this->first_name} {$this->last_name}";
     }
+    public function getFullNameAttribute(): string
+    {
+        return "{$this->first_name} {$this->last_name}";
+    }
     public function company(): BelongsTo
     {
         return $this->belongsTo(Company::class);
@@ -99,7 +103,7 @@ class User extends Authenticatable
 
     public function createdBy(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'created_by');
     }
 
     public function companies(): HasMany
