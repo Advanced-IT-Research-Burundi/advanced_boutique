@@ -9,6 +9,8 @@ use Livewire\Component;
 class AddProductStock extends Component
 {
     public $stock;
+    public $search;
+    public $products = [];
 
     public function mount($stock)
     {
@@ -18,16 +20,8 @@ class AddProductStock extends Component
     public function render()
     {
         // Recuperer la liste des produits qui ne sont pa lies avec ce stock en Passant par le model StockProduit
-
-        $products = Product::all();
-
         $stockProducts = StockProduct::with(['product'])->where('stock_id', $this->stock->id)->get();
-
-        $products = $products->filter(function ($product) use ($stockProducts) {
-            return !$stockProducts->contains('product_id', $product->id);
-        });
-
-        return view('livewire.stock.add-product-stock', compact('products' , 'stockProducts'));
+        return view('livewire.stock.add-product-stock', compact( 'stockProducts'));
     }
 
     public function addProduct($productId)
@@ -38,10 +32,21 @@ class AddProductStock extends Component
         $stockProduct->quantity = 0;
         $stockProduct->agency_id = $this->stock->agency_id;
         $stockProduct->save();
-
         $this->dispatch('stock-product-added', stockId: $this->stock->id);
 
-        return redirect()->route('stocks.list', $this->stock->id);
+      $this->searchProduct();
 
+    }
+
+    public function searchProduct(){
+
+        $this->products = Product::where('name', 'like', "%{$this->search}%")->get();
+        $stockProducts = StockProduct::with(['product'])->where('stock_id', $this->stock->id)->get();
+
+        $this->products = $this->products->filter(function ($product) use ($stockProducts) {
+            return !$stockProducts->contains('product_id', $product->id);
+        });
+
+        return view('livewire.stock.add-product-stock', compact( 'stockProducts'));
     }
 }

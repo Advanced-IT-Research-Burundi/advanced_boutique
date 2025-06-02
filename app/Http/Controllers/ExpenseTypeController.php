@@ -2,65 +2,78 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\ExpenseTypeStoreRequest;
-use App\Http\Requests\ExpenseTypeUpdateRequest;
 use App\Models\ExpenseType;
-use Illuminate\Http\RedirectResponse;
+use App\Models\Agency;
 use Illuminate\Http\Request;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
 class ExpenseTypeController extends Controller
 {
     public function index(Request $request): View
     {
-        $expenseTypes = ExpenseType::all();
+        $query = ExpenseType::with('agency');
 
-        return view('expenseType.index', [
-            'expenseTypes' => $expenseTypes,
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $query->where('name', 'like', "%$search%");
+        }
+        if ($request->filled('agency_id')) {
+            $query->where('agency_id', $request->input('agency_id'));
+        }
+
+        $expenseTypes = $query->orderBy('name')->paginate(15)->withQueryString();
+        $agencies = Agency::orderBy('name')->get();
+
+        return view('expenseType.index', compact('expenseTypes', 'agencies'));
+    }
+
+    public function create(): View
+    {
+        $agencies = Agency::orderBy('name')->get();
+        return view('expenseType.create', compact('agencies'));
+    }
+
+    public function store(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'agency_id' => 'nullable|exists:agencies,id',
         ]);
+        $data['created_by'] = auth()->id();
+
+        ExpenseType::create($data);
+
+        return redirect()->route('expense-types.index')->with('success', 'Type de dépense créé avec succès.');
     }
 
-    public function create(Request $request): View
+    public function show(ExpenseType $expense_type): View
     {
-        return view('expenseType.create');
+        return view('expenseType.show', compact('expense_type'));
     }
 
-    public function store(ExpenseTypeStoreRequest $request): RedirectResponse
+    public function edit(ExpenseType $expense_type): View
     {
-        $expenseType = ExpenseType::create($request->validated());
-
-        $request->session()->flash('expenseType.id', $expenseType->id);
-
-        return redirect()->route('expenseTypes.index');
+        $agencies = Agency::orderBy('name')->get();
+        return view('expenseType.edit', compact('expense_type', 'agencies'));
     }
 
-    public function show(Request $request, ExpenseType $expenseType): View
+    public function update(Request $request, ExpenseType $expensetype): RedirectResponse
     {
-        return view('expenseType.show', [
-            'expenseType' => $expenseType,
+        $data = $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'agency_id' => 'nullable|exists:agencies,id',
         ]);
+        $expensetype->update($data);
+
+        return redirect()->route('expenseType.index')->with('success', 'Type de dépense modifié avec succès.');
     }
 
-    public function edit(Request $request, ExpenseType $expenseType): View
+    public function destroy(ExpenseType $expense_type): RedirectResponse
     {
-        return view('expenseType.edit', [
-            'expenseType' => $expenseType,
-        ]);
-    }
-
-    public function update(ExpenseTypeUpdateRequest $request, ExpenseType $expenseType): RedirectResponse
-    {
-        $expenseType->update($request->validated());
-
-        $request->session()->flash('expenseType.id', $expenseType->id);
-
-        return redirect()->route('expenseTypes.index');
-    }
-
-    public function destroy(Request $request, ExpenseType $expenseType): RedirectResponse
-    {
-        $expenseType->delete();
-
-        return redirect()->route('expenseTypes.index');
+        $expense_type->delete();
+        return redirect()->route('expense-types.index')->with('success', 'Type de dépense supprimé avec succès.');
     }
 }
