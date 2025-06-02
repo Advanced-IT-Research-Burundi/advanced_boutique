@@ -26,15 +26,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-
-
-
     Route::get('parametres', [App\Http\Controllers\ParametrageController::class, 'index'])->name('parametres');
     Route::put('/parametrage/company/update', [App\Http\Controllers\ParametrageController::class, 'updateCompany'])->name('parametrage.company.update');
+    Route::get('stocks/{stock}/show', [App\Http\Controllers\StockController::class, 'list'])->name('stocks.list');
 });
 
 require __DIR__.'/auth.php';
-
 
 
 Route::resource('companies', App\Http\Controllers\CompanyController::class);
@@ -70,3 +67,5 @@ Route::resource('stock-transfers', App\Http\Controllers\StockTransferController:
 Route::resource('payments', App\Http\Controllers\PaymentController::class);
 
 Route::resource('user-stocks', App\Http\Controllers\UserStockController::class);
+
+
