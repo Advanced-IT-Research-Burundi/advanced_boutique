@@ -186,9 +186,9 @@
                             </td>
                             <td class="px-4">
                                 <div>
-                                    <strong>{{ $sale->sale_date->format('d/m/Y') }}</strong>
+                                    <strong>{{ \Carbon\Carbon::parse($sale->sale_date)->format('d/m/Y') }}</strong>
                                     <br>
-                                    <small class="text-muted">{{ $sale->sale_date->diffForHumans() }}</small>
+                                    <small class="text-muted">{{ \Carbon\Carbon::parse($sale->sale_date)->diffForHumans() }}</small>
                                 </div>
                             </td>
                             <td class="px-4">
