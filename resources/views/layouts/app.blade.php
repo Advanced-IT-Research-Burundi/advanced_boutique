@@ -23,6 +23,7 @@
 
 
     @stack('styles')
+     @livewireStyles
 </head>
 <body>
     <!-- Sidebar -->
@@ -557,5 +558,6 @@
     </script>
 
     @stack('scripts')
+    @livewireScripts
 </body>
 </html>
