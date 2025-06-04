@@ -5,4 +5,3 @@
 @section('content')
     <livewire:sales.sale-create />
 @endsection
-

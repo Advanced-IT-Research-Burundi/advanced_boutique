@@ -145,6 +145,13 @@
             </div>
 
             <div class="d-flex align-items-center ms-auto">
+                <button class="btn btn-outline-secondary position-relative me-3" type="button" data-bs-toggle="dropdown">
+                        <i class="bi bi-cart-plus"></i>
+                        <span class="top-0 position-absolute start-100 translate-middle badge rounded-pill bg-danger">
+                            3
+                            <span class="visually-hidden">notifications non lues</span>
+                        </span>
+                    </button>
                 <!-- Notifications (optionnel) -->
                 <div class="dropdown me-3">
                     <button class="btn btn-outline-secondary position-relative" type="button" data-bs-toggle="dropdown">

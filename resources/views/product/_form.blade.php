@@ -157,7 +157,7 @@
     <!-- Agence -->
     <div class="col-md-6 mb-3">
         <label for="agency_id" class="form-label">
-            <i class="bi bi-building me-1"></i>
+            <i class="bi bi-box-seam me-1"></i>
             Agence
         </label>
         <select class="form-select @error('agency_id') is-invalid @enderror"

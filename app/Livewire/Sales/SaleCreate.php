@@ -12,10 +12,10 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Carbon\Carbon;
+use Darryldecode\Cart\Facades\CartFacade as Cart;
 
 class SaleCreate extends Component
 {
-
     public $client_search = '';
     public $selected_client = null;
     public $client_id = null;
@@ -24,15 +24,13 @@ class SaleCreate extends Component
     public $product_search = '';
     public $show_product_search = false;
     public $filtered_products = [];
-
+    public $selected_products = []; // Produits actuellement dans le panier
 
     public $sale_date;
     public $note = '';
     public $paid_amount = 0;
 
-
     public $items = [];
-
 
     public $subtotal = 0;
     public $total_discount = 0;
@@ -43,6 +41,9 @@ class SaleCreate extends Component
     public $products;
     public $clients;
     public $current_stock;
+
+    // Cart session identifier
+    public $cart_session;
 
     protected $rules = [
         'client_id' => 'required|exists:clients,id',
@@ -74,8 +75,9 @@ class SaleCreate extends Component
     public function mount()
     {
         $this->sale_date = now()->format('Y-m-d\TH:i');
+        $this->cart_session = 'sale_' . Auth::id() . '_' . time();
         $this->loadData();
-        $this->addEmptyItem();
+        $this->loadCartItems();
     }
 
     public function loadData()
@@ -94,12 +96,37 @@ class SaleCreate extends Component
                 $product->available_stock = $this->getProductAvailableStock($product->id);
                 return $product;
             });
-            // dump($this->);
 
         // Obtenir le stock actuel (le plus récent)
         $this->current_stock = Stock::where('agency_id', Auth::user()->agency_id ?? null)
             ->latest()
             ->first();
+    }
+
+    public function loadCartItems()
+    {
+        // Charger les items du panier dans la propriété items
+        $cartItems = Cart::session($this->cart_session)->getContent();
+        $this->items = [];
+        $this->selected_products = [];
+
+        foreach ($cartItems as $cartItem) {
+            $product = $this->products->find($cartItem->id);
+            if ($product) {
+                $this->items[] = [
+                    'product_id' => $cartItem->id,
+                    'quantity' => $cartItem->quantity,
+                    'sale_price' => $cartItem->price,
+                    'discount' => $cartItem->attributes->discount ?? 0,
+                    'subtotal' => $cartItem->getPriceSum(),
+                    'unit' => $product->unit,
+                    'available_stock' => $product->available_stock,
+                ];
+                $this->selected_products[] = $cartItem->id;
+            }
+        }
+
+        $this->calculateTotals();
     }
 
     public function updatedClientSearch()
@@ -117,8 +144,11 @@ class SaleCreate extends Component
     public function updatedProductSearch()
     {
         if (strlen($this->product_search) >= 2) {
+            // Filtrer les produits en excluant ceux déjà sélectionnés
             $this->filtered_products = $this->products->filter(function ($product) {
-                return stripos($product->name, $this->product_search) !== false;
+                $nameMatch = stripos($product->name, $this->product_search) !== false;
+                $notSelected = !in_array($product->id, $this->selected_products);
+                return $nameMatch && $notSelected;
             })->take(12)->values();
         } else {
             $this->filtered_products = [];
@@ -141,19 +171,6 @@ class SaleCreate extends Component
         $this->filtered_clients = [];
     }
 
-    public function addEmptyItem()
-    {
-        $this->items[] = [
-            'product_id' => '',
-            'quantity' => '',
-            'sale_price' => '',
-            'discount' => 0,
-            'subtotal' => 0,
-            'unit' => '',
-            'available_stock' => 0,
-        ];
-    }
-
     public function addProductToSale($productId)
     {
         $product = $this->products->find($productId);
@@ -162,59 +179,85 @@ class SaleCreate extends Component
             return;
         }
 
-        // Vérifier si le produit est déjà dans la liste
-        $existingIndex = collect($this->items)->search(function ($item) use ($productId) {
-            return $item['product_id'] == $productId;
-        });
-
-        if ($existingIndex !== false) {
-            // Augmenter la quantité si le produit existe déjà
-            $this->items[$existingIndex]['quantity'] = ($this->items[$existingIndex]['quantity'] ?: 0) + 1;
+        // Vérifier si le produit est déjà dans le panier
+        if (Cart::session($this->cart_session)->get($productId)) {
+            // Augmenter la quantité
+            Cart::session($this->cart_session)->update($productId, [
+                'quantity' => 1, // Cette valeur sera ajoutée à la quantité existante
+            ]);
         } else {
-            // Ajouter un nouveau produit
-            $this->items[] = [
-                'product_id' => $productId,
+            // Ajouter un nouveau produit au panier
+            Cart::session($this->cart_session)->add([
+                'id' => $productId,
+                'name' => $product->name,
+                'price' => $product->sale_price,
                 'quantity' => 1,
-                'sale_price' => $product->sale_price,
-                'discount' => 0,
-                'subtotal' => $product->sale_price,
-                'unit' => $product->unit,
-                'available_stock' => $product->available_stock,
-            ];
+                'attributes' => [
+                    'unit' => $product->unit,
+                    'available_stock' => $product->available_stock,
+                    'discount' => 0,
+                    'image' => $product->image,
+                ]
+            ]);
         }
 
         $this->show_product_search = false;
         $this->product_search = '';
-        $this->calculateTotals();
+        $this->loadCartItems();
+        $this->dispatch('productAdded', ['message' => "Produit '{$product->name}' ajouté avec succès!"]);
     }
 
     public function removeItem($index)
     {
-        unset($this->items[$index]);
-        $this->items = array_values($this->items);
-
-        if (empty($this->items)) {
-            $this->addEmptyItem();
+        if (isset($this->items[$index])) {
+            $productId = $this->items[$index]['product_id'];
+            Cart::session($this->cart_session)->remove($productId);
+            $this->loadCartItems();
+            $this->dispatch('productRemoved', ['message' => 'Produit retiré du panier']);
         }
-
-        $this->calculateTotals();
     }
 
-    public function updatedItems()
+    public function updateItemQuantity($index, $quantity)
     {
-        // Mettre à jour les informations du produit quand un produit est sélectionné
-        foreach ($this->items as $index => $item) {
-            if (!empty($item['product_id']) && empty($item['sale_price'])) {
-                $product = $this->products->find($item['product_id']);
-                if ($product) {
-                    $this->items[$index]['sale_price'] = $product->sale_price;
-                    $this->items[$index]['unit'] = $product->unit;
-                    $this->items[$index]['available_stock'] = $product->available_stock;
-                }
+        if (isset($this->items[$index]) && $quantity > 0) {
+            $productId = $this->items[$index]['product_id'];
+            Cart::session($this->cart_session)->update($productId, [
+                'quantity' => [
+                    'relative' => false,
+                    'value' => $quantity
+                ]
+            ]);
+            $this->loadCartItems();
+        }
+    }
+
+    public function updateItemPrice($index, $price)
+    {
+        if (isset($this->items[$index]) && $price >= 0) {
+            $productId = $this->items[$index]['product_id'];
+            Cart::session($this->cart_session)->update($productId, [
+                'price' => $price
+            ]);
+            $this->loadCartItems();
+        }
+    }
+
+    public function updateItemDiscount($index, $discount)
+    {
+        if (isset($this->items[$index])) {
+            $productId = $this->items[$index]['product_id'];
+            $cartItem = Cart::session($this->cart_session)->get($productId);
+
+            if ($cartItem) {
+                $attributes = $cartItem->attributes->toArray();
+                $attributes['discount'] = max(0, min(100, $discount ?? 0));
+
+                Cart::session($this->cart_session)->update($productId, [
+                    'attributes' => $attributes
+                ]);
+                $this->loadCartItems();
             }
         }
-
-        $this->calculateTotals();
     }
 
     public function calculateTotals()
@@ -222,7 +265,7 @@ class SaleCreate extends Component
         $this->subtotal = 0;
         $this->total_discount = 0;
 
-        foreach ($this->items as $index => $item) {
+        foreach ($this->items as $item) {
             if (!empty($item['product_id']) && !empty($item['quantity']) && !empty($item['sale_price'])) {
                 $quantity = floatval($item['quantity']);
                 $price = floatval($item['sale_price']);
@@ -230,9 +273,7 @@ class SaleCreate extends Component
 
                 $item_subtotal = $quantity * $price;
                 $item_discount = ($item_subtotal * $discount) / 100;
-                $final_subtotal = $item_subtotal - $item_discount;
 
-                $this->items[$index]['subtotal'] = $final_subtotal;
                 $this->subtotal += $item_subtotal;
                 $this->total_discount += $item_discount;
             }
@@ -249,13 +290,8 @@ class SaleCreate extends Component
 
     public function getProductAvailableStock($productId)
     {
-        $quantity = StockProduct::where('product_id', $productId)
-            ->sum('quantity');
-
-        return $quantity ?? 0;
+        return StockProduct::where('product_id', $productId)->sum('quantity') ?? 0;
     }
-
-
 
     public function getPaymentStatusProperty()
     {
@@ -300,23 +336,27 @@ class SaleCreate extends Component
         return true;
     }
 
+    public function clearCart()
+    {
+        Cart::session($this->cart_session)->clear();
+        $this->loadCartItems();
+        $this->dispatch('cartCleared', ['message' => 'Panier vidé avec succès']);
+    }
+
     public function save()
     {
-        // Nettoyer les items vides
-        $this->items = array_filter($this->items, function ($item) {
-            return !empty($item['product_id']) && !empty($item['quantity']);
-        });
+        // Synchroniser les items du panier
+        $this->loadCartItems();
+
+        if (empty($this->items)) {
+            $this->addError('items', 'Veuillez ajouter au moins un produit à la vente.');
+            return;
+        }
 
         $this->validate();
 
         // Vérifier le stock
         if (!$this->validateStock()) {
-            return;
-        }
-
-        // Vérifier qu'il y a au moins un item
-        if (empty($this->items)) {
-            $this->addError('items', 'Veuillez ajouter au moins un produit à la vente.');
             return;
         }
 
@@ -332,6 +372,7 @@ class SaleCreate extends Component
                 'paid_amount' => $this->paid_amount,
                 'due_amount' => $this->due_amount,
                 'sale_date' => Carbon::parse($this->sale_date),
+                'note' => $this->note,
                 'agency_id' => Auth::user()->agency_id,
                 'created_by' => Auth::id(),
             ]);
@@ -352,8 +393,7 @@ class SaleCreate extends Component
                 ]);
 
                 // Mettre à jour le stock
-                $stockProduct = StockProduct::where('stock_id', $this->current_stock->id)
-                    ->where('product_id', $item['product_id'])
+                $stockProduct = StockProduct::where('product_id', $item['product_id'])
                     ->first();
 
                 if ($stockProduct) {
@@ -365,8 +405,10 @@ class SaleCreate extends Component
 
             DB::commit();
 
-            session()->flash('success', 'Vente enregistrée avec succès!');
+            // Vider le panier après une vente réussie
+            Cart::session($this->cart_session)->clear();
 
+            session()->flash('success', 'Vente enregistrée avec succès!');
             return redirect()->route('sales.index');
 
         } catch (\Exception $e) {
