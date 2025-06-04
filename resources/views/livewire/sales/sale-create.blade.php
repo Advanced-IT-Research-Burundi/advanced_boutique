@@ -78,8 +78,8 @@
                         @if($selected_client)
                             <div class="alert alert-info border-0 mt-3 bg-info bg-opacity-10 rounded-3">
                                 <div class="d-flex align-items-center">
-                                    <div class="avatar bg-info bg-opacity-20 rounded-circle me-3 p-2">
-                                        <i class="bi bi-person text-info"></i>
+                                    <div class="avatar bg-info bg-opacity-20 rounded-circle me-3 p-2 d-flex align-items-center justify-content-center">
+                                        <i class="bi bi-person fs-2"></i>
                                     </div>
                                     <div class="flex-grow-1">
                                         <h6 class="mb-1">{{ $selected_client->name }}</h6>
@@ -489,7 +489,7 @@
     }
 
     @keyframes pulse {
-        0% { box-shadow: 0 0 0 0 rgba(13, 110, 253, 0.7); }
+        /* 0% { box-shadow: 0 0 0 0 rgba(13, 110, 253, 0.7); } */
         70% { box-shadow: 0 0 0 10px rgba(13, 110, 253, 0); }
         100% { box-shadow: 0 0 0 0 rgba(13, 110, 253, 0); }
     }
@@ -501,11 +501,12 @@
     .product-card:hover {
         transform: translateY(-2px);
         box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.1);
-        border-color: #0d6efd !important;
+        /* border-color: #0d6efd !important;  */
     }
 
     .bg-gradient-primary {
-        background: linear-gradient(135deg, #0d6efd 0%, #6610f2 100%);
+        /* background: linear-gradient(135deg, #0d6efd 0%, #6610f2 100%); */
+        background: var(--secondary-blue);
     }
 
     .avatar-sm {

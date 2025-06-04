@@ -195,7 +195,7 @@
                                 <strong class="text-dark">{{ number_format($sale->total_amount, 0, ',', ' ') }} F</strong>
                             </td>
                             <td class="px-4">
-                                <span class="text-success">{{ number_format($sale->paid_amount, 0, ',', ' ') }} F</span>
+                                <span class="text-success">{{ number_format($sale->paid_amount, 0, ',', ' ') }} Fbu</span>
                             </td>
                             <td class="px-4">
                                 @if($sale->due_amount > 0)
@@ -206,15 +206,15 @@
                             </td>
                             <td class="px-4">
                                 @if($sale->due_amount == 0)
-                                    <span class="badge bg-success-subtle text-success px-3 py-2">
+                                    <span class="text-success px-3 py-2">
                                         <i class="bi bi-check-circle me-1"></i>Payé
                                     </span>
                                 @elseif($sale->paid_amount > 0)
-                                    <span class="badge bg-warning-subtle text-warning px-3 py-2">
+                                    <span class="text-warning px-3 py-2">
                                         <i class="bi bi-clock me-1"></i>Partiel
                                     </span>
                                 @else
-                                    <span class="badge bg-danger-subtle text-danger px-3 py-2">
+                                    <span class=" text-danger px-3 py-2">
                                         <i class="bi bi-x-circle me-1"></i>Impayé
                                     </span>
                                 @endif
