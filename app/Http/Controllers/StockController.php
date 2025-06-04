@@ -70,8 +70,9 @@ class StockController extends Controller
     {
         $agencies = Agency::all();
         $users = User::latest()->get();
+        $stocks = Stock::where('agency_id', Auth::user()->agency_id)->latest()->get();
 
-        return view('stock.create', compact(['agencies', 'users']));
+        return view('stock.create', compact(['agencies', 'users','stocks']));
     }
 
     /**
@@ -113,6 +114,7 @@ class StockController extends Controller
     {
         $agencies = Agency::latest()->get();
         $users = User::latest()->get();
+
 
         return view('stock.edit', compact('stock', 'agencies', 'users'));
     }

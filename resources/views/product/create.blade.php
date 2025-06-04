@@ -27,7 +27,7 @@
     <div class="row justify-content-center">
         <div class="col-lg-10">
             <div class="card shadow-sm">
-                <div class="card-header bg-primary text-white">
+                <div style="background: var(--bs-primary)" class="card-header  text-white">
                     <h5 class="card-title mb-0">
                         <i class="bi bi-plus-circle me-2"></i>
                         Créer un nouveau produit

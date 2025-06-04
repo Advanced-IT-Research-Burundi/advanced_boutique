@@ -53,4 +53,5 @@ class StockProduct extends Model
     {
         return $this->belongsTo(Agency::class);
     }
+
 }

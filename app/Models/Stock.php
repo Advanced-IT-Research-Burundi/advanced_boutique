@@ -166,5 +166,13 @@ class Stock extends Model
     {
         return $this->user_id ? 'Assigné' : 'Non assigné';
     }
+    //  public function products()
+    // {
+    //     return $this->belongsToMany(Product::class, 'stock_products')
+    //                 ->withPivot('quantity', 'agency_id')
+    //                 ->withTimestamps();
+    // }
+
+
 }
 

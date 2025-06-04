@@ -91,8 +91,40 @@ class Product extends Model
         return $this->hasMany(StockTransferItem::class);
     }
 
-    public function stocks(): BelongsToMany
+    // public function stocks(): BelongsToMany
+    // {
+    //     return $this->belongsToMany(Stock::class);
+    // }
+     public function stocks()
     {
-        return $this->belongsToMany(Stock::class);
+        return $this->belongsToMany(Stock::class, 'stock_products')
+                    // ->withPivot('quantity', 'agency_id')
+                    ->withTimestamps();
+    }
+
+
+
+
+
+    /**
+     * Obtenir la quantité pour une agence spécifique
+     */
+    public function getQuantityForAgency($agencyId)
+    {
+        $stockProduct = $this->stocks()
+                            ->wherePivot('agency_id', $agencyId)
+                            ->first();
+
+        return $stockProduct ? $stockProduct->pivot->quantity : 0;
+    }
+
+    /**
+     * Obtenir le stock associé pour une agence spécifique
+     */
+    public function getStockForAgency($agencyId)
+    {
+        return $this->stocks()
+                   ->wherePivot('agency_id', $agencyId)
+                   ->first();
     }
 }

@@ -154,49 +154,52 @@
         @endif
     </div>
 
-    <!-- Agence -->
+    <!-- Stock et Quantité -->
     <div class="col-md-6 mb-3">
-        <label for="agency_id" class="form-label">
-            <i class="bi bi-box-seam me-1"></i>
-            Agence
+        <label for="stock_id" class="form-label">
+            <i class="bi bi-archive me-1"></i>
+            Stock <span class="text-danger">*</span>
         </label>
-        <select class="form-select @error('agency_id') is-invalid @enderror"
-                id="agency_id"
-                name="agency_id">
-            <option value="">Aucune agence</option>
-            @foreach($agencies as $agency)
-                <option value="{{ $agency->id }}"
-                        {{ old('agency_id', $product->agency_id ?? '') == $agency->id ? 'selected' : '' }}>
-                    {{ $agency->name }}
+        <select class="form-select @error('stock_id') is-invalid @enderror"
+                id="stock_id"
+                name="stock_id"
+                required>
+            <option value="">Sélectionner un stock</option>
+            @foreach($stocks as $stock)
+                <option value="{{ $stock->id }}"
+                        {{ old('stock_id', $selectedStockId ?? '') == $stock->id ? 'selected' : '' }}>
+                    {{ $stock->name }} - {{ $stock->location }}
                 </option>
             @endforeach
         </select>
-        @error('agency_id')
+        @error('stock_id')
             <div class="invalid-feedback">{{ $message }}</div>
         @enderror
     </div>
 
-    <!-- Utilisateur assigné -->
     {{-- <div class="col-md-12 mb-3">
-        <label for="user_id" class="form-label">
-            <i class="bi bi-person-check me-1"></i>
-            Assigné à
+        <label for="quantity" class="form-label">
+            <i class="bi bi-box-seam me-1"></i>
+            Quantité initiale <span class="text-danger">*</span>
         </label>
-        <select class="form-select @error('user_id') is-invalid @enderror"
-                id="user_id"
-                name="user_id">
-            <option value="">Aucun utilisateur</option>
-            @foreach($users as $user)
-                <option value="{{ $user->id }}"
-                        {{ old('user_id', $product->user_id ?? '') == $user->id ? 'selected' : '' }}>
-                    {{ $user->name }}
-                </option>
-            @endforeach
-        </select>
-        @error('user_id')
+        <input type="number"
+               class="form-control @error('quantity') is-invalid @enderror"
+               id="quantity"
+               name="quantity"
+               value="{{ old('quantity', $currentQuantity ?? 0) }}"
+               step="0.01"
+               min="0"
+               required>
+        @error('quantity')
             <div class="invalid-feedback">{{ $message }}</div>
         @enderror
+        <div class="form-text">Quantité disponible dans le stock sélectionné</div>
     </div> --}}
+
+    <!-- Affichage de la marge -->
+    <div class="col-12 mb-3">
+        <div id="margin-display" class="badge bg-secondary fs-6"></div>
+    </div>
 </div>
 
 <script>
@@ -214,13 +217,16 @@ document.addEventListener('DOMContentLoaded', function() {
             const marginElement = document.getElementById('margin-display');
             if (marginElement) {
                 marginElement.textContent = `Marge: ${margin}%`;
-                marginElement.className = margin > 0 ? 'text-success' : 'text-danger';
+                marginElement.className = margin > 0 ? 'badge bg-success fs-6' : 'badge bg-danger fs-6';
             }
         }
     }
 
     purchasePrice.addEventListener('input', calculateMargin);
     salePrice.addEventListener('input', calculateMargin);
+
+    // Calcul initial si les valeurs existent
+    calculateMargin();
 
     // Preview de l'image
     const imageInput = document.getElementById('image');
