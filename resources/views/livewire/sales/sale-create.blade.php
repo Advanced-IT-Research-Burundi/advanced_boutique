@@ -341,13 +341,13 @@
                                         <div class="col-md-6">
                                             <div class="d-flex justify-content-between">
                                                 <span>Sous-total:</span>
-                                                <span class="fw-semibold">{{ number_format($subtotal, 0, ',', ' ') }} F</span>
+                                                <span class="fw-semibold">{{ number_format($total_subtotal, 0, ',', ' ') }} Fbu</span>
                                             </div>
                                         </div>
                                         <div class="col-md-6">
                                             <div class="d-flex justify-content-between">
                                                 <span>Remise totale:</span>
-                                                <span class="fw-semibold text-warning">-{{ number_format($total_discount, 0, ',', ' ') }} F</span>
+                                                <span class="fw-semibold text-warning">-{{ number_format($total_discount, 0, ',', ' ') }} Fbu</span>
                                             </div>
                                         </div>
                                         <div class="col-12">
@@ -361,8 +361,8 @@
                                 </div>
                             </div>
                         @endif
+        </div>
     </div>
-</div>
 </div>
 
 <!-- Colonne latérale -->
@@ -383,7 +383,7 @@
                 </div>
                 <div class="summary-item d-flex justify-content-between mb-3">
                     <span class="text-muted">Sous-total:</span>
-                    <span class="fw-semibold">{{ number_format($subtotal, 0, ',', ' ') }} Fbu</span>
+                    <span class="fw-semibold">{{ number_format($total_subtotal, 0, ',', ' ') }} Fbu</span>
                 </div>
                 @if($total_discount > 0)
                     <div class="summary-item d-flex justify-content-between mb-3">
@@ -415,23 +415,26 @@
         </div>
         <div class="card-body p-4">
             <div class="mb-3">
-                <label for="paid_amount" class="form-label fw-semibold">
-                    Montant payé <span class="text-danger">*</span>
-                </label>
-                <div class="input-group">
-                    <input type="number"
-                           class="form-control @error('paid_amount') is-invalid @enderror"
-                           wire:model.live="paid_amount"
-                           id="paid_amount"
-                           min="0"
-                           step="0.01"
-                           placeholder="0">
-                    <span class="input-group-text">F</span>
-                </div>
-                @error('paid_amount')
-                    <div class="invalid-feedback">{{ $message }}</div>
-                @enderror
+            <label for="paid_amount" class="form-label fw-semibold">
+                Montant payé <span class="text-danger">*</span>
+            </label>
+            <div class="input-group">
+                <input type="number"
+                    id="paid_amount"
+                    min="0"
+                    step="0.01"
+                    placeholder="0"
+                    class="form-control @error('paid_amount') is-invalid @enderror"
+                    wire:model.live="paid_amount"
+
+                >
+                <span class="input-group-text">Fbu</span>
             </div>
+            @error('paid_amount')
+                <div class="invalid-feedback">{{ $message }}</div>
+            @enderror
+        </div>
+
 
             @if($total_amount > 0)
                 <div class="alert {{ $this->paymentStatus['type'] == 'success' ? 'alert-success' : ($this->paymentStatus['type'] == 'info' ? 'alert-info' : 'alert-warning') }} border-0 rounded-3">
@@ -446,7 +449,7 @@
                     <label class="form-label fw-semibold small">Montant rapide:</label>
                     <div class="d-flex flex-wrap gap-2">
                         <button type="button" class="btn btn-outline-secondary btn-sm"
-                                wire:click="$set('paid_amount', {{ $total_amount }})">
+                                wire:click="setExactAmount">
                             Exact
                         </button>
                         @php
@@ -458,14 +461,20 @@
                             $quickAmounts = array_unique($quickAmounts);
                             sort($quickAmounts);
                         @endphp
-                        @foreach(array_slice($quickAmounts, 0, 3) as $amount)
+                        @foreach(array_slice($quickAmounts, 0, 3) as $index => $amount)
                             @if($amount > $total_amount)
-                                <button type="button" class="btn btn-outline-secondary btn-sm"
-                                        wire:click="$set('paid_amount', {{ $amount }})">
+                                @php $amount = ceil($amount / 1000) * 1000; @endphp
+                                <button
+                                    type="button"
+                                    class="btn btn-outline-secondary btn-sm"
+                                    wire:click="setQuickAmount({{ $amount }})"
+                                    wire:key="quick-amount-{{ $index }}-{{ $amount }}"
+                                >
                                     {{ number_format($amount, 0, ',', ' ') }}
                                 </button>
                             @endif
                         @endforeach
+
                     </div>
                 </div>
             @endif

@@ -33,6 +33,7 @@ class SaleCreate extends Component
     public $items = [];
 
     public $subtotal = 0;
+    public $total_subtotal = 0;
     public $total_discount = 0;
     public $total_amount = 0;
     public $due_amount = 0;
@@ -268,22 +269,32 @@ class SaleCreate extends Component
 
     public function calculateTotals()
     {
-        $this->subtotal = 0;
-        $this->total_discount = 0;
+        $this->subtotal = 0;           // Total AVANT remises
+        $this->total_discount = 0;     // Total des remises
+        $this->total_amount = 0;       // Total APRÈS remises (montant final)
 
         foreach ($this->items as $item) {
-            $quantity = floatval($item['quantity']);
-            $price = floatval($item['sale_price']);
-            $discount = floatval($item['discount'] ?? 0);
+            if (!empty($item['product_id']) && !empty($item['quantity']) && !empty($item['sale_price'])) {
+                $quantity = floatval($item['quantity']);
+                $price = floatval($item['sale_price']);
+                $discount = floatval($item['discount'] ?? 0);
 
-            $item_subtotal = $quantity * $price;
-            $item_discount = ($item_subtotal * $discount) / 100;
+                // Calcul pour cet item
+                $item_subtotal = $quantity * $price;                    // Sous-total de l'item
+                $item_discount_amount = ($item_subtotal * $discount) / 100;  // Montant de remise de l'item
 
-            $this->subtotal += $item_subtotal;
-            $this->total_discount += $item_discount;
+                // Accumulation des totaux
+                $this->subtotal +=  $item_subtotal;                     // Additionner les sous-totaux
+                $this->total_discount += $item_discount_amount;        // Additionner les remises
+            }
         }
 
+        // Le total final = sous-total - remises totales
         $this->total_amount = $this->subtotal - $this->total_discount;
+
+        $this->total_subtotal = $this->subtotal;
+        // dump($this->subtotal);
+        // Montant restant à payer
         $this->due_amount = $this->total_amount - floatval($this->paid_amount);
     }
 
@@ -417,7 +428,20 @@ class SaleCreate extends Component
         }
     }
 
+    public function setExactAmount()
+    {
+        // dd($this->total_amount);
+        $this->paid_amount = $this->total_amount;
+        $this->calculateTotals();
+    }
 
+    public function setQuickAmount($amount)
+    {
+        // dd('Quick amount set');
+
+        $this->paid_amount = floatval($amount);
+        $this->calculateTotals();
+    }
     public function render()
     {
         return view('livewire.sales.sale-create');
