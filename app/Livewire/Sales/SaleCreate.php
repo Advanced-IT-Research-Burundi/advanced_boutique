@@ -91,11 +91,7 @@ class SaleCreate extends Component
         $this->products = Product::with(['stockProducts.stock'])
             ->select('id', 'name', 'sale_price', 'unit', 'alert_quantity', 'image', 'agency_id')
             ->orderBy('name')
-            ->get()
-            ->map(function ($product) {
-                $product->available_stock = $this->getProductAvailableStock($product->id);
-                return $product;
-            });
+            ->get();
 
         // Obtenir le stock actuel (le plus récent)
         $this->current_stock = Stock::where('agency_id', Auth::user()->agency_id ?? null)
@@ -105,20 +101,30 @@ class SaleCreate extends Component
 
     public function loadCartItems()
     {
-        // Charger les items du panier dans la propriété items
         $cartItems = Cart::session($this->cart_session)->getContent();
         $this->items = [];
         $this->selected_products = [];
 
-        foreach ($cartItems as $cartItem) {
+        $sortedCartItems = $cartItems->sortBy('id');
+
+        foreach ($sortedCartItems as $cartItem) {
             $product = $this->products->find($cartItem->id);
             if ($product) {
+                $discount = floatval($cartItem->attributes->discount ?? 0);
+                $quantity = floatval($cartItem->quantity);
+                $price = floatval($cartItem->price);
+
+                // Calculer le sous-total avec remise
+                $subtotal_before_discount = $quantity * $price;
+                $discount_amount = ($subtotal_before_discount * $discount) / 100;
+                $subtotal_after_discount = $subtotal_before_discount - $discount_amount;
+
                 $this->items[] = [
                     'product_id' => $cartItem->id,
-                    'quantity' => $cartItem->quantity,
-                    'sale_price' => $cartItem->price,
-                    'discount' => $cartItem->attributes->discount ?? 0,
-                    'subtotal' => $cartItem->getPriceSum(),
+                    'quantity' => $quantity,
+                    'sale_price' => $price,
+                    'discount' => $discount,
+                    'subtotal' => $subtotal_after_discount,
                     'unit' => $product->unit,
                     'available_stock' => $product->available_stock,
                 ];
@@ -201,62 +207,62 @@ class SaleCreate extends Component
             ]);
         }
 
-        $this->show_product_search = false;
+        // $this->show_product_search = false;
         $this->product_search = '';
         $this->loadCartItems();
         $this->dispatch('productAdded', ['message' => "Produit '{$product->name}' ajouté avec succès!"]);
     }
 
-    public function removeItem($index)
+    public function removeItem($productId)
     {
-        if (isset($this->items[$index])) {
-            $productId = $this->items[$index]['product_id'];
-            Cart::session($this->cart_session)->remove($productId);
-            $this->loadCartItems();
-            $this->dispatch('productRemoved', ['message' => 'Produit retiré du panier']);
-        }
+        Cart::session($this->cart_session)->remove($productId);
+        $this->loadCartItems();
+        $this->dispatch('productRemoved', ['message' => 'Produit retiré du panier']);
     }
 
-    public function updateItemQuantity($index, $quantity)
+    public function updateItemQuantity($productId, $quantity)
     {
-        if (isset($this->items[$index]) && $quantity > 0) {
-            $productId = $this->items[$index]['product_id'];
+        if ($quantity > 0) {
             Cart::session($this->cart_session)->update($productId, [
                 'quantity' => [
                     'relative' => false,
                     'value' => $quantity
                 ]
             ]);
+
             $this->loadCartItems();
+
+            \Log::info("Quantity updated for product {$productId}: {$quantity}");
         }
     }
 
-    public function updateItemPrice($index, $price)
+    public function updateItemPrice($productId, $price)
     {
-        if (isset($this->items[$index]) && $price >= 0) {
-            $productId = $this->items[$index]['product_id'];
+        if ($price >= 0) {
             Cart::session($this->cart_session)->update($productId, [
                 'price' => $price
             ]);
             $this->loadCartItems();
+
+            \Log::info("Price updated for product {$productId}: {$price}");
         }
     }
 
-    public function updateItemDiscount($index, $discount)
+    public function updateItemDiscount($productId, $discount)
     {
-        if (isset($this->items[$index])) {
-            $productId = $this->items[$index]['product_id'];
-            $cartItem = Cart::session($this->cart_session)->get($productId);
+        $cartItem = Cart::session($this->cart_session)->get($productId);
 
-            if ($cartItem) {
-                $attributes = $cartItem->attributes->toArray();
-                $attributes['discount'] = max(0, min(100, $discount ?? 0));
+        if ($cartItem) {
+            $attributes = $cartItem->attributes->toArray();
+            $attributes['discount'] = max(0, min(100, floatval($discount ?? 0)));
 
-                Cart::session($this->cart_session)->update($productId, [
-                    'attributes' => $attributes
-                ]);
-                $this->loadCartItems();
-            }
+            Cart::session($this->cart_session)->update($productId, [
+                'attributes' => $attributes
+            ]);
+
+            $this->loadCartItems();
+
+            \Log::info("Discount updated for product {$productId}: {$discount}");
         }
     }
 
@@ -266,17 +272,15 @@ class SaleCreate extends Component
         $this->total_discount = 0;
 
         foreach ($this->items as $item) {
-            if (!empty($item['product_id']) && !empty($item['quantity']) && !empty($item['sale_price'])) {
-                $quantity = floatval($item['quantity']);
-                $price = floatval($item['sale_price']);
-                $discount = floatval($item['discount'] ?? 0);
+            $quantity = floatval($item['quantity']);
+            $price = floatval($item['sale_price']);
+            $discount = floatval($item['discount'] ?? 0);
 
-                $item_subtotal = $quantity * $price;
-                $item_discount = ($item_subtotal * $discount) / 100;
+            $item_subtotal = $quantity * $price;
+            $item_discount = ($item_subtotal * $discount) / 100;
 
-                $this->subtotal += $item_subtotal;
-                $this->total_discount += $item_discount;
-            }
+            $this->subtotal += $item_subtotal;
+            $this->total_discount += $item_discount;
         }
 
         $this->total_amount = $this->subtotal - $this->total_discount;
@@ -288,10 +292,6 @@ class SaleCreate extends Component
         $this->calculateTotals();
     }
 
-    public function getProductAvailableStock($productId)
-    {
-        return StockProduct::where('product_id', $productId)->sum('quantity') ?? 0;
-    }
 
     public function getPaymentStatusProperty()
     {
@@ -320,7 +320,7 @@ class SaleCreate extends Component
         foreach ($this->items as $index => $item) {
             if (!empty($item['product_id']) && !empty($item['quantity'])) {
                 $product = $this->products->find($item['product_id']);
-                $availableStock = $this->getProductAvailableStock($item['product_id']);
+                $availableStock = $product->available_stock ?? 0;
 
                 if ($item['quantity'] > $availableStock) {
                     $errors[] = "Stock insuffisant pour {$product->name}. Stock disponible: {$availableStock}, Demandé: {$item['quantity']}";
@@ -416,6 +416,7 @@ class SaleCreate extends Component
             session()->flash('error', 'Erreur lors de l\'enregistrement de la vente: ' . $e->getMessage());
         }
     }
+
 
     public function render()
     {

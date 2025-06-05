@@ -127,4 +127,8 @@ class Product extends Model
                    ->wherePivot('agency_id', $agencyId)
                    ->first();
     }
+    public function getAvailableStockAttribute()
+    {
+        return \App\Models\StockProduct::where('product_id', $this->id)->sum('quantity') ?? 0;
+    }
 }
