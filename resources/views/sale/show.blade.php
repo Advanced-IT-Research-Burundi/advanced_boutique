@@ -18,26 +18,30 @@
                     <i class="fas fa-arrow-left me-1"></i>
                     Retour
                 </a>
-                <a href="{{ route('sales.edit', $sale) }}" class="btn btn-outline-primary">
+                {{-- <a href="{{ route('sales.edit', $sale) }}" class="btn btn-outline-primary">
                     <i class="fas fa-edit me-1"></i>
                     Modifier
-                </a>
-                <button onclick="window.print()" class="btn btn-success">
+                </a> --}}
+                <button id="printInvoice"  class="btn btn-success">
                     <i class="fas fa-print me-1"></i>
-                    Imprimer
+                    Imprimer Facture
                 </button>
-                <button onclick="downloadPDF()" class="btn btn-danger">
+                <button id="printReceipt" class="btn btn-info">
+                    <i class="fas fa-receipt me-1"></i>
+                    Imprimer Reçu POS
+                </button>
+                <a href="{{ route('sales.pdf', $sale) }}"  class="btn btn-danger">
                     <i class="fas fa-download me-1"></i>
                     PDF
-                </button>
+                </a>
             </div>
         </div>
     </div>
 
     <!-- Facture -->
-    <div class="invoice-container">
+    <div class="invoice-container" id="invoiceContent">
         <div class="card shadow-lg border-0">
-            <div class="card-body p-5" id="invoice-content">
+            <div class="card-body p-5">
                 <!-- Header de la facture -->
                 <div class="row mb-5">
                     <div class="col-md-6">
@@ -106,9 +110,8 @@
                     </div>
                     <div class="col-md-6">
                         <div class="sale-info">
-                            <h5 class="section-title">Informations de vente:</h5>
+                            <h5 class="section-title">Statut de paiement:</h5>
                             <div class="sale-details">
-                                <p><strong>Vendeur:</strong> {{ $sale->user->name }}</p>
                                 <p><strong>Statut:</strong>
                                     @if($sale->due_amount <= 0)
                                         <span class="badge bg-success">Payée</span>
@@ -162,7 +165,7 @@
                     </table>
                 </div>
 
-                <!-- Totaux -->
+                <!-- Totaux et montant en lettres -->
                 <div class="row">
                     <div class="col-md-6">
                         <div class="payment-info">
@@ -172,6 +175,10 @@
                                 @if($sale->due_amount > 0)
                                     <p class="text-danger"><strong>Montant dû:</strong> {{ number_format($sale->due_amount, 0) }} BIF</p>
                                 @endif
+                            </div>
+                            <div class="amount-in-words mt-3 p-3 bg-light rounded">
+                                <h6>Montant payé en lettres:</h6>
+                                <p class="mb-0"><em>{{ getNumberToWord($sale->paid_amount) }} francs burundais</em></p>
                             </div>
                         </div>
                     </div>
@@ -201,7 +208,7 @@
                         <div class="col-md-8">
                             <div class="notes">
                                 <h6>Notes:</h6>
-                                <p class="text-muted">Merci pour votre confiance. Cette facture est générée automatiquement.</p>
+                                <p class="text-muted">Merci pour votre confiance.</p>
                             </div>
                         </div>
                         <div class="col-md-4 text-end">
@@ -217,286 +224,92 @@
             </div>
         </div>
     </div>
-</div>
 
-<style>
-/* Styles généraux */
-.invoice-container {
-    max-width: 1000px;
-    margin: 0 auto;
-}
+    <!-- Reçu POS (caché par défaut) -->
+    <div class="receipt-container d-none" id="receiptContent">
+        <div class="receipt">
+            <div class="receipt-header text-center">
+                <h4>{{ $company->tp_name ?? 'ENTREPRISE' }}</h4>
+                <p>{{ $company->tp_address ?? 'Adresse' }}</p>
+                <p>Tel: {{ $company->tp_phone_number ?? 'N/A' }}</p>
+                @if($company->tp_TIN ?? false)
+                    <p>NIF: {{ $company->tp_TIN }}</p>
+                @endif
+                <div class="receipt-divider">================================</div>
+                <h5>REÇU DE VENTE</h5>
+                <div class="receipt-divider">================================</div>
+            </div>
 
-/* Header de la facture */
-.company-logo {
-    max-height: 80px;
-    max-width: 200px;
-}
+            <div class="receipt-info">
+                <p><strong>N° Reçu:</strong> {{ str_pad($sale->id, 6, '0', STR_PAD_LEFT) }}</p>
+                <p><strong>Date:</strong> {{ \Carbon\Carbon::parse($sale->sale_date)->format('d/m/Y H:i') }}</p>
+                <p><strong>Client:</strong>
+                    @if($sale->client->patient_type === 'morale')
+                        {{ $sale->client->societe }}
+                    @else
+                        {{ $sale->client->name }} {{ $sale->client->first_name }}
+                    @endif
+                </p>
+                <div class="receipt-divider">--------------------------------</div>
+            </div>
 
-.company-name {
-    color: #2c3e50;
-    font-weight: 700;
-    margin-bottom: 10px;
-}
+            <div class="receipt-items">
+                @foreach($sale->saleItems as $item)
+                <div class="receipt-item">
+                    <div class="item-name">{{ $item->product->name }}</div>
+                    <div class="item-details">
+                        {{ $item->quantity }} x {{ number_format($item->sale_price, 0) }}
+                        @if($item->discount > 0)
+                            (-{{ number_format($item->discount, 0) }})
+                        @endif
+                        <span class="float-end">{{ number_format($item->subtotal, 0) }}</span>
+                    </div>
+                </div>
+                @endforeach
+                <div class="receipt-divider">--------------------------------</div>
+            </div>
 
-.company-details p {
-    color: #6c757d;
-    font-size: 0.9rem;
-}
+            <div class="receipt-totals">
+                <div class="total-line">
+                    <span>Sous-total:</span>
+                    <span class="float-end">{{ number_format($sale->saleItems->sum('subtotal'), 0) }} BIF</span>
+                </div>
+                @if($sale->saleItems->sum('discount') > 0)
+                <div class="total-line">
+                    <span>Remise:</span>
+                    <span class="float-end">-{{ number_format($sale->saleItems->sum('discount'), 0) }} BIF</span>
+                </div>
+                @endif
+                <div class="receipt-divider">================================</div>
+                <div class="total-line total-final">
+                    <span><strong>TOTAL:</strong></span>
+                    <span class="float-end"><strong>{{ number_format($sale->total_amount, 0) }} BIF</strong></span>
+                </div>
+                <div class="total-line">
+                    <span>Payé:</span>
+                    <span class="float-end">{{ number_format($sale->paid_amount, 0) }} BIF</span>
+                </div>
+                @if($sale->due_amount > 0)
+                <div class="total-line text-danger">
+                    <span>Dû:</span>
+                    <span class="float-end">{{ number_format($sale->due_amount, 0) }} BIF</span>
+                </div>
+                @endif
+            </div>
 
-.invoice-title {
-    color: #2c3e50;
-    font-size: 2.5rem;
-    font-weight: 700;
-    margin-bottom: 20px;
-}
-
-.invoice-number {
-    font-size: 1.2rem;
-    font-weight: 600;
-    color: #007bff;
-    margin-bottom: 15px;
-}
-
-.invoice-dates p {
-    margin-bottom: 5px;
-    color: #6c757d;
-}
-
-/* Sections client et vente */
-.section-title {
-    color: #2c3e50;
-    font-weight: 600;
-    margin-bottom: 15px;
-    padding-bottom: 5px;
-    border-bottom: 2px solid #007bff;
-}
-
-.client-name {
-    color: #2c3e50;
-    font-weight: 600;
-    margin-bottom: 10px;
-}
-
-.client-details p, .sale-details p {
-    margin-bottom: 8px;
-    color: #6c757d;
-}
-
-/* Tableau des articles */
-.invoice-table {
-    border: none;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    border-radius: 8px;
-    overflow: hidden;
-}
-
-.invoice-table thead th {
-    background: linear-gradient(135deg, #2c3e50, #34495e);
-    border: none;
-    font-weight: 600;
-    text-transform: uppercase;
-    font-size: 0.85rem;
-    letter-spacing: 0.5px;
-}
-
-.invoice-table tbody tr {
-    border-bottom: 1px solid #e9ecef;
-    transition: background-color 0.2s ease;
-}
-
-.invoice-table tbody tr:hover {
-    background-color: #f8f9fa;
-}
-
-.invoice-table td {
-    padding: 15px 12px;
-    vertical-align: middle;
-}
-
-.product-info strong {
-    color: #2c3e50;
-}
-
-/* Totaux */
-.invoice-totals .table td {
-    border: none;
-    padding: 8px 15px;
-    font-size: 1rem;
-}
-
-.invoice-totals .table-dark td {
-    background: linear-gradient(135deg, #2c3e50, #34495e);
-    color: white;
-    font-size: 1.1rem;
-}
-
-/* Informations de paiement */
-.payment-details p {
-    margin-bottom: 8px;
-    font-size: 1rem;
-}
-
-/* Footer */
-.invoice-footer {
-    margin-top: 40px;
-}
-
-.signature-line {
-    width: 200px;
-    margin-left: auto;
-}
-
-.signature-line hr {
-    margin-bottom: 5px;
-    border-color: #2c3e50;
-}
-
-/* Badges */
-.badge {
-    font-size: 0.8rem;
-    padding: 6px 12px;
-}
-
-/* Styles d'impression */
-@media print {
-    .no-print {
-        display: none !important;
-    }
-
-    body {
-        font-size: 12px;
-        line-height: 1.4;
-    }
-
-    .invoice-container {
-        max-width: 100%;
-        margin: 0;
-    }
-
-    .card {
-        box-shadow: none !important;
-        border: none !important;
-    }
-
-    .card-body {
-        padding: 20px !important;
-    }
-
-    .invoice-table {
-        box-shadow: none;
-    }
-
-    .invoice-table thead th {
-        background: #2c3e50 !important;
-        color: white !important;
-        -webkit-print-color-adjust: exact;
-        color-adjust: exact;
-    }
-
-    .invoice-totals .table-dark td {
-        background: #2c3e50 !important;
-        color: white !important;
-        -webkit-print-color-adjust: exact;
-        color-adjust: exact;
-    }
-
-    .badge {
-        border: 1px solid #000;
-        background: transparent !important;
-        color: #000 !important;
-    }
-
-    /* Saut de page */
-    .invoice-container {
-        page-break-inside: avoid;
-    }
-}
-
-/* Responsivité */
-@media (max-width: 768px) {
-    .invoice-title {
-        font-size: 2rem;
-    }
-
-    .card-body {
-        padding: 20px !important;
-    }
-
-    .invoice-table {
-        font-size: 0.85rem;
-    }
-
-    .company-logo {
-        max-height: 60px;
-    }
-
-    .btn-group {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 5px;
-    }
-
-    .btn-group .btn {
-        flex: 1;
-        min-width: auto;
-    }
-}
-
-/* Animations subtiles */
-.card {
-    transition: transform 0.2s ease;
-}
-
-.btn {
-    transition: all 0.2s ease;
-}
-
-.btn:hover {
-    transform: translateY(-1px);
-}
-
-/* Amélioration de l'accessibilité */
-.invoice-table thead th {
-    position: relative;
-}
-
-.table-responsive {
-    border-radius: 8px;
-}
-
-/* Style pour les icônes */
-.fas {
-    width: 16px;
-    text-align: center;
-}
-</style>
-
-<script>
-// Fonction pour télécharger en PDF
-function downloadPDF() {
-    // Option 1: Utiliser window.print() avec une CSS print optimisée
-    window.print();
-
-    // Option 2: Si vous voulez implémenter jsPDF ou une autre solution
-    // Vous pouvez ajouter votre logique ici
-}
-
-// Amélioration de l'impression
-window.addEventListener('beforeprint', function() {
-    document.title = 'Facture #{{ str_pad($sale->id, 6, "0", STR_PAD_LEFT) }} - {{ $sale->client->name }}';
-});
-
-// Animation d'entrée
-document.addEventListener('DOMContentLoaded', function() {
-    const card = document.querySelector('.card');
-    card.style.opacity = '0';
-    card.style.transform = 'translateY(20px)';
-
-    setTimeout(() => {
-        card.style.transition = 'all 0.5s ease';
-        card.style.opacity = '1';
-        card.style.transform = 'translateY(0)';
-    }, 100);
-});
-</script>
+            <div class="receipt-footer text-center mt-3">
+                <div class="receipt-divider">================================</div>
+                <p><small>Montant payé: {{ getNumberToWord($sale->paid_amount) }} francs burundais</small></p>
+                <div class="receipt-divider">================================</div>
+                <p><small>Merci pour votre visite!</small></p>
+                <p><small>{{ now()->format('d/m/Y H:i:s') }}</small></p>
+            </div>
+        </div>
+    </div>
 @endsection
+@push('styles')
+    <link rel="stylesheet" href="{{ asset('css/facture.css') }}">
+@endpush
+@push('scripts')
+    <script src="{{ asset('js/facture.js')}}"></script>
+@endpush

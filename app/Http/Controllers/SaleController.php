@@ -7,9 +7,11 @@ use App\Models\SaleItem;
 use App\Models\Product;
 use App\Models\Client;
 use App\Models\Stock;
+use App\Models\Company;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class SaleController extends Controller
 {
@@ -168,8 +170,10 @@ class SaleController extends Controller
     public function show(Sale $sale)
     {
         $sale->load(['client', 'saleItems.product', 'user']);
+        $company = Company::where('is_actif', true)->first();
 
-        return view('sale.show', compact('sale'));
+        // dd($company);
+        return view('sale.show', compact(['sale', 'company']));
     }
 
     public function edit(Sale $sale)
@@ -339,5 +343,37 @@ class SaleController extends Controller
             'totalDue' => Sale::sum('due_amount'),
             'todaySales' => Sale::whereDate('sale_date', $today)->count(),
         ];
+    }
+
+    public function downloadPDF(Sale $sale)
+    {
+        $sale->load(['client', 'saleItems.product']);
+
+        $company = Company::where('is_actif', true)->first();
+
+
+        $data = [
+            'sale' => $sale,
+            'company' => $company,
+            'title' => 'Facture #' . str_pad($sale->id, 6, '0', STR_PAD_LEFT)
+        ];
+
+        // Générer le PDF avec DomPDF
+        $pdf = Pdf::loadView('sale.invoice-pdf', $data);
+
+        // Configuration du PDF
+        $pdf->setPaper('A4', 'portrait');
+        $pdf->setOptions([
+            'defaultFont' => 'DejaVu Sans',
+            'isHtml5ParserEnabled' => true,
+            'isPhpEnabled' => true,
+            'isRemoteEnabled' => true,
+        ]);
+
+        // Nom du fichier
+        $filename = 'facture_' . str_pad($sale->id, 6, '0', STR_PAD_LEFT) . '.pdf';
+
+        // Retourner le PDF pour téléchargement
+        return $pdf->download($filename);
     }
 }
