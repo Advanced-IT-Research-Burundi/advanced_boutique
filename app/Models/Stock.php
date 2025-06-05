@@ -107,6 +107,7 @@ class Stock extends Model
     }
 
 
+
     /**
      * Scope pour filtrer par agence
      */

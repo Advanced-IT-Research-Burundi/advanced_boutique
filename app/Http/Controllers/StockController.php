@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Stock;
 use App\Models\Agency;
+use App\Models\StockProduct;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -16,7 +17,8 @@ class StockController extends Controller
 
     public function mouvement($stock)
     {
-      
+        $stock = StockProduct::with(['stock', 'product', 'agency', 'stockProductMouvements'])->findOrFail($stock);
+
         return view('stock.mouvement', compact('stock'));
     }
 

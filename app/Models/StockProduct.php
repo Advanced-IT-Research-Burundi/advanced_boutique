@@ -44,6 +44,11 @@ class StockProduct extends Model
         return $this->belongsTo(Stock::class);
     }
 
+    public function stockProductMouvements()
+    {
+        return $this->hasMany(StockProductMouvement::class , 'item_code', 'id');
+    }
+
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
