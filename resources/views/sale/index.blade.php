@@ -56,7 +56,7 @@
                         </div>
                         <div class="flex-grow-1 ms-3">
                             <h6 class="text-muted mb-1">Ventes Payées</h6>
-                            <h4 class="mb-0">{{ $paidSales ?? 0 }}</h4>
+                            <h5 class="mb-0">{{ $paidSales ?? 0 }}</h5>
                         </div>
                     </div>
                 </div>
@@ -73,7 +73,7 @@
                         </div>
                         <div class="flex-grow-1 ms-3">
                             <h6 class="text-muted mb-1">Créances</h6>
-                            <h4 class="mb-0">{{ number_format($totalDue ?? 0, 0, ',', ' ') }} F</h4>
+                            <h4 class="mb-0">{{ number_format($totalDue ?? 0, 0, ',', ' ') }} Fbu</h4>
                         </div>
                     </div>
                 </div>
@@ -90,7 +90,7 @@
                         </div>
                         <div class="flex-grow-1 ms-3">
                             <h6 class="text-muted mb-1">Aujourd'hui</h6>
-                            <h4 class="mb-0">{{ $todaySales ?? 0 }}</h4>
+                            <h6 class="mb-0">{{ $todaySales ?? 0 }}</h6>
                         </div>
                     </div>
                 </div>
