@@ -64,10 +64,7 @@ class CashRegister extends Model
         return $this->belongsTo(Agency::class);
     }
 
-    public function user(): BelongsTo
-    {
-        return $this->belongsTo(User::class);
-    }
+
 
     public function createdBy(): BelongsTo
     {
