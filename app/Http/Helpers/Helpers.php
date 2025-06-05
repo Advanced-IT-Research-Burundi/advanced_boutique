@@ -1,4 +1,5 @@
 <?php
+use NumberToWords\NumberToWords;
 
 define('TAUX_TVA', [0,10,18]);
 
@@ -10,56 +11,6 @@ function getNumberToWord($number , $language='fr'){
     return  $numberTransformer->toWords($number);
 }
 
-function getInvoiceNumber($invoince_id){
-    return INVOICE_PREFIX.str_pad($invoince_id, 6, "0", STR_PAD_LEFT);
-}
-
-function remplacerPremierePartie($chaine, $nouvelleValeur , $key=0) {
-    // Séparer la chaîne par les slashs
-    $parties = explode('/', $chaine);
-    // Vérifier qu'il y a bien des parties à modifier
-    if (count($parties) > 1) {
-        // Remplacer la première partie par la nouvelle valeur
-        $parties[$key] = $nouvelleValeur;
-        // Rejoindre les parties pour reformer la chaîne
-        return implode('/', $parties);
-    }
-    // Retourner la chaîne d'origine si aucune modification n'a été faite
-    return $chaine;
-}
-
-
-function convertTimestamp($timestamp) {
-    // Use DateTime class to parse the input string
-    $dateTime = DateTime::createFromFormat('YmdHis', $timestamp);
-    // Return the formatted date as 'YYYY-MM-DD hh:mm:ss'
-    return $dateTime->format('Y-m-d H:i:s');
-}
-
-
-function prixVenteHorsTva($price, $taux = 0.18){
-    $res = $price / (1 + $taux );
-    return ARRONDIR_RESULTAT ? round($res) : number_format($res, 2 );
-}
-function prixVenteTvac($price, $taux = 0.18){
-    $res = $price * (1 + $taux );
-    return ARRONDIR_RESULTAT ? round($res) : number_format($res, 2 );
-}
-
-function calculerTauxTVA($prixHT, $montantTVA) {
-    if ($prixHT <= 0) {
-        return "Erreur : Le prix HT doit être supérieur à 0";
-    }
-    // Calcul du taux de TVA
-    $tauxTVA = ($montantTVA / $prixHT) * 100;
-    // Arrondir à 2 décimales
-    return round($tauxTVA, 2);
-}
-function getPrice($price)
-{
-    $price = floatval($price);
-    return number_format($price, 2, ',', ' . ');
-}
 const MOUVEMENT_STOCK = [
     'EN' => 'Entrée Normales',
     'ER' => 'Entrée Retour',
@@ -92,13 +43,6 @@ function getMouvement($key){
 
 function setActiveRoute($route){
     return request()->routeIs($route) ? 'active' : '';
-}
-
-function isValideNumber($number){
-    return is_numeric($number);
-}
-function getMaisonById($id){
-    return MaisonLocation::find($id);
 }
 
 function sub_letters($text, $limit = 50, $ellipsis = '...') {

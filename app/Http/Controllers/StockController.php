@@ -16,7 +16,7 @@ class StockController extends Controller
 
     public function mouvement($stock)
     {
-        dd($stock);
+      
         return view('stock.mouvement', compact('stock'));
     }
 

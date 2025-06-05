@@ -17,6 +17,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('stock_id')->constrained();
             $table->foreignId('product_id')->constrained();
+            $table->text("product_name");
             $table->float('quantity');
             $table->foreignId('agency_id')->nullable()->constrained();
             $table->timestamps();
