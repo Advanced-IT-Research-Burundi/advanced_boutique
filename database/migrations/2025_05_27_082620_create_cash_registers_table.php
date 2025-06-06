@@ -16,12 +16,13 @@ return new class extends Migration
         Schema::create('cash_registers', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained();
-            $table->foreignId('stock_id')->constrained();
+            $table->foreignId('stock_id')->nullable()->constrained();
             $table->decimal('opening_balance');
             $table->decimal('closing_balance');
             $table->string('status');
             $table->dateTime('opened_at');
-            $table->dateTime('closed_at');
+            $table->dateTime('closed_at')->nullable();
+            $table->string('description')->nullable();
             $table->foreignId('agency_id')->nullable()->constrained();
             $table->foreignId('created_by')->constrained('users');
             $table->timestamps();

@@ -57,6 +57,8 @@ Route::resource('sales', App\Http\Controllers\SaleController::class);
 Route::get('/sales/{sale}/pdf', [App\Http\Controllers\SaleController::class, 'downloadPDF'])->name('sales.pdf');
 
 Route::resource('cash-registers', App\Http\Controllers\CashRegisterController::class);
+;
+Route::post('cash-register/{cashRegister}/close', [App\Http\Controllers\CashRegisterController::class, 'close'])->name('cash-register.close');
 
 Route::resource('cash-transactions', App\Http\Controllers\CashTransactionController::class);
 

@@ -55,14 +55,12 @@ class CashRegisterController extends Controller
 
         // Données pour les filtres
         $agencies = Agency::all();
-        $creators = User::select('id', 'first_name')->distinct()->get();
         $users = User::all();
         $stocks = Stock::all();
 
         return view('cashRegister.index', compact(
             'cashRegisters',
             'agencies',
-            'creators',
             'users',
             'stocks'
         ));
@@ -81,7 +79,6 @@ class CashRegisterController extends Controller
     {
         $request->validate([
             'user_id' => 'required|exists:users,id',
-            'stock_id' => 'required|exists:stocks,id',
             'opening_balance' => 'required|numeric|min:0',
             'status' => 'required|in:open,closed,suspended',
             'opened_at' => 'required|date',
@@ -141,7 +138,6 @@ class CashRegisterController extends Controller
     {
         $request->validate([
             'user_id' => 'required|exists:users,id',
-            'stock_id' => 'required|exists:stocks,id',
             'opening_balance' => 'required|numeric|min:0',
             'closing_balance' => 'nullable|numeric|min:0',
             'status' => 'required|in:open,closed,suspended',

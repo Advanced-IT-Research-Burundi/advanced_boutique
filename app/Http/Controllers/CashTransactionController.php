@@ -2,65 +2,606 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\CashTransactionStoreRequest;
-use App\Http\Requests\CashTransactionUpdateRequest;
 use App\Models\CashTransaction;
-use Illuminate\Http\RedirectResponse;
+use App\Models\CashRegister;
 use Illuminate\Http\Request;
-use Illuminate\View\View;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
+use Carbon\Carbon;
 
 class CashTransactionController extends Controller
 {
-    public function index(Request $request): View
+    /**
+     * Display a listing of the resource.
+     */
+    public function index(Request $request)
     {
-        $cashTransactions = CashTransaction::all();
+        $query = CashTransaction::with(['cashRegister.user', 'createdBy', 'agency'])
+                                ->orderBy('created_at', 'desc');
 
-        return view('cashTransaction.index', [
-            'cashTransactions' => $cashTransactions,
+        // Filtrage par caisse
+        if ($request->filled('cash_register_id')) {
+            $query->where('cash_register_id', $request->cash_register_id);
+        }
+
+        // Filtrage par type
+        if ($request->filled('type')) {
+            $query->where('type', $request->type);
+        }
+
+        // Filtrage par agence
+        if ($request->filled('agency_id')) {
+            $query->where('agency_id', $request->agency_id);
+        }
+
+        // Filtrage par utilisateur
+        if ($request->filled('user_id')) {
+            $query->where('created_by', $request->user_id);
+        }
+
+        // Filtrage par date
+        if ($request->filled('date_from')) {
+            $query->whereDate('created_at', '>=', $request->date_from);
+        }
+
+        if ($request->filled('date_to')) {
+            $query->whereDate('created_at', '<=', $request->date_to);
+        }
+
+        // Filtrage par montant
+        if ($request->filled('amount_min')) {
+            $query->where('amount', '>=', $request->amount_min);
+        }
+
+        if ($request->filled('amount_max')) {
+            $query->where('amount', '<=', $request->amount_max);
+        }
+
+        // Recherche textuelle
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('description', 'like', "%{$search}%")
+                  ->orWhere('reference_id', 'like', "%{$search}%")
+                  ->orWhereHas('cashRegister', function ($subQuery) use ($search) {
+                      $subQuery->where('id', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        $transactions = $query->paginate(15);
+
+        // Données pour les filtres
+        $cashRegisters = CashRegister::with('user')->get();
+        $agencies = \App\Models\Agency::all();
+        $users = \App\Models\User::all();
+
+        // Statistiques
+        $stats = [
+            'total_count' => $query->count(),
+            'total_in' => $query->where('type', 'in')->sum('amount'),
+            'total_out' => $query->where('type', 'out')->sum('amount'),
+            'today_count' => $query->whereDate('created_at', today())->count(),
+        ];
+
+        return view('cash-transactions.index', compact(
+            'transactions',
+            'cashRegisters',
+            'agencies',
+            'users',
+            'stats'
+        ));
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create(Request $request)
+    {
+        $cashRegister = null;
+
+        // Si une caisse est spécifiée
+        if ($request->filled('cash_register_id')) {
+            $cashRegister = CashRegister::findOrFail($request->cash_register_id);
+
+            // Vérifier que la caisse est ouverte
+            if ($cashRegister->status !== 'open') {
+                return redirect()->route('cash-registers.show', $cashRegister)
+                                ->with('error', 'Impossible d\'ajouter des transactions à une caisse fermée.');
+            }
+        }
+
+        $cashRegisters = CashRegister::where('status', 'open')
+                                   ->with('user')
+                                   ->get();
+
+        $agencies = \App\Models\Agency::all();
+
+        return view('cash-transactions.create', compact(
+            'cashRegister',
+            'cashRegisters',
+            'agencies'
+        ));
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'cash_register_id' => 'required|exists:cash_registers,id',
+            'type' => 'required|in:in,out',
+            'amount' => 'required|numeric|min:0.01',
+            'description' => 'required|string|max:1000',
+            'reference_id' => 'nullable|integer',
+            'agency_id' => 'nullable|exists:agencies,id',
         ]);
+
+        if ($validator->fails()) {
+            return back()->withErrors($validator)->withInput();
+        }
+
+        try {
+            DB::beginTransaction();
+
+            // Vérifier que la caisse existe et est ouverte
+            $cashRegister = CashRegister::findOrFail($request->cash_register_id);
+
+            if ($cashRegister->status !== 'open') {
+                return back()->with('error', 'Impossible d\'ajouter des transactions à une caisse fermée.')
+                            ->withInput();
+            }
+
+            // Vérifier les limites de montant si nécessaire
+            if ($request->type === 'out') {
+                $currentBalance = $this->calculateCurrentBalance($cashRegister);
+                if ($request->amount > $currentBalance) {
+                    return back()->with('error', 'Montant insuffisant en caisse. Solde actuel: ' . number_format($currentBalance, 2) . ' €')
+                                ->withInput();
+                }
+            }
+
+            // Créer la transaction
+            $transaction = CashTransaction::create([
+                'cash_register_id' => $request->cash_register_id,
+                'type' => $request->type,
+                'amount' => $request->amount,
+                'description' => $request->description,
+                'reference_id' => $request->reference_id,
+                'agency_id' => $request->agency_id ?? $cashRegister->agency_id,
+                'created_by' => Auth::id(),
+                'user_id' => Auth::id(),
+            ]);
+
+            // Enregistrer l'activité
+            // activity()
+            //     ->performedOn($transaction)
+            //     ->causedBy(Auth::user())
+            //     ->withProperties([
+            //         'cash_register_id' => $cashRegister->id,
+            //         'type' => $request->type,
+            //         'amount' => $request->amount,
+            //     ])
+            //     ->log('Transaction de caisse créée');
+
+            DB::commit();
+
+            $message = $request->type === 'in'
+                ? 'Entrée de ' . number_format($request->amount, 2) . ' € enregistrée avec succès.'
+                : 'Sortie de ' . number_format($request->amount, 2) . ' € enregistrée avec succès.';
+
+            // Redirection selon la source
+            if ($request->has('redirect_to_register')) {
+                return redirect()->route('cash-registers.show', $cashRegister)
+                                ->with('success', $message);
+            }
+
+            return redirect()->route('cash-registers.show', $request->cash_register_id)
+                            ->with('success', 'Transaction annulée avec succès.');
+
+            return redirect()->route('cash-transactions.show', $transaction)
+                            ->with('success', $message);
+
+        } catch (\Exception $e) {
+            DB::rollback();
+
+            return back()->with('error', 'Erreur lors de l\'enregistrement de la transaction: ' . $e->getMessage())
+                        ->withInput();
+        }
     }
 
-    public function create(Request $request): View
+    /**
+     * Display the specified resource.
+     */
+    public function show(CashTransaction $cashTransaction)
     {
-        return view('cashTransaction.create');
+        $cashTransaction->load(['cashRegister.user', 'createdBy', 'agency']);
+
+        // Calculer le solde au moment de la transaction
+        $balanceAtTransaction = $this->calculateBalanceAtTransaction($cashTransaction);
+
+        // Transactions précédentes et suivantes
+        $previousTransaction = CashTransaction::where('cash_register_id', $cashTransaction->cash_register_id)
+                                            ->where('created_at', '<', $cashTransaction->created_at)
+                                            ->orderBy('created_at', 'desc')
+                                            ->first();
+
+        $nextTransaction = CashTransaction::where('cash_register_id', $cashTransaction->cash_register_id)
+                                        ->where('created_at', '>', $cashTransaction->created_at)
+                                        ->orderBy('created_at', 'asc')
+                                        ->first();
+
+        return view('cash-transactions.show', compact(
+            'cashTransaction',
+            'balanceAtTransaction',
+            'previousTransaction',
+            'nextTransaction'
+        ));
     }
 
-    public function store(CashTransactionStoreRequest $request): RedirectResponse
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(CashTransaction $cashTransaction)
     {
-        $cashTransaction = CashTransaction::create($request->validated());
+        // Vérifier que la transaction peut être modifiée
+        if (!$this->canEditTransaction($cashTransaction)) {
+            return redirect()->route('cash-transactions.show', $cashTransaction)
+                            ->with('error', 'Cette transaction ne peut plus être modifiée.');
+        }
 
-        $request->session()->flash('cashTransaction.id', $cashTransaction->id);
+        $cashTransaction->load(['cashRegister', 'agency']);
 
-        return redirect()->route('cashTransactions.index');
+        $cashRegisters = CashRegister::where('status', 'open')
+                                   ->with('user')
+                                   ->get();
+
+        $agencies = \App\Models\Agency::all();
+
+        return view('cash-transactions.edit', compact(
+            'cashTransaction',
+            'cashRegisters',
+            'agencies'
+        ));
     }
 
-    public function show(Request $request, CashTransaction $cashTransaction): View
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, CashTransaction $cashTransaction)
     {
-        return view('cashTransaction.show', [
-            'cashTransaction' => $cashTransaction,
+        // Vérifier que la transaction peut être modifiée
+        if (!$this->canEditTransaction($cashTransaction)) {
+            return back()->with('error', 'Cette transaction ne peut plus être modifiée.');
+        }
+
+        $validator = Validator::make($request->all(), [
+            'type' => 'required|in:in,out',
+            'amount' => 'required|numeric|min:0.01',
+            'description' => 'required|string|max:1000',
+            'reference_id' => 'nullable|integer',
         ]);
+
+        if ($validator->fails()) {
+            return back()->withErrors($validator)->withInput();
+        }
+
+        try {
+            DB::beginTransaction();
+
+            $oldData = $cashTransaction->toArray();
+
+            // Vérifier les limites de montant si c'est une sortie
+            if ($request->type === 'out') {
+                $currentBalance = $this->calculateCurrentBalance($cashTransaction->cashRegister, $cashTransaction);
+                if ($request->amount > $currentBalance) {
+                    return back()->with('error', 'Montant insuffisant en caisse. Solde disponible: ' . number_format($currentBalance, 2) . ' €')
+                                ->withInput();
+                }
+            }
+
+            // Mettre à jour la transaction
+            $cashTransaction->update([
+                'type' => $request->type,
+                'amount' => $request->amount,
+                'description' => $request->description,
+                'reference_id' => $request->reference_id,
+            ]);
+
+            // Enregistrer l'activité
+            // activity()
+            //     ->performedOn($cashTransaction)
+            //     ->causedBy(Auth::user())
+            //     ->withProperties([
+            //         'old' => $oldData,
+            //         'new' => $cashTransaction->toArray(),
+            //     ])
+            //     ->log('Transaction de caisse modifiée');
+
+            DB::commit();
+
+            return redirect()->route('cash-transactions.show', $cashTransaction)
+                            ->with('success', 'Transaction modifiée avec succès.');
+
+        } catch (\Exception $e) {
+            DB::rollback();
+
+            return back()->with('error', 'Erreur lors de la modification: ' . $e->getMessage())
+                        ->withInput();
+        }
     }
 
-    public function edit(Request $request, CashTransaction $cashTransaction): View
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(CashTransaction $cashTransaction)
     {
-        return view('cashTransaction.edit', [
-            'cashTransaction' => $cashTransaction,
-        ]);
+        // Vérifier que la transaction peut être supprimée
+        if (!$this->canDeleteTransaction($cashTransaction)) {
+            return back()->with('error', 'Cette transaction ne peut pas être supprimée.');
+        }
+
+        try {
+            DB::beginTransaction();
+
+            $cashRegister = $cashTransaction->cashRegister;
+            $transactionData = $cashTransaction->toArray();
+
+            // Enregistrer l'activité avant suppression
+            // activity()
+            //     ->performedOn($cashTransaction)
+            //     ->causedBy(Auth::user())
+            //     ->withProperties($transactionData)
+            //     ->log('Transaction de caisse supprimée');
+
+            $cashTransaction->delete();
+
+            DB::commit();
+
+            return redirect()->route('cash-registers.show', $cashRegister)
+                            ->with('success', 'Transaction supprimée avec succès.');
+
+        } catch (\Exception $e) {
+            DB::rollback();
+
+            return back()->with('error', 'Erreur lors de la suppression: ' . $e->getMessage());
+        }
     }
 
-    public function update(CashTransactionUpdateRequest $request, CashTransaction $cashTransaction): RedirectResponse
+    /**
+     * Annuler une transaction
+     */
+    public function cancel(CashTransaction $cashTransaction)
     {
-        $cashTransaction->update($request->validated());
+        if (!$this->canCancelTransaction($cashTransaction)) {
+            return back()->with('error', 'Cette transaction ne peut pas être annulée.');
+        }
 
-        $request->session()->flash('cashTransaction.id', $cashTransaction->id);
+        try {
+            DB::beginTransaction();
 
-        return redirect()->route('cashTransactions.index');
+            // Créer une transaction inverse
+            $cancelTransaction = CashTransaction::create([
+                'cash_register_id' => $cashTransaction->cash_register_id,
+                'type' => $cashTransaction->type === 'in' ? 'out' : 'in',
+                'amount' => $cashTransaction->amount,
+                'description' => 'ANNULATION - ' . $cashTransaction->description,
+                'reference_id' => $cashTransaction->reference_id,
+                'agency_id' => $cashTransaction->agency_id,
+                'created_by' => Auth::id(),
+                'user_id' => Auth::id(),
+            ]);
+
+            // Marquer la transaction originale comme annulée
+            $cashTransaction->update([
+                'description' => '[ANNULÉE] ' . $cashTransaction->description
+            ]);
+
+            // Enregistrer l'activité
+            // activity()
+            //     ->performedOn($cashTransaction)
+            //     ->causedBy(Auth::user())
+            //     ->withProperties([
+            //         'cancel_transaction_id' => $cancelTransaction->id,
+            //         'original_amount' => $cashTransaction->amount,
+            //     ])
+                // ->log('Transaction de caisse annulée');
+
+            DB::commit();
+
+
+            return redirect()->route('cash-registers.show', $cashTransaction->cashRegister)
+                            ->with('success', 'Transaction annulée avec succès.');
+
+        } catch (\Exception $e) {
+            DB::rollback();
+
+            return back()->with('error', 'Erreur lors de l\'annulation: ' . $e->getMessage());
+        }
     }
 
-    public function destroy(Request $request, CashTransaction $cashTransaction): RedirectResponse
+    /**
+     * Export des transactions
+     */
+    public function export(Request $request)
     {
-        $cashTransaction->delete();
+        $query = CashTransaction::with(['cashRegister.user', 'createdBy', 'agency'])
+                                ->orderBy('created_at', 'desc');
 
-        return redirect()->route('cashTransactions.index');
+        // Appliquer les mêmes filtres que l'index
+        if ($request->filled('cash_register_id')) {
+            $query->where('cash_register_id', $request->cash_register_id);
+        }
+
+        if ($request->filled('type')) {
+            $query->where('type', $request->type);
+        }
+
+        if ($request->filled('date_from')) {
+            $query->whereDate('created_at', '>=', $request->date_from);
+        }
+
+        if ($request->filled('date_to')) {
+            $query->whereDate('created_at', '<=', $request->date_to);
+        }
+
+        $transactions = $query->get();
+
+        // Générer le CSV
+        $filename = 'transactions_caisse_' . date('Y-m-d_H-i-s') . '.csv';
+
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ];
+
+        $callback = function() use ($transactions) {
+            $file = fopen('php://output', 'w');
+
+            // En-têtes CSV
+            fputcsv($file, [
+                'ID',
+                'Date',
+                'Caisse',
+                'Utilisateur Caisse',
+                'Type',
+                'Montant',
+                'Description',
+                'Référence',
+                'Agence',
+                'Créé par'
+            ]);
+
+            // Données
+            foreach ($transactions as $transaction) {
+                fputcsv($file, [
+                    $transaction->id,
+                    $transaction->created_at->format('d/m/Y H:i:s'),
+                    'Caisse #' . $transaction->cashRegister->id,
+                    $transaction->cashRegister->user->name,
+                    $transaction->type === 'in' ? 'Entrée' : 'Sortie',
+                    number_format($transaction->amount, 2),
+                    $transaction->description,
+                    $transaction->reference_id ?? '',
+                    $transaction->agency->name ?? '',
+                    $transaction->createdBy->name ?? ''
+                ]);
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+    /**
+     * Calculer le solde actuel d'une caisse
+     */
+    private function calculateCurrentBalance(CashRegister $cashRegister, CashTransaction $excludeTransaction = null)
+    {
+        $query = CashTransaction::where('cash_register_id', $cashRegister->id);
+
+        if ($excludeTransaction) {
+            $query->where('id', '!=', $excludeTransaction->id);
+        }
+
+        $totalIn = $query->where('type', 'in')->sum('amount');
+        $totalOut = $query->where('type', 'out')->sum('amount');
+
+        return $cashRegister->opening_balance + $totalIn - $totalOut;
+    }
+
+    /**
+     * Calculer le solde au moment d'une transaction
+     */
+    private function calculateBalanceAtTransaction(CashTransaction $transaction)
+    {
+        $totalIn = CashTransaction::where('cash_register_id', $transaction->cash_register_id)
+                                 ->where('created_at', '<=', $transaction->created_at)
+                                 ->where('type', 'in')
+                                 ->sum('amount');
+
+        $totalOut = CashTransaction::where('cash_register_id', $transaction->cash_register_id)
+                                  ->where('created_at', '<=', $transaction->created_at)
+                                  ->where('type', 'out')
+                                  ->sum('amount');
+
+        return $transaction->cashRegister->opening_balance + $totalIn - $totalOut;
+    }
+
+    /**
+     * Vérifier si une transaction peut être modifiée
+     */
+    private function canEditTransaction(CashTransaction $transaction)
+    {
+        // Vérifier que la caisse est ouverte
+        if ($transaction->cashRegister->status !== 'open') {
+            return false;
+        }
+
+        // Vérifier que la transaction est récente (moins de 24h)
+        if ($transaction->created_at->diffInHours() > 24) {
+            return false;
+        }
+
+        // Vérifier les permissions
+        if (!Auth::user()->can('edit', $transaction)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Vérifier si une transaction peut être supprimée
+     */
+    private function canDeleteTransaction(CashTransaction $transaction)
+    {
+        // Vérifier que la caisse est ouverte
+        if ($transaction->cashRegister->status !== 'open') {
+            return false;
+        }
+
+        // Vérifier que la transaction est très récente (moins de 1h)
+        if ($transaction->created_at->diffInMinutes() > 60) {
+            return false;
+        }
+
+        // Vérifier les permissions
+        if (!Auth::user()->can('delete', $transaction)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Vérifier si une transaction peut être annulée
+     */
+    private function canCancelTransaction(CashTransaction $transaction)
+    {
+        // Vérifier que la caisse est ouverte
+        if ($transaction->cashRegister->status !== 'open') {
+            return false;
+        }
+
+        // Vérifier que la transaction n'est pas déjà annulée
+        if (strpos($transaction->description, '[ANNULÉE]') !== false) {
+            return false;
+        }
+
+        // Vérifier que la transaction est récente (moins de 48h)
+        if ($transaction->created_at->diffInHours() > 48) {
+            return false;
+        }
+
+        // Vérifier les permissions
+        if (!Auth::user()->can('cancel', $transaction)) {
+            return false;
+        }
+
+        return true;
     }
 }

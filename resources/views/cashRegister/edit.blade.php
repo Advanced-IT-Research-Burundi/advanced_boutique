@@ -65,7 +65,6 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <strong>Utilisateur:</strong> {{ $cashRegister->user->name }}<br>
-                                <strong>Stock:</strong> {{ $cashRegister->stock->name }}<br>
                                 <strong>Statut:</strong>
                                 @switch($cashRegister->status)
                                     @case('open')
