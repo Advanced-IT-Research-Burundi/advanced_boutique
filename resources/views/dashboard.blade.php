@@ -87,16 +87,60 @@
         border: none;
         padding: 0.75rem;
     }
+
+    .progress-custom {
+        height: 8px;
+        border-radius: 5px;
+    }
+
+    .progress-bar-custom {
+        background: linear-gradient(135deg, #2E7DB8 0%, #3498db 100%);
+        border-radius: 5px;
+    }
 </style>
 @endpush
 
 @section('content')
 <div class="container-fluid">
 
+    <!-- Filtres -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="d-flex gap-3">
+                    <!-- Filtre période -->
+                    <form method="GET" action="{{ route('dashboard') }}" class="d-flex gap-2">
+                        <input type="hidden" name="agency_id" value="{{ $agency_id }}">
+                        <select name="period" class="form-select form-select-sm" onchange="this.form.submit()">
+                            <option value="7" {{ $period == '7' ? 'selected' : '' }}>7 derniers jours</option>
+                            <option value="30" {{ $period == '30' ? 'selected' : '' }}>30 derniers jours</option>
+                            <option value="90" {{ $period == '90' ? 'selected' : '' }}>3 derniers mois</option>
+                        </select>
+                    </form>
+
+                    <!-- Filtre agence -->
+                    @if($agencies->count() > 1)
+                    <form method="GET" action="{{ route('dashboard') }}" class="d-flex gap-2">
+                        <input type="hidden" name="period" value="{{ $period }}">
+                        <select name="agency_id" class="form-select form-select-sm" onchange="this.form.submit()">
+                            <option value="">Toutes les agences</option>
+                            @foreach($agencies as $agency)
+                                <option value="{{ $agency->id }}" {{ $agency_id == $agency->id ? 'selected' : '' }}>
+                                    {{ $agency->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </form>
+                    @endif
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Stats Cards Row -->
-    <div class="mb-4 row">
+    <div class="row mb-4">
         <!-- Chiffre d'affaires -->
-        <div class="mb-4 col-xl-3 col-md-6">
+        <div class="col-xl-3 col-md-6 mb-4">
             <div class="card stats-card">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
@@ -104,10 +148,11 @@
                             <i class="bi bi-currency-dollar"></i>
                         </div>
                         <div class="ms-3">
-                            <h6 class="mb-1 text-muted">Chiffre d'affaires</h6>
-                            <h3 class="mb-0 text-success">{{ number_format(450000, 0, ',', ' ') }} FBU</h3>
-                            <small class="text-success">
-                                <i class="bi bi-arrow-up"></i> +12,5% ce mois
+                            <h6 class="text-muted mb-1">Chiffre d'affaires</h6>
+                            <h3 class="text-success mb-0">{{ number_format($stats['revenue']['amount'], 0, ',', ' ') }} FBU</h3>
+                            <small class="{{ $stats['revenue']['is_positive'] ? 'text-success' : 'text-danger' }}">
+                                <i class="bi bi-arrow-{{ $stats['revenue']['is_positive'] ? 'up' : 'down' }}"></i>
+                                {{ $stats['revenue']['is_positive'] ? '+' : '' }}{{ $stats['revenue']['growth'] }}% ce mois
                             </small>
                         </div>
                     </div>
@@ -116,7 +161,7 @@
         </div>
 
         <!-- Ventes du jour -->
-        <div class="mb-4 col-xl-3 col-md-6">
+        <div class="col-xl-3 col-md-6 mb-4">
             <div class="card stats-card">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
@@ -124,10 +169,10 @@
                             <i class="bi bi-cart-check"></i>
                         </div>
                         <div class="ms-3">
-                            <h6 class="mb-1 text-muted">Ventes aujourd'hui</h6>
-                            <h3 class="mb-0" style="color: var(--primary-blue);">{{ number_format(25000, 0, ',', ' ') }} FBU</h3>
+                            <h6 class="text-muted mb-1">Ventes aujourd'hui</h6>
+                            <h3 class="mb-0" style="color: var(--primary-blue);">{{ number_format($stats['today_sales']['amount'], 0, ',', ' ') }} FBU</h3>
                             <small class="text-info">
-                                <i class="bi bi-graph-up"></i> 24 transactions
+                                <i class="bi bi-graph-up"></i> {{ $stats['today_sales']['count'] }} transactions
                             </small>
                         </div>
                     </div>
@@ -136,7 +181,7 @@
         </div>
 
         <!-- Produits en stock -->
-        <div class="mb-4 col-xl-3 col-md-6">
+        <div class="col-xl-3 col-md-6 mb-4">
             <div class="card stats-card">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
@@ -144,10 +189,10 @@
                             <i class="bi bi-box-seam"></i>
                         </div>
                         <div class="ms-3">
-                            <h6 class="mb-1 text-muted">Produits en stock</h6>
-                            <h3 class="mb-0 text-purple">1 247</h3>
+                            <h6 class="text-muted mb-1">Produits en stock</h6>
+                            <h3 class="text-purple mb-0">{{ number_format($stats['products']['total']) }}</h3>
                             <small class="text-warning">
-                                <i class="bi bi-exclamation-triangle"></i> 15 en rupture
+                                <i class="bi bi-exclamation-triangle"></i> {{ $stats['products']['low_stock'] }} en rupture
                             </small>
                         </div>
                     </div>
@@ -156,7 +201,7 @@
         </div>
 
         <!-- Clients actifs -->
-        <div class="mb-4 col-xl-3 col-md-6">
+        <div class="col-xl-3 col-md-6 mb-4">
             <div class="card stats-card">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
@@ -164,10 +209,10 @@
                             <i class="bi bi-people"></i>
                         </div>
                         <div class="ms-3">
-                            <h6 class="mb-1 text-muted">Clients actifs</h6>
-                            <h3 class="mb-0 text-orange">342</h3>
+                            <h6 class="text-muted mb-1">Clients actifs</h6>
+                            <h3 class="text-orange mb-0">{{ $stats['clients']['active'] }}</h3>
                             <small class="text-info">
-                                <i class="bi bi-person-plus"></i> +8 nouveaux
+                                <i class="bi bi-person-plus"></i> +{{ $stats['clients']['new'] }} nouveaux
                             </small>
                         </div>
                     </div>
@@ -177,22 +222,24 @@
     </div>
 
     <!-- Graphique des ventes et actions rapides -->
-    <div class="mb-4 row">
+    <div class="row mb-4">
         <!-- Graphique des ventes -->
         <div class="col-xl-6 col-lg-7">
-            <div class="chart-container">
-                <div class="mb-3 d-flex justify-content-between align-items-center">
+            <div class="chart-container" style="position: relative; height:400px;" >
+                <div class="d-flex justify-content-between align-items-center mb-3">
                     <h5 class="mb-0" style="color: var(--primary-blue);">
                         <i class="bi bi-graph-up me-2"></i>Évolution des ventes
                     </h5>
                     <div class="btn-group btn-group-sm">
-                        <button class="btn btn-outline-primary active">7J</button>
-                        <button class="btn btn-outline-primary">30J</button>
-                        <button class="btn btn-outline-primary">3M</button>
+                        <a href="{{ route('dashboard', ['period' => '7', 'agency_id' => $agency_id]) }}"
+                           class="btn btn-outline-primary {{ $period == '7' ? 'active' : '' }}">7J</a>
+                        <a href="{{ route('dashboard', ['period' => '30', 'agency_id' => $agency_id]) }}"
+                           class="btn btn-outline-primary {{ $period == '30' ? 'active' : '' }}">30J</a>
+                        <a href="{{ route('dashboard', ['period' => '90', 'agency_id' => $agency_id]) }}"
+                           class="btn btn-outline-primary {{ $period == '90' ? 'active' : '' }}">3M</a>
                     </div>
                 </div>
-                <canvas id="venteChart" width="250" height="150"></canvas>
-
+                <canvas id="venteChart" ></canvas>
             </div>
         </div>
 
@@ -204,60 +251,70 @@
                 </h5>
                 <div class="row g-3">
                     <div class="col-6">
-                        <a href="{{ route('sales.create') }}" class="text-center quick-action-btn d-block">
-                            <i class="mb-2 bi bi-plus-circle fs-2 d-block"></i>
+                        <a href="{{ route('sales.create') }}" class="quick-action-btn d-block text-center">
+                            <i class="bi bi-plus-circle fs-2 d-block mb-2"></i>
                             Nouvelle vente
                         </a>
                     </div>
                     <div class="col-6">
-                        <a href="{{ route('purchases.create') }}" class="text-center quick-action-btn d-block">
-                            <i class="mb-2 bi bi-cart-plus fs-2 d-block"></i>
+                        <a href="{{ route('purchases.create') }}" class="quick-action-btn d-block text-center">
+                            <i class="bi bi-cart-plus fs-2 d-block mb-2"></i>
                             Nouvel achat
                         </a>
                     </div>
                     <div class="col-6">
-                        <a href="{{ route('products.create') }}" class="text-center quick-action-btn d-block">
-                            <i class="mb-2 bi bi-bag-plus fs-2 d-block"></i>
+                        <a href="{{ route('products.create') }}" class="quick-action-btn d-block text-center">
+                            <i class="bi bi-bag-plus fs-2 d-block mb-2"></i>
                             Ajouter produit
                         </a>
                     </div>
                     <div class="col-6">
-                        <a href="{{ route('clients.create') }}" class="text-center quick-action-btn d-block">
-                            <i class="mb-2 bi bi-person-plus fs-2 d-block"></i>
+                        <a href="{{ route('clients.create') }}" class="quick-action-btn d-block text-center">
+                            <i class="bi bi-person-plus fs-2 d-block mb-2"></i>
                             Nouveau client
                         </a>
                     </div>
                 </div>
 
                 <!-- Mini rapport caisse -->
-                <div class="p-3 mt-4 rounded" style="background: linear-gradient(135deg, #e8f4f8 0%, #d4edda 100%);">
+                @if($cashRegisterStatus)
+                <div class="mt-4 p-3 rounded" style="background: linear-gradient(135deg, #e8f4f8 0%, #d4edda 100%);">
                     <h6 class="mb-2" style="color: var(--primary-blue);">
                         <i class="bi bi-cash-stack me-2"></i>État de la caisse
+                        <small class="text-muted">(Ouverte le {{ $cashRegisterStatus['opened_at']->format('d/m/Y à H:i') }})</small>
                     </h6>
                     <div class="d-flex justify-content-between">
                         <span>Solde d'ouverture:</span>
-                        <strong>50 000 FBU</strong>
+                        <strong>{{ number_format($cashRegisterStatus['opening_balance'], 0, ',', ' ') }} FBU</strong>
                     </div>
                     <div class="d-flex justify-content-between">
                         <span>Recettes du jour:</span>
-                        <strong class="text-success">+25 000 FBU</strong>
+                        <strong class="text-success">+{{ number_format($cashRegisterStatus['today_revenue'], 0, ',', ' ') }} FBU</strong>
                     </div>
                     <div class="d-flex justify-content-between">
                         <span>Dépenses du jour:</span>
-                        <strong class="text-danger">-5 000 FBU</strong>
+                        <strong class="text-danger">-{{ number_format($cashRegisterStatus['today_expenses'], 0, ',', ' ') }} FBU</strong>
                     </div>
                     <hr>
                     <div class="d-flex justify-content-between">
                         <span><strong>Solde actuel:</strong></span>
-                        <strong style="color: var(--primary-blue);">70 000 FBU</strong>
+                        <strong style="color: var(--primary-blue);">{{ number_format($cashRegisterStatus['current_balance'], 0, ',', ' ') }} FBU</strong>
                     </div>
                 </div>
+                @else
+                <div class="mt-4 p-3 rounded bg-light">
+                    <h6 class="mb-2 text-muted">
+                        <i class="bi bi-cash-stack me-2"></i>Caisse fermée
+                    </h6>
+                    <p class="text-muted mb-0">Ouvrez une caisse pour commencer les transactions.</p>
+                </div>
+                @endif
             </div>
         </div>
     </div>
 
     <!-- Rapports détaillés -->
-    <div class="mb-4 row">
+    <div class="row mb-4">
         <!-- Top produits -->
         <div class="col-xl-6 col-lg-6">
             <div class="chart-container">
@@ -265,7 +322,7 @@
                     <i class="bi bi-star me-2"></i>Top 5 Produits vendus
                 </h5>
                 <div class="table-responsive">
-                    <table class="table mb-0 table-hover">
+                    <table class="table table-hover mb-0">
                         <thead>
                             <tr>
                                 <th>Produit</th>
@@ -274,66 +331,24 @@
                             </tr>
                         </thead>
                         <tbody>
+                            @forelse($topProducts as $product)
                             <tr>
                                 <td>
                                     <div class="d-flex align-items-center">
-                                        <div class="p-2 bg-primary rounded-circle me-2">
-                                            <i class="text-white bi bi-phone"></i>
+                                        <div class="bg-primary rounded-circle me-2 p-2">
+                                            <i class="bi bi-box text-white"></i>
                                         </div>
-                                        Samsung Galaxy A54
+                                        {{ $product->name }}
                                     </div>
                                 </td>
-                                <td><span class="badge bg-info">45 unités</span></td>
-                                <td><strong>135 000 FBU</strong></td>
+                                <td><span class="badge bg-info">{{ $product->total_quantity }} unités</span></td>
+                                <td><strong>{{ number_format($product->total_revenue, 0, ',', ' ') }} FBU</strong></td>
                             </tr>
+                            @empty
                             <tr>
-                                <td>
-                                    <div class="d-flex align-items-center">
-                                        <div class="p-2 bg-success rounded-circle me-2">
-                                            <i class="text-white bi bi-laptop"></i>
-                                        </div>
-                                        HP Pavilion 15
-                                    </div>
-                                </td>
-                                <td><span class="badge bg-info">12 unités</span></td>
-                                <td><strong>96 000 FBU</strong></td>
+                                <td colspan="3" class="text-center text-muted">Aucune vente pour cette période</td>
                             </tr>
-                            <tr>
-                                <td>
-                                    <div class="d-flex align-items-center">
-                                        <div class="p-2 bg-warning rounded-circle me-2">
-                                            <i class="text-white bi bi-headphones"></i>
-                                        </div>
-                                        AirPods Pro
-                                    </div>
-                                </td>
-                                <td><span class="badge bg-info">28 unités</span></td>
-                                <td><strong>84 000 FBU</strong></td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div class="d-flex align-items-center">
-                                        <div class="p-2 bg-danger rounded-circle me-2">
-                                            <i class="text-white bi bi-smartwatch"></i>
-                                        </div>
-                                        Apple Watch SE
-                                    </div>
-                                </td>
-                                <td><span class="badge bg-info">18 unités</span></td>
-                                <td><strong>72 000 FBU</strong></td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div class="d-flex align-items-center">
-                                        <div class="p-2 bg-secondary rounded-circle me-2">
-                                            <i class="text-white bi bi-mouse"></i>
-                                        </div>
-                                        Logitech MX Master
-                                    </div>
-                                </td>
-                                <td><span class="badge bg-info">33 unités</span></td>
-                                <td><strong>49 500 FBU</strong></td>
-                            </tr>
+                            @endforelse
                         </tbody>
                     </table>
                 </div>
@@ -347,79 +362,80 @@
                     <i class="bi bi-clock-history me-2"></i>Activités récentes
                 </h5>
                 <div class="recent-activity">
-                    <div class="activity-item">
+                    @forelse($recentActivities as $activity)
+                    <div class="activity-item {{ $activity['type'] === 'low_stock' ? 'low-stock-alert' : '' }}">
                         <div class="d-flex justify-content-between align-items-start">
                             <div>
-                                <h6 class="mb-1">Nouvelle vente</h6>
-                                <p class="mb-1 text-muted">Vente #VS-2024-001 - Client: Marie Dubois</p>
-                                <small class="text-muted">
-                                    <i class="bi bi-clock me-1"></i>Il y a 5 minutes
-                                </small>
-                            </div>
-                            <span class="badge bg-success">3 500 FBU</span>
-                        </div>
-                    </div>
-
-                    <div class="activity-item">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <div>
-                                <h6 class="mb-1">Réapprovisionnement</h6>
-                                <p class="mb-1 text-muted">Stock mis à jour - Produit: iPhone 15</p>
-                                <small class="text-muted">
-                                    <i class="bi bi-clock me-1"></i>Il y a 15 minutes
-                                </small>
-                            </div>
-                            <span class="badge bg-info">+50 unités</span>
-                        </div>
-                    </div>
-
-                    <div class="activity-item">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <div>
-                                <h6 class="mb-1">Nouveau client</h6>
-                                <p class="mb-1 text-muted">Inscription: Jean Mbala</p>
-                                <small class="text-muted">
-                                    <i class="bi bi-clock me-1"></i>Il y a 1 heure
-                                </small>
-                            </div>
-                            <span class="badge bg-primary">Nouveau</span>
-                        </div>
-                    </div>
-
-                    <div class="activity-item">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <div>
-                                <h6 class="mb-1">Paiement reçu</h6>
-                                <p class="mb-1 text-muted">Facture #FA-2024-045 - Client: Tech Solutions</p>
-                                <small class="text-muted">
-                                    <i class="bi bi-clock me-1"></i>Il y a 2 heures
-                                </small>
-                            </div>
-                            <span class="badge bg-success">15 000 FBU</span>
-                        </div>
-                    </div>
-
-                    <div class="activity-item low-stock-alert">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <div>
-                                <h6 class="mb-1 text-warning">
-                                    <i class="bi bi-exclamation-triangle me-1"></i>Stock faible
+                                <h6 class="mb-1 {{ $activity['type'] === 'low_stock' ? 'text-warning' : '' }}">
+                                    @if($activity['type'] === 'low_stock')
+                                        <i class="bi bi-exclamation-triangle me-1"></i>
+                                    @endif
+                                    {{ $activity['title'] }}
                                 </h6>
-                                <p class="mb-1 text-muted">Produit: MacBook Air M2 - Quantité: 3 restantes</p>
+                                <p class="text-muted mb-1">{{ $activity['description'] }}</p>
                                 <small class="text-muted">
-                                    <i class="bi bi-clock me-1"></i>Il y a 3 heures
+                                    <i class="bi bi-clock me-1"></i>{{ $activity['created_at']->diffForHumans() }}
                                 </small>
                             </div>
-                            <span class="badge bg-warning">Alerte</span>
+                            @if($activity['amount'])
+                                <span class="badge {{ $activity['badge_class'] }}">
+                                    {{ number_format($activity['amount'], 0, ',', ' ') }} FBU
+                                </span>
+                            @else
+                                <span class="badge {{ $activity['badge_class'] }}">
+                                    {{ $activity['type'] === 'client' ? 'Nouveau' : 'Info' }}
+                                </span>
+                            @endif
                         </div>
                     </div>
+                    @empty
+                    <div class="text-center text-muted">
+                        <i class="bi bi-clock-history fs-3 d-block mb-2"></i>
+                        Aucune activité récente
+                    </div>
+                    @endforelse
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Produits en rupture de stock -->
+    @if($lowStockProducts->count() > 0)
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="chart-container low-stock-alert">
+                <h5 class="mb-3 text-warning">
+                    <i class="bi bi-exclamation-triangle me-2"></i>Produits en rupture de stock
+                </h5>
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Produit</th>
+                                <th>Stock actuel</th>
+                                <th>Seuil d'alerte</th>
+                                <th>Dépôt</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($lowStockProducts as $product)
+                            <tr>
+                                <td>{{ $product->name }}</td>
+                                <td><span class="badge bg-danger">{{ $product->quantity }} unités</span></td>
+                                <td>{{ $product->alert_quantity }} unités</td>
+                                <td>{{ $product->stock_name }}</td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
+
     <!-- Indicateurs de performance -->
-    <div class="mb-4 row">
+    <div class="row mb-4">
         <div class="col-12">
             <div class="chart-container">
                 <h5 class="mb-4" style="color: var(--primary-blue);">
@@ -429,41 +445,54 @@
                     <div class="col-md-3">
                         <div class="metric-card">
                             <h6 class="text-muted">Objectif mensuel</h6>
-                            <div class="mb-2 progress progress-custom">
-                                <div class="progress-bar progress-bar-custom" style="width: 75%"></div>
+                            <div class="progress progress-custom mb-2">
+                                <div class="progress-bar progress-bar-custom"
+                                     style="width: {{ $performanceMetrics['monthly_target']['progress'] }}%"></div>
                             </div>
-                            <p class="mb-1"><strong>750 000 / 1 000 000 FBU</strong></p>
-                            <small class="text-success">75% atteint</small>
+                            <p class="mb-1">
+                                <strong>
+                                    {{ number_format($performanceMetrics['monthly_target']['current'], 0, ',', ' ') }} /
+                                    {{ number_format($performanceMetrics['monthly_target']['target'], 0, ',', ' ') }} FBU
+                                </strong>
+                            </p>
+                            <small class="text-success">{{ round($performanceMetrics['monthly_target']['progress']) }}% atteint</small>
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="metric-card">
                             <h6 class="text-muted">Rotation stock</h6>
-                            <div class="mb-2 progress progress-custom">
-                                <div class="progress-bar progress-bar-custom" style="width: 60%"></div>
+                            <div class="progress progress-custom mb-2">
+                                <div class="progress-bar progress-bar-custom"
+                                     style="width: {{ min(100, $performanceMetrics['stock_rotation']['value'] * 20) }}%"></div>
                             </div>
-                            <p class="mb-1"><strong>2,4x / mois</strong></p>
-                            <small class="text-info">Bon rythme</small>
+                            <p class="mb-1"><strong>{{ $performanceMetrics['stock_rotation']['value'] }}x / mois</strong></p>
+                            <small class="{{ $performanceMetrics['stock_rotation']['status'] === 'good' ? 'text-success' : 'text-warning' }}">
+                                {{ $performanceMetrics['stock_rotation']['status'] === 'good' ? 'Bon rythme' : 'Amélioration nécessaire' }}
+                            </small>
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="metric-card">
                             <h6 class="text-muted">Satisfaction client</h6>
-                            <div class="mb-2 progress progress-custom">
-                                <div class="progress-bar progress-bar-custom" style="width: 92%"></div>
+                            <div class="progress progress-custom mb-2">
+                                <div class="progress-bar progress-bar-custom"
+                                     style="width: {{ $performanceMetrics['customer_satisfaction']['progress'] }}%"></div>
                             </div>
-                            <p class="mb-1"><strong>4,6/5</strong></p>
+                            <p class="mb-1"><strong>{{ $performanceMetrics['customer_satisfaction']['rating'] }}/5</strong></p>
                             <small class="text-success">Excellent</small>
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="metric-card">
                             <h6 class="text-muted">Temps moyen vente</h6>
-                            <div class="mb-2 progress progress-custom">
-                                <div class="progress-bar progress-bar-custom" style="width: 85%"></div>
+                            <div class="progress progress-custom mb-2">
+                                <div class="progress-bar progress-bar-custom"
+                                     style="width: {{ $performanceMetrics['avg_sale_time']['status'] === 'fast' ? '85' : '60' }}%"></div>
                             </div>
-                            <p class="mb-1"><strong>3,2 min</strong></p>
-                            <small class="text-success">Rapide</small>
+                            <p class="mb-1"><strong>{{ $performanceMetrics['avg_sale_time']['minutes'] }} min</strong></p>
+                            <small class="{{ $performanceMetrics['avg_sale_time']['status'] === 'fast' ? 'text-success' : 'text-warning' }}">
+                                {{ $performanceMetrics['avg_sale_time']['status'] === 'fast' ? 'Rapide' : 'Peut être amélioré' }}
+                            </small>
                         </div>
                     </div>
                 </div>
@@ -478,15 +507,18 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Données du graphique depuis le contrôleur
+    const chartData = @json($chartData);
+
     // Graphique des ventes
     const ctx = document.getElementById('venteChart').getContext('2d');
     const venteChart = new Chart(ctx, {
         type: 'line',
         data: {
-            labels: ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'],
+            labels: chartData.labels,
             datasets: [{
                 label: 'Ventes (FBU)',
-                data: [12000, 19000, 15000, 25000, 22000, 30000, 28000],
+                data: chartData.sales,
                 borderColor: '#2E7DB8',
                 backgroundColor: 'rgba(46, 125, 184, 0.1)',
                 borderWidth: 3,
@@ -497,13 +529,47 @@ document.addEventListener('DOMContentLoaded', function() {
                 pointBorderWidth: 2,
                 pointRadius: 6,
                 pointHoverRadius: 8
+            }, {
+                label: 'Achats (FBU)',
+                data: chartData.purchases,
+                borderColor: '#e74c3c',
+                backgroundColor: 'rgba(231, 76, 60, 0.1)',
+                borderWidth: 2,
+                fill: false,
+                tension: 0.4,
+                pointBackgroundColor: '#e74c3c',
+                pointBorderColor: '#ffffff',
+                pointBorderWidth: 2,
+                pointRadius: 4,
+                pointHoverRadius: 6
             }]
         },
-
-
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top'
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return value.toLocaleString() + ' FBU';
+                        }
+                    }
+                }
+            },
+            elements: {
+                point: {
+                    hoverRadius: 8
+                }
+            }
+        }
     });
-
-
 });
 </script>
 @endpush
