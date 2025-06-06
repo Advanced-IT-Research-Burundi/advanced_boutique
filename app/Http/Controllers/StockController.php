@@ -104,9 +104,20 @@ class StockController extends Controller
      */
     public function show(Stock $stock)
     {
-        $stock->load(['agency', 'createdBy', 'user']);
+        $stock->load(['agency', 'user', 'createdBy']);
 
-        return view('stock.show', compact('stock'));
+        $recentProducts = $stock->stockProducts()
+            ->with(['product'])
+            ->orderBy('created_at', 'desc')
+            ->take(5)
+            ->get();
+
+
+        $stockProducts = $stock->stockProducts()
+            ->with(['product'])
+            ->get();
+
+        return view('stock.show', compact('stock', 'recentProducts', 'stockProducts'));
     }
 
     /**
