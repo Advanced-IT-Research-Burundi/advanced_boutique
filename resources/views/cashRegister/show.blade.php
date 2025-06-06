@@ -227,7 +227,7 @@
                                             </td>
                                             <td>
                                                 <strong class="{{ $transaction->type === 'in' ? 'text-success' : 'text-danger' }}">
-                                                    {{ $transaction->type === 'in' ? '+' : '-' }}{{ number_format($transaction->amount, 2) }} €
+                                                    {{ $transaction->type === 'in' ? '+' : '-' }}{{ number_format($transaction->amount, 2) }} Fbu
                                                 </strong>
                                             </td>
                                             <td>
@@ -304,7 +304,7 @@
                             <strong>Solde d'ouverture:</strong>
                         </div>
                         <span class="badge bg-success fs-6">
-                            {{ number_format($cashRegister->opening_balance, 2) }} €
+                            {{ number_format($cashRegister->opening_balance, 2) }} Fbu
                         </span>
                     </div>
 
@@ -314,7 +314,7 @@
                             <strong>Total entrées:</strong>
                         </div>
                         <span class="badge bg-success fs-6">
-                            +{{ number_format($totalIn, 2) }} €
+                            +{{ number_format($totalIn, 2) }} Fbu
                         </span>
                     </div>
 
@@ -324,7 +324,7 @@
                             <strong>Total sorties:</strong>
                         </div>
                         <span class="badge bg-danger fs-6">
-                            -{{ number_format($totalOut, 2) }} €
+                            -{{ number_format($totalOut, 2) }} Fbu
                         </span>
                     </div>
 
@@ -336,7 +336,7 @@
                             <strong>Solde actuel:</strong>
                         </div>
                         <span class="badge bg-primary fs-5">
-                            {{ number_format($currentBalance, 2) }} €
+                            {{ number_format($currentBalance, 2) }} Fbu
                         </span>
                     </div>
 
@@ -347,7 +347,7 @@
                                 <strong>Solde de fermeture:</strong>
                             </div>
                             <span class="badge bg-warning fs-6">
-                                {{ number_format($cashRegister->closing_balance, 2) }} €
+                                {{ number_format($cashRegister->closing_balance, 2) }} Fbu
                             </span>
                         </div>
 
@@ -358,7 +358,7 @@
                             <div class="alert alert-{{ $difference > 0 ? 'info' : 'warning' }} mt-3">
                                 <i class="bi bi-info-circle me-2"></i>
                                 <strong>Écart:</strong>
-                                {{ $difference > 0 ? '+' : '' }}{{ number_format($difference, 2) }} €
+                                {{ $difference > 0 ? '+' : '' }}{{ number_format($difference, 2) }} Fbu
                             </div>
                         @endif
                     @endif
@@ -470,7 +470,7 @@
                     </div>
 
                     <div class="mb-3">
-                        <label for="amount" class="form-label">Montant (€)</label>
+                        <label for="amount" class="form-label">Montant (Fbu)</label>
                         <input type="number" class="form-control" id="amount" name="amount"
                                step="0.01" min="0" required>
                     </div>
@@ -529,7 +529,7 @@
                     <dt class="col-sm-4">Montant:</dt>
                     <dd class="col-sm-8">
                         <strong class="{{ $transaction->type === 'in' ? 'text-success' : 'text-danger' }}">
-                            {{ $transaction->type === 'in' ? '+' : '-' }}{{ number_format($transaction->amount, 2) }} €
+                            {{ $transaction->type === 'in' ? '+' : '-' }}{{ number_format($transaction->amount, 2) }} Fbu
                         </strong>
                     </dd>
 

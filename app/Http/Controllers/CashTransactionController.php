@@ -158,7 +158,7 @@ class CashTransactionController extends Controller
             if ($request->type === 'out') {
                 $currentBalance = $this->calculateCurrentBalance($cashRegister);
                 if ($request->amount > $currentBalance) {
-                    return back()->with('error', 'Montant insuffisant en caisse. Solde actuel: ' . number_format($currentBalance, 2) . ' €')
+                    return back()->with('error', 'Montant insuffisant en caisse. Solde actuel: ' . number_format($currentBalance, 2) . ' Fbu')
                                 ->withInput();
                 }
             }
@@ -189,8 +189,8 @@ class CashTransactionController extends Controller
             DB::commit();
 
             $message = $request->type === 'in'
-                ? 'Entrée de ' . number_format($request->amount, 2) . ' € enregistrée avec succès.'
-                : 'Sortie de ' . number_format($request->amount, 2) . ' € enregistrée avec succès.';
+                ? 'Entrée de ' . number_format($request->amount, 2) . ' Fbu enregistrée avec succès.'
+                : 'Sortie de ' . number_format($request->amount, 2) . ' Fbu enregistrée avec succès.';
 
             // Redirection selon la source
             if ($request->has('redirect_to_register')) {
@@ -297,7 +297,7 @@ class CashTransactionController extends Controller
             if ($request->type === 'out') {
                 $currentBalance = $this->calculateCurrentBalance($cashTransaction->cashRegister, $cashTransaction);
                 if ($request->amount > $currentBalance) {
-                    return back()->with('error', 'Montant insuffisant en caisse. Solde disponible: ' . number_format($currentBalance, 2) . ' €')
+                    return back()->with('error', 'Montant insuffisant en caisse. Solde disponible: ' . number_format($currentBalance, 2) . ' Fbu')
                                 ->withInput();
                 }
             }
