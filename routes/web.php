@@ -61,6 +61,9 @@ Route::resource('cash-registers', App\Http\Controllers\CashRegisterController::c
 Route::post('cash-register/{cashRegister}/close', [App\Http\Controllers\CashRegisterController::class, 'close'])->name('cash-register.close');
 
 Route::resource('cash-transactions', App\Http\Controllers\CashTransactionController::class);
+Route::get('cash-transactions/{cashRegister}/export', [App\Http\Controllers\CashTransactionController::class, 'export'])->name('cash-transactions.export');
+Route::post('cash-transactions/{transaction}/cancel', [App\Http\Controllers\CashTransactionController::class, 'cancel'])->name('cash-transactions.cancel');
+
 
 Route::resource('expenses', App\Http\Controllers\ExpenseController::class);
 

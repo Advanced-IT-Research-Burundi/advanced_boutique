@@ -24,7 +24,7 @@
     </nav>
 
     <!-- Messages d'alerte -->
-    @if(session('success'))
+    {{-- @if(session('success'))
         <div class="alert alert-success alert-dismissible fade show" role="alert">
             <i class="bi bi-check-circle me-2"></i>
             {{ session('success') }}
@@ -38,7 +38,7 @@
             {{ session('error') }}
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
-    @endif
+    @endif --}}
 
     <!-- En-tête avec actions -->
     <div class="row mb-4">
@@ -80,7 +80,7 @@
                           class="d-inline"
                           onsubmit="return confirm('Êtes-vous sûr de vouloir fermer cette caisse ?')">
                         @csrf
-                        @method('PATCH')
+                        @method('POST')
                         <button type="submit" class="btn btn-outline-danger">
                             <i class="bi bi-lock me-1"></i>
                             Fermer

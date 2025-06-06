@@ -85,7 +85,7 @@ class CashTransactionController extends Controller
             'today_count' => $query->whereDate('created_at', today())->count(),
         ];
 
-        return view('cash-transactions.index', compact(
+        return view('cashTransaction.index', compact(
             'transactions',
             'cashRegisters',
             'agencies',
@@ -118,7 +118,7 @@ class CashTransactionController extends Controller
 
         $agencies = \App\Models\Agency::all();
 
-        return view('cash-transactions.create', compact(
+        return view('cashTransaction.create', compact(
             'cashRegister',
             'cashRegisters',
             'agencies'
@@ -233,7 +233,7 @@ class CashTransactionController extends Controller
                                         ->orderBy('created_at', 'asc')
                                         ->first();
 
-        return view('cash-transactions.show', compact(
+        return view('cashTransaction.show', compact(
             'cashTransaction',
             'balanceAtTransaction',
             'previousTransaction',

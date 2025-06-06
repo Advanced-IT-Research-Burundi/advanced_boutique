@@ -19,7 +19,7 @@ return new class extends Migration
             $table->foreignId('stock_id')->nullable()->constrained();
             $table->decimal('opening_balance');
             $table->decimal('closing_balance');
-            $table->string('status');
+            $table->string('status')->default('open'); // 'open', 'closed', 'suspended'
             $table->dateTime('opened_at');
             $table->dateTime('closed_at')->nullable();
             $table->string('description')->nullable();

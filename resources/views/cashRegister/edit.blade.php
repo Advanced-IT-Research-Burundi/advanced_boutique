@@ -142,7 +142,7 @@
                                   class="d-inline"
                                   onsubmit="return confirm('Êtes-vous sûr de vouloir fermer cette caisse ?')">
                                 @csrf
-                                @method('PATCH')
+                                @method('POST')
                                 <button type="submit" class="btn btn-outline-danger">
                                     <i class="bi bi-lock me-2"></i>
                                     Fermer la caisse
