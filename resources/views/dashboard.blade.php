@@ -281,7 +281,7 @@
                 <div class="mt-4 p-3 rounded" style="background: linear-gradient(135deg, #e8f4f8 0%, #d4edda 100%);">
                     <h6 class="mb-2" style="color: var(--primary-blue);">
                         <i class="bi bi-cash-stack me-2"></i>État de la caisse
-                        <small class="text-muted">(Ouverte le {{ $cashRegisterStatus['opened_at']->format('d/m/Y à H:i') }})</small>
+                        <small class="text-muted">(Ouverte le {{ \Carbon\Carbon::parse($cashRegisterStatus['opened_at'])->format('d/m/Y à H:i') }})</small>
                     </h6>
                     <div class="d-flex justify-content-between">
                         <span>Solde d'ouverture:</span>

@@ -7,6 +7,7 @@ use App\Models\SaleItem;
 use App\Models\Product;
 use App\Models\Client;
 use App\Models\Stock;
+use App\Models\StockProduct;
 use App\Models\Company;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -292,7 +293,7 @@ class SaleController extends Controller
         try {
             // Restore stock quantities
             foreach ($sale->saleItems as $item) {
-                $stock = Stock::where('product_id', $item->product_id)->first();
+                $stock = StockProduct::where('product_id', $item->product_id)->first();
                 if ($stock) {
                     $stock->increment('quantity', $item->quantity);
                 }
@@ -309,8 +310,9 @@ class SaleController extends Controller
                 ->with('success', 'Vente supprimée avec succès!');
 
         } catch (\Exception $e) {
+            // dd($e);
             DB::rollback();
-            return back()->withErrors(['error' => $e->getMessage()]);
+            return back()->with('error', 'Erreur lors de la suppression de la vente: ' . $e->getMessage());
         }
     }
 
