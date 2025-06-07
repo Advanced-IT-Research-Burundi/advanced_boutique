@@ -28,7 +28,7 @@ class StockController extends Controller
     }
     public function index(Request $request)
     {
-        $query = Stock::with(['agency', 'createdBy', 'user']);
+        $query = Stock::where('agency_id',auth()->user()->agency_id)->with(['agency', 'createdBy', 'user']);
 
         // Filtres de recherche
         if ($request->filled('search')) {

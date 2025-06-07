@@ -149,7 +149,7 @@
 
 <div class="row">
     <!-- Agence -->
-    <div class="col-md-6 mb-3">
+    {{-- <div class="col-md-6 mb-3">
         <label for="agency_id" class="form-label">Agence</label>
         <select class="form-select @error('agency_id') is-invalid @enderror"
                 id="agency_id"
@@ -165,7 +165,7 @@
         @error('agency_id')
             <div class="invalid-feedback">{{ $message }}</div>
         @enderror
-    </div>
+    </div> --}}
 </div>
 
 <script>
