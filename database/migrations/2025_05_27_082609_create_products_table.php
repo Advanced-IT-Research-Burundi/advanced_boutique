@@ -18,8 +18,8 @@ return new class extends Migration
             $table->string('name');
             $table->text('description')->nullable();
             $table->foreignId('category_id')->constrained();
-            $table->decimal('purchase_price');
-            $table->decimal('sale_price');
+            $table->double('purchase_price');
+            $table->double('sale_price');
             $table->string('unit');
             $table->float('alert_quantity');
             $table->string('image')->nullable();

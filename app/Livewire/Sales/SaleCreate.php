@@ -8,6 +8,8 @@ use App\Models\Sale;
 use App\Models\SaleItem;
 use App\Models\Stock;
 use App\Models\StockProduct;
+use App\Models\CashRegister;
+use App\Models\CashTransaction;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
@@ -347,6 +349,7 @@ class SaleCreate extends Component
         return true;
     }
 
+
     public function clearCart()
     {
         Cart::session($this->cart_session)->clear();
@@ -369,6 +372,11 @@ class SaleCreate extends Component
         // Vérifier le stock
         if (!$this->validateStock()) {
             return;
+        }
+        $caisse = CashRegister::where('user_id', auth()->user()->id)->first();
+        if(!$caisse){
+                 $this->addError('error', "Veuillez Nous excuse vous n'avez droit de créer une facture");
+           return;
         }
 
         try {
@@ -413,6 +421,19 @@ class SaleCreate extends Component
                     ]);
                 }
             }
+             // Enregistre montant sur la caisse de l'utilisateur
+
+
+            CashTransaction::create([
+                'cash_register_id' =>$caisse->id,
+                'type' =>'in',
+                'reference_id' =>'Ref '.$sale->id,
+                'amount' => $this->total_amount,
+                'description' => $this->note,
+                'agency_id' => $caisse->agency_id,
+                'created_by' =>auth()->user()->id,
+                'user_id'=>auth()->user()->id,
+            ]);
 
             DB::commit();
 
@@ -423,8 +444,9 @@ class SaleCreate extends Component
             return redirect()->route('sales.index');
 
         } catch (\Exception $e) {
+            dd($e);
             DB::rollBack();
-            session()->flash('error', 'Erreur lors de l\'enregistrement de la vente: ' . $e->getMessage());
+            $this->addError('error', 'Erreur lors de l\'enregistrement de la vente: ' . $e->getMessage());
         }
     }
 

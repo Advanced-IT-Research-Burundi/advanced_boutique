@@ -17,8 +17,8 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained();
             $table->foreignId('stock_id')->nullable()->constrained();
-            $table->decimal('opening_balance');
-            $table->decimal('closing_balance');
+            $table->double('opening_balance');
+            $table->double('closing_balance');
             $table->string('status')->default('open'); // 'open', 'closed', 'suspended'
             $table->dateTime('opened_at');
             $table->dateTime('closed_at')->nullable();
