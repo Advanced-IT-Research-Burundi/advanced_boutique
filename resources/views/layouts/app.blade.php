@@ -120,6 +120,7 @@
                 </a>
             </li>
 
+
             <li class="nav-item">
                 <a href="{{ route('expenses.index') }}" class="nav-link {{ request()->routeIs('expenses.*') ? 'active' : '' }}">
                     <i class="bi bi-wallet2"></i>
@@ -131,6 +132,12 @@
                 <a href="{{ route('expense-types.index') }}" class="nav-link {{ request()->routeIs('expense-types.*') ? 'active' : '' }}">
                     <i class="bi bi-gear"></i>
                     Types de dépenses
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link">
+                    <i class="bi bi-bar-chart"></i>
+                    Rapports
                 </a>
             </li>
         </ul>
