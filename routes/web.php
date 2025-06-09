@@ -74,3 +74,6 @@ Route::resource('payments', App\Http\Controllers\PaymentController::class);
 Route::resource('user-stocks', App\Http\Controllers\UserStockController::class);
 
 
+
+
+Route::resource('vehicules', App\Http\Controllers\VehiculeController::class);

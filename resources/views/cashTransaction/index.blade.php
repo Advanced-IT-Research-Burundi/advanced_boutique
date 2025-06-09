@@ -3,9 +3,9 @@
 @section('title', 'Gestion des transactions de caisse')
 
 @section('content')
-<div class="container-fluid px-4">
+<div class="px-4 container-fluid">
     <!-- Breadcrumb -->
-    <nav aria-label="breadcrumb" class="mb-4 d-flex justify-between">
+    <nav aria-label="breadcrumb" class="justify-between mb-4 d-flex">
         <ol class="breadcrumb">
             <li class="breadcrumb-item">
                 <a href="{{ route('dashboard') }}" class="text-decoration-none">
@@ -27,9 +27,9 @@
     </nav>
 
     <!-- Stats Cards -->
-    <div class="row mb-4">
+    <div class="mb-4 row">
         <div class="col-md-3">
-            <div class="card bg-primary text-white">
+            <div class="text-white card bg-primary">
                 <div class="card-body">
                     <div class="d-flex justify-content-between">
                         <div>
@@ -44,7 +44,7 @@
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card bg-success text-white">
+            <div class="text-white card bg-success">
                 <div class="card-body">
                     <div class="d-flex justify-content-between">
                         <div>
@@ -59,7 +59,7 @@
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card bg-danger text-white">
+            <div class="text-white card bg-danger">
                 <div class="card-body">
                     <div class="d-flex justify-content-between">
                         <div>
@@ -74,7 +74,7 @@
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card bg-info text-white">
+            <div class="text-white card bg-info">
                 <div class="card-body">
                     <div class="d-flex justify-content-between">
                         <div>
@@ -91,8 +91,8 @@
     </div>
 
     <!-- Accordion Filters -->
-    <div class="accordion mb-4" id="filterAccordion">
-        <div class="accordion-item shadow-sm">
+    <div class="mb-4 accordion" id="filterAccordion">
+        <div class="shadow-sm accordion-item">
             <h2 class="accordion-header" id="headingFilters">
                 <button class="accordion-button bg-light" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFilters" aria-expanded="false" aria-controls="collapseFilters">
                     <i class="bi bi-funnel me-2"></i> Filtres de recherche
@@ -191,7 +191,7 @@
                             <a href="{{ route('cash-transactions.index') }}" class="btn btn-outline-secondary me-2">
                                 <i class="bi bi-arrow-clockwise"></i>
                             </a>
-                            <a href="{{ route('cash-transactions.export', ['cashRegister' => $cashRegister->id] + request()->query()) }}" class="btn btn-outline-success">
+                            <a href="" class="btn btn-outline-success">
                                 <i class="bi bi-download"></i>
                             </a>
 
@@ -203,17 +203,17 @@
     </div>
 
     <!-- Results Card -->
-    <div class="card shadow-sm">
-        <div class="card-header bg-white d-flex justify-content-between align-items-center">
-            <h5 class="card-title mb-0">
+    <div class="shadow-sm card">
+        <div class="bg-white card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 card-title">
                 <i class="bi bi-list-ul me-2"></i>
                 Liste des transactions ({{ $transactions->total() }} résultats)
             </h5>
         </div>
-        <div class="card-body p-0">
+        <div class="p-0 card-body">
             @if($transactions->count() > 0)
                 <div class="table-responsive">
-                    <table class="table table-hover mb-0">
+                    <table class="table mb-0 table-hover">
                         <thead class="table-light">
                             <tr>
                                 <th>#</th>
@@ -364,9 +364,9 @@
                     </div>
                 @endif
             @else
-                <div class="text-center py-5">
+                <div class="py-5 text-center">
                     <i class="bi bi-arrow-left-right display-1 text-muted"></i>
-                    <h4 class="text-muted mt-3">Aucune transaction trouvée</h4>
+                    <h4 class="mt-3 text-muted">Aucune transaction trouvée</h4>
                     <p class="text-muted">Essayez de modifier vos critères de recherche ou créez une nouvelle transaction.</p>
                     <a href="{{ route('cash-transactions.create') }}" class="btn btn-primary">
                         <i class="bi bi-plus-circle me-2"></i>

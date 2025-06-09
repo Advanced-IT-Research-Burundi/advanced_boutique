@@ -100,6 +100,13 @@
             </li>
 
             <li class="nav-item">
+                <a href="{{ route('vehicules.index') }}" class="nav-link {{ request()->routeIs('vehicules.*') ? 'active' : '' }}">
+                    <i class="fas fa-car"></i>
+                    Véhicules
+                </a>
+            </li>
+
+            <li class="nav-item">
                 <a href="{{ route('cash-registers.index') }}" class="nav-link {{ request()->routeIs('cash-registers.*') ? 'active' : '' }}">
                     <i class="bi bi-currency-dollar"></i>
                     Caisse
@@ -307,16 +314,16 @@
             const toastTitle = title || titleMap[type];
             toast.innerHTML = `
                 <div class="d-flex w-100">
-                    <div class="toast-body text-white">
+                    <div class="text-white toast-body">
                         <div class="d-flex align-items-start">
                             <i class="bi ${iconMap[type]} me-3 mt-1 fs-5"></i>
                             <div class="flex-grow-1">
-                                ${toastTitle ? `<div class="fw-semibold mb-1">${toastTitle}</div>` : ''}
+                                ${toastTitle ? `<div class="mb-1 fw-semibold">${toastTitle}</div>` : ''}
                                 <div>${message}</div>
                             </div>
                         </div>
                     </div>
-                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                    <button type="button" class="m-auto btn-close btn-close-white me-2" data-bs-dismiss="toast"></button>
                 </div>
             `;
 
