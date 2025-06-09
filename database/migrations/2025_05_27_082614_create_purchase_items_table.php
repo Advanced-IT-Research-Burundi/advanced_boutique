@@ -18,8 +18,8 @@ return new class extends Migration
             $table->foreignId('purchase_id')->constrained();
             $table->foreignId('product_id')->constrained();
             $table->integer('quantity');
-            $table->decimal('purchase_price');
-            $table->decimal('subtotal');
+            $table->double('purchase_price');
+            $table->double('subtotal');
             $table->foreignId('agency_id')->nullable()->constrained();
             $table->foreignId('created_by')->constrained('users');
             $table->foreignId('user_id')->nullable();

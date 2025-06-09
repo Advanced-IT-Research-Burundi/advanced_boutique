@@ -226,11 +226,11 @@
                                        data-bs-toggle="tooltip" title="Voir">
                                         <i class="bi bi-eye"></i>
                                     </a>
-                                    <a href="{{ route('sales.edit', $sale) }}"
+                                    {{-- <a href="{{ route('sales.edit', $sale) }}"
                                        class="btn btn-sm btn-outline-warning"
                                        data-bs-toggle="tooltip" title="Modifier">
                                         <i class="bi bi-pencil"></i>
-                                    </a>
+                                    </a> --}}
                                     <button type="button"
                                             class="btn btn-sm btn-outline-danger delete-btn"
                                             data-id="{{ $sale->id }}"

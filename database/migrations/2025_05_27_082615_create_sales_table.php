@@ -18,9 +18,9 @@ return new class extends Migration
             $table->foreignId('client_id')->constrained();
             $table->foreignId('stock_id')->constrained();
             $table->foreignId('user_id')->constrained();
-            $table->decimal('total_amount');
-            $table->decimal('paid_amount');
-            $table->decimal('due_amount');
+            $table->double('total_amount');
+            $table->double('paid_amount');
+            $table->double('due_amount');
             $table->dateTime('sale_date');
             $table->foreignId('agency_id')->nullable()->constrained();
             $table->foreignId('created_by')->constrained('users');

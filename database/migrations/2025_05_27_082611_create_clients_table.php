@@ -26,7 +26,7 @@ return new class extends Migration
             $table->string('phone')->nullable();
             $table->string('email')->nullable();
             $table->text('address')->nullable();
-            $table->decimal('balance')->default(0);
+            $table->double('balance')->default(0);
             $table->foreignId('agency_id')->nullable()->constrained();
             $table->foreignId('created_by')->constrained('users');
             $table->foreignId('user_id')->nullable();

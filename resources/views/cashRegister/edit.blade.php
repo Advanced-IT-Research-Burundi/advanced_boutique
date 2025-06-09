@@ -65,7 +65,6 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <strong>Utilisateur:</strong> {{ $cashRegister->user->name }}<br>
-                                <strong>Stock:</strong> {{ $cashRegister->stock->name }}<br>
                                 <strong>Statut:</strong>
                                 @switch($cashRegister->status)
                                     @case('open')
@@ -143,7 +142,7 @@
                                   class="d-inline"
                                   onsubmit="return confirm('Êtes-vous sûr de vouloir fermer cette caisse ?')">
                                 @csrf
-                                @method('PATCH')
+                                @method('POST')
                                 <button type="submit" class="btn btn-outline-danger">
                                     <i class="bi bi-lock me-2"></i>
                                     Fermer la caisse

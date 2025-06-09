@@ -69,12 +69,12 @@ class ClientController extends Controller
             'email' => 'nullable|email|max:255',
             'address' => 'nullable|string',
             'balance' => 'nullable|numeric|min:0',
-            'agency_id' => 'nullable|exists:agencies,id',
         ]);
 
         $validated['created_by'] = Auth::id();
         $validated['user_id'] = Auth::id();
         $validated['balance'] = $validated['balance'] ?? 0;
+        $validated['agency_id'] = auth()->user()->agency_id ?? 1;
 
         Client::create($validated);
 
@@ -107,8 +107,8 @@ class ClientController extends Controller
             'email' => 'nullable|email|max:255',
             'address' => 'nullable|string',
             'balance' => 'nullable|numeric|min:0',
-            'agency_id' => 'nullable|exists:agencies,id',
         ]);
+        $validated['agency_id'] = auth()->user()->agency_id ?? 1;
 
         $client->update($validated);
 

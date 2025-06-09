@@ -25,6 +25,28 @@
 
     <div class="col-md-6">
         <div class="mb-3">
+            <label for="opening_balance" class="form-label">
+                <i class="bi bi-cash-coin text-success me-1"></i>
+                Solde d'ouverture <span class="text-danger">*</span>
+            </label>
+            <div class="input-group">
+                <span class="input-group-text">Fbu</span>
+                <input type="number"
+                       class="form-control @error('opening_balance') is-invalid @enderror"
+                       id="opening_balance"
+                       name="opening_balance"
+                       value="{{ old('opening_balance', $cashRegister->opening_balance ?? '') }}"
+                       step="0.01"
+                       min="0"
+                       required>
+            </div>
+            @error('opening_balance')
+                <div class="invalid-feedback">{{ $message }}</div>
+            @enderror
+        </div>
+    </div>
+    {{-- <div class="col-md-6">
+        <div class="mb-3">
             <label for="stock_id" class="form-label">
                 <i class="bi bi-box text-info me-1"></i>
                 Stock associé <span class="text-danger">*</span>
@@ -45,32 +67,11 @@
                 <div class="invalid-feedback">{{ $message }}</div>
             @enderror
         </div>
-    </div>
+    </div> --}}
 </div>
 
 <div class="row">
-    <div class="col-md-6">
-        <div class="mb-3">
-            <label for="opening_balance" class="form-label">
-                <i class="bi bi-cash-coin text-success me-1"></i>
-                Solde d'ouverture <span class="text-danger">*</span>
-            </label>
-            <div class="input-group">
-                <span class="input-group-text">€</span>
-                <input type="number"
-                       class="form-control @error('opening_balance') is-invalid @enderror"
-                       id="opening_balance"
-                       name="opening_balance"
-                       value="{{ old('opening_balance', $cashRegister->opening_balance ?? '') }}"
-                       step="0.01"
-                       min="0"
-                       required>
-            </div>
-            @error('opening_balance')
-                <div class="invalid-feedback">{{ $message }}</div>
-            @enderror
-        </div>
-    </div>
+
 
     @if(isset($cashRegister) && $cashRegister->exists)
         <div class="col-md-6">
@@ -80,7 +81,7 @@
                     Solde de fermeture
                 </label>
                 <div class="input-group">
-                    <span class="input-group-text">€</span>
+                    <span class="input-group-text">Fbu</span>
                     <input type="number"
                            class="form-control @error('closing_balance') is-invalid @enderror"
                            id="closing_balance"
@@ -163,7 +164,7 @@
                    class="form-control @error('opened_at') is-invalid @enderror"
                    id="opened_at"
                    name="opened_at"
-                   value="{{ old('opened_at', isset($cashRegister) && $cashRegister->opened_at ? $cashRegister->opened_at->format('Y-m-d\TH:i') : '') }}"
+                   value="{{ old('opened_at', isset($cashRegister) && $cashRegister->opened_at ? \Carbon\Carbon::parse($cashRegister->opened_at)->format('Y-m-d\TH:i') : '') }}"
                    required>
             @error('opened_at')
                 <div class="invalid-feedback">{{ $message }}</div>
@@ -182,7 +183,7 @@
                        class="form-control @error('closed_at') is-invalid @enderror"
                        id="closed_at"
                        name="closed_at"
-                       value="{{ old('closed_at', $cashRegister->closed_at ? $cashRegister->closed_at->format('Y-m-d\TH:i') : '') }}">
+                       value="{{ old('closed_at', $cashRegister->closed_at ? \Carbon\Carbon::parse($cashRegister->closed_at)->format('Y-m-d\TH:i') : '') }}">
                 @error('closed_at')
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror

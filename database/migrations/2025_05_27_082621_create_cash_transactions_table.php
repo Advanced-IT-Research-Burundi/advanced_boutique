@@ -16,9 +16,9 @@ return new class extends Migration
         Schema::create('cash_transactions', function (Blueprint $table) {
             $table->id();
             $table->foreignId('cash_register_id')->constrained();
-            $table->string('type');
-            $table->integer('reference_id');
-            $table->decimal('amount');
+            $table->enum('type', ['in', 'out', 'transfer']);
+            $table->string('reference_id')->nullable();
+            $table->double('amount');
             $table->text('description');
             $table->foreignId('agency_id')->nullable()->constrained();
             $table->foreignId('created_by')->constrained('users');

@@ -304,7 +304,7 @@
                       <th>Nom de l'agence</th>
                       <th>Responsable</th>
                       <th>Adresse</th>
-                      <th>Statut</th>
+                      {{-- <th>Action</th> --}}
                     </tr>
                   </thead>
                   <tbody>
@@ -332,11 +332,11 @@
                         @endif
                       </td>
                       <td>{{ $agency->adresse ?? 'Non renseignée' }}</td>
-                      <td>
+                      {{-- <td>
                         <div class="form-check form-switch">
                           <input class="form-check-input agency-status" type="checkbox" id="agency-status-{{ $agency->id }}" data-id="{{ $agency->id }}" {{ $agency->is_active ? 'checked' : '' }}>
                         </div>
-                      </td>
+                      </td> --}}
                     </tr>
                     @endforeach
                   </tbody>
@@ -544,7 +544,7 @@
                       <th>Nom</th>
                       <th>Email</th>
                       <th>Rôle</th>
-                      <th>Statut</th>
+                      {{-- <th>Statut</th> --}}
                       {{-- <th>Actions</th> --}}
                     </tr>
                   </thead>
@@ -565,11 +565,11 @@
                           {{ ucfirst($user->role) }}
                         </span>
                       </td>
-                      <td>
+                      {{-- <td>
                         <div class="form-check form-switch">
                           <input class="form-check-input user-status" type="checkbox" id="user-status-{{ $user->id }}" data-id="{{ $user->id }}" {{ $user->is_active ? 'checked' : '' }}>
                         </div>
-                      </td>
+                      </td> --}}
                       {{-- <td>
                         <button class="btn btn-sm btn-outline-primary me-1" data-bs-toggle="modal" data-bs-target="#editUserModal" data-user-id="{{ $user->id }}">
                           <i class="bi bi-pencil"></i>

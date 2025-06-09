@@ -28,16 +28,96 @@
             </a>
         </div>
     </nav>
-    <div class="mb-4">
-        <a href="{{ route('stocks.list' , $stock) }}" class="btn btn-outline-secondary">
-            <i class="bi bi-boxes me-2"></i>
-            Liste des produits
-        </a>
-    </div>
 
     <div class="row">
         <!-- Informations principales -->
         <div class="col-lg-8">
+            <!-- Section des 5 derniers produits ajoutés -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                    <h6 class="card-title mb-0">
+                        <i class="bi bi-clock-history me-2"></i>
+                        Derniers produits ajoutés
+                    </h6>
+                    <a href="{{ route('stocks.list', $stock) }}" class="btn btn-outline-light btn-sm">
+                        <i class="bi bi-boxes me-1"></i>
+                        Voir tous les produits
+                    </a>
+                </div>
+                <div class="card-body">
+                    @if($recentProducts->count() > 0)
+                        <div class="table-responsive">
+                            <table class="table table-sm table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Produit</th>
+                                        <th>Quantité</th>
+                                        <th>Date d'ajout</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($recentProducts as $stockProduct)
+                                    {{-- {{$stockProduct}} --}}
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    @if($stockProduct->product->image)
+                                                        <img src="{{ asset('storage/' . $stockProduct->product->image) }}"
+                                                             alt="{{ $stockProduct->product->name }}"
+                                                             class="rounded me-2"
+                                                             style="width: 32px; height: 32px; object-fit: cover;">
+                                                    @else
+                                                        <div class="bg-secondary rounded me-2 d-flex align-items-center justify-content-center"
+                                                             style="width: 32px; height: 32px;">
+                                                            <i class="bi bi-box text-white"></i>
+                                                        </div>
+                                                    @endif
+                                                    <div>
+                                                        <strong>{{ $stockProduct->product->name ?? 'N/A' }}</strong>
+                                                        <br>
+                                                        <small class="text-muted">{{ $stockProduct->product->unit ?? 'N/A' }}</small>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-primary">{{ number_format($stockProduct->quantity, 2) }}</span>
+                                            </td>
+                                            <td>
+                                                <small>
+                                                    <i class="bi bi-calendar me-1"></i>
+                                                    {{ $stockProduct->created_at->format('d/m/Y') }}
+                                                    <br>
+                                                    <i class="bi bi-clock me-1"></i>
+                                                    {{ $stockProduct->created_at->format('H:i') }}
+                                                </small>
+                                            </td>
+                                            <td>
+                                                <div class="btn-group btn-group-sm">
+                                                    <a href="{{ route('stocks.mouvement', $stockProduct->id) }}"
+                                                       class="btn btn-outline-info"
+                                                       title="Voir les mouvements">
+                                                        <i class="bi bi-arrows-angle-contract">Mouvement</i>
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    @else
+                        <div class="text-center py-4">
+                            <i class="bi bi-inbox display-4 text-muted"></i>
+                            <p class="text-muted mt-2">Aucun produit dans ce stock</p>
+                            <a href="{{ route('stocks.list', $stock) }}" class="btn btn-primary">
+                                <i class="bi bi-plus-circle me-2"></i>
+                                Ajouter des produits
+                            </a>
+                        </div>
+                    @endif
+                </div>
+            </div>
             <div class="card shadow-sm mb-4">
                 <div class="card-header bg-info text-white">
                     <h5 class="card-title mb-0">
@@ -119,9 +199,11 @@
                     </div>
                 </div>
             </div>
+
+
         </div>
 
-        <!-- Informations système -->
+        <!-- Informations système et Actions -->
         <div class="col-lg-4">
             <div class="card shadow-sm mb-4">
                 <div class="card-header bg-secondary text-white">
@@ -166,6 +248,30 @@
                 </div>
             </div>
 
+            <!-- Statistiques rapides -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h6 class="card-title mb-0">
+                        <i class="bi bi-graph-up me-2"></i>
+                        Statistiques
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <div class="border-end">
+                                <h4 class="text-primary mb-0">{{ $stockProducts->count() }}</h4>
+                                <small class="text-muted">Produits</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <h4 class="text-success mb-0">{{ number_format($stockProducts->sum('quantity'), 0) }}</h4>
+                            <small class="text-muted">Quantité totale</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Actions rapides -->
             <div class="card shadow-sm">
                 <div class="card-header bg-dark text-white">
@@ -176,6 +282,11 @@
                 </div>
                 <div class="card-body">
                     <div class="d-grid gap-2">
+                        <a href="{{ route('stocks.list', $stock) }}" class="btn btn-outline-primary">
+                            <i class="bi bi-boxes me-2"></i>
+                            Gérer les produits
+                        </a>
+
                         <a href="{{ route('stocks.edit', $stock) }}" class="btn btn-warning">
                             <i class="bi bi-pencil me-2"></i>
                             Modifier ce stock

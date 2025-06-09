@@ -18,7 +18,7 @@ return new class extends Migration
             $table->foreignId('stock_id')->constrained();
             $table->foreignId('user_id')->constrained();
             $table->foreignId('expense_type_id')->constrained();
-            $table->decimal('amount');
+            $table->double('amount');
             $table->text('description');
             $table->dateTime('expense_date');
             $table->foreignId('agency_id')->nullable()->constrained();

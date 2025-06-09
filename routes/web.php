@@ -18,9 +18,7 @@ Route::get('/', function () {
     return redirect('dashboard');
 });
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/dashboard', [App\Http\Controllers\DashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -57,8 +55,13 @@ Route::resource('sales', App\Http\Controllers\SaleController::class);
 Route::get('/sales/{sale}/pdf', [App\Http\Controllers\SaleController::class, 'downloadPDF'])->name('sales.pdf');
 
 Route::resource('cash-registers', App\Http\Controllers\CashRegisterController::class);
+;
+Route::post('cash-register/{cashRegister}/close', [App\Http\Controllers\CashRegisterController::class, 'close'])->name('cash-register.close');
 
 Route::resource('cash-transactions', App\Http\Controllers\CashTransactionController::class);
+Route::get('cash-transactions/{cashRegister}/export', [App\Http\Controllers\CashTransactionController::class, 'export'])->name('cash-transactions.export');
+Route::post('cash-transactions/{transaction}/cancel', [App\Http\Controllers\CashTransactionController::class, 'cancel'])->name('cash-transactions.cancel');
+
 
 Route::resource('expenses', App\Http\Controllers\ExpenseController::class);
 

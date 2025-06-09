@@ -17,7 +17,7 @@ return new class extends Migration
             $table->id();
             $table->string('payment_type');
             $table->integer('reference_id');
-            $table->decimal('amount');
+            $table->double('amount');
             $table->string('payment_method');
             $table->dateTime('payment_date');
             $table->foreignId('agency_id')->nullable()->constrained();

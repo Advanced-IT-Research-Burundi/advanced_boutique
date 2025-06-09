@@ -126,6 +126,10 @@
                                         <i class="bi bi-trash me-1"></i>
                                         Vider
                                     </button>
+                                    <button type="button" class="btn btn-outline-light btn-sm">
+                                        <i class="bi bi-arrow-clockwise me-1"></i>
+                                        Actualiser
+                                    </button>
                                 @endif
                             </div>
                         </div>
