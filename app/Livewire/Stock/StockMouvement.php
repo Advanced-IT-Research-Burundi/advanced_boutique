@@ -76,6 +76,8 @@ class StockMouvement extends Component
             dd($e);
             $this->dispatch('movement-error', message: 'Error saving stock movement: ' . $e->getMessage());
         }
+
+        return redirect()->route('stocks.show', $this->stock->stock_id);
     }
 
     protected function updateStockQuantity($movement)

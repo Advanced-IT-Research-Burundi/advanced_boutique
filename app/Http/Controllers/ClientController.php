@@ -73,6 +73,7 @@ class ClientController extends Controller
         ]);
 
         $validated['created_by'] = Auth::id();
+        $validated['user_id'] = Auth::id();
         $validated['balance'] = $validated['balance'] ?? 0;
 
         Client::create($validated);

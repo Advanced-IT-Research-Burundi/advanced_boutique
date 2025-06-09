@@ -6,7 +6,6 @@
 <div>
     <div>
       @livewire('stock.stock-mouvement', ['stock' => $stock])
-
     </div>
     <div class="card-header">
         <h3 class="card-title">Mouvements</h3>
