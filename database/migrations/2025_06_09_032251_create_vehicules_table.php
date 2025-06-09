@@ -22,7 +22,7 @@ return new class extends Migration
             $table->integer('year')->nullable();
             $table->string('color')->nullable();
             $table->decimal('price')->nullable();
-            $table->string('status')->default('available');
+            $table->string('status')->default('disponible');
             $table->text('description')->nullable();
             $table->foreignId('agency_id')->nullable()->constrained();
             $table->foreignId('created_by');

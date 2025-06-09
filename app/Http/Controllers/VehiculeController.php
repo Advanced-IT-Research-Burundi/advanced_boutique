@@ -10,9 +10,48 @@ class VehiculeController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $vehicules = Vehicule::latest()->paginate(10);
+        $query = Vehicule::query();
+
+        // Filtres
+        if ($request->filled('search')) {
+            $search = $request->get('search');
+            $query->where(function($q) use ($search) {
+                $q->where('brand', 'like', '%' . $search . '%')
+                  ->orWhere('model', 'like', '%' . $search . '%')
+                  ->orWhere('immatriculation', 'like', '%' . $search . '%');
+            });
+        }
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->get('status'));
+        }
+
+        if ($request->filled('brand')) {
+            $query->where('brand', 'like', '%' . $request->get('brand') . '%');
+        }
+
+        if ($request->filled('year')) {
+            $query->where('year', $request->get('year'));
+        }
+
+        // // Tri
+        // $sortBy = $request->get('sort_by', 'created_at');
+        // $sortOrder = $request->get('sort_order', 'desc');
+        // $query->orderBy($sortBy, $sortOrder);
+
+        $vehicules = $query->latest()->paginate(10)->appends($request->query());
+
+        // // Données pour les filtres
+        // $brands = Vehicule::distinct()->pluck('brand')->sort();
+        // $years = Vehicule::distinct()->pluck('year')->sort()->reverse();
+        // $statuses = [
+        //     'disponible' => 'Disponible',
+        //     'en_location' => 'En location',
+        //     'en_reparation' => 'En réparation'
+        // ];
+
         return view('vehicules.index', compact('vehicules'));
     }
 
@@ -77,7 +116,6 @@ class VehiculeController extends Controller
             'description' => 'nullable|string',
         ]);
 
-       // $validated['created_by'] = auth()->user()->id;
         $validated['user_id'] = auth()->user()->id;
 
         $vehicule->update($validated);

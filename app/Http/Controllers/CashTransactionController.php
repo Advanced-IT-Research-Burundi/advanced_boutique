@@ -78,12 +78,14 @@ class CashTransactionController extends Controller
         $users = \App\Models\User::all();
 
         // Statistiques
+        $allRecords = $query->get();
         $stats = [
-            'total_count' => $query->count(),
-            'total_in' => $query->where('type', 'in')->sum('amount'),
-            'total_out' => $query->where('type', 'out')->sum('amount'),
-            'today_count' => $query->whereDate('created_at', today())->count(),
+            'total_count' => $allRecords->count(),
+            'total_in' => $allRecords->where('type', 'in')->sum('amount'),
+            'total_out' => $allRecords->where('type', 'out')->sum('amount'),
+            'today_count' => $allRecords->where('created_at', '>=', today()->startOfDay())->count(),
         ];
+        // dd($stats['total_out']);
 
         return view('cashTransaction.index', compact(
             'transactions',
