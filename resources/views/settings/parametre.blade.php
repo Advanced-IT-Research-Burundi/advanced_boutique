@@ -16,11 +16,14 @@
                 <i class="bi bi-building me-2"></i> Informations entreprise
             </a>
             </li>
-            <li class="nav-item" role="presentation">
-            <a class="nav-link d-flex align-items-center" id="commercial-tab" data-bs-toggle="tab" href="#commercial" role="tab">
-                <i class="bi bi-briefcase me-2"></i> Commercial
-            </a>
-            </li>
+            @if (env('APP_USE_AGENCY', false))
+               <li class="nav-item" role="presentation">
+                    <a class="nav-link d-flex align-items-center" id="commercial-tab" data-bs-toggle="tab" href="#commercial" role="tab">
+                        <i class="bi bi-briefcase me-2"></i> Commercial
+                    </a>
+               </li>
+            @endif
+
             <li class="nav-item" role="presentation">
             <a class="nav-link d-flex align-items-center" id="products-tab" data-bs-toggle="tab" href="#products" role="tab">
                 <i class="bi bi-box-seam me-2"></i> Produits & Services

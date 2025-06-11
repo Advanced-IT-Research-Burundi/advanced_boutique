@@ -29,7 +29,7 @@ class DatabaseSeeder extends Seeder
         $user->id = 1;
         $user->last_name = 'Lionel';
         $user->first_name = 'Jean';
-        $user->email = 'jeanlionel@gmail.com';
+        $user->email = 'ubwizaburundi@gmail.com';
         $user->password = Hash::make('password');
         $user->save();
 
@@ -37,7 +37,7 @@ class DatabaseSeeder extends Seeder
             'company_id' => 1,
             'code' => 'AGC001',
             'name' => 'Agence Principale',
-            'adresse' => 'Bujumbura,Rohero , Avenue du Mwaro no 13',
+            'adresse' => 'Avenue de la Croix Rouge , N° 3688',
             'manager_id' => $user->id,
             'user_id' => $user->id,
             'is_main_office' => true,
