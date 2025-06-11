@@ -133,6 +133,7 @@
                         <thead class="table-light">
                             <tr>
                                 <th>Image</th>
+                                <th>Code</th>
                                 <th>Nom</th>
                                 <th>Catégorie</th>
                                 <th>Prix d'Achat</th>
@@ -161,6 +162,9 @@
                                                 <i class="bi bi-image text-muted"></i>
                                             </div>
                                         @endif
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-info">{{ $product->code }}</span>
                                     </td>
                                     <td>
                                         <div class="d-flex align-items-center">
