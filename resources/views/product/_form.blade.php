@@ -1,4 +1,22 @@
 <div class="row">
+
+    <!-- Code du produit -->
+    <div class="col-md-6 mb-3">
+        <label for="code" class="form-label">
+            <i class="bi bi-upc-scan me-1"></i>
+            Code du produit <span class="text-danger">*</span>
+        </label>
+        <input type="text"
+               class="form-control @error('code') is-invalid @enderror"
+               id="code"
+               name="code"
+               value="{{ old('code', $product->code ?? '') }}"
+               placeholder="Ex: PRD-001"
+               required>
+        @error('code')
+            <div class="invalid-feedback">{{ $message }}</div>
+        @enderror
+    </div>
     <!-- Nom du produit -->
     <div class="col-md-6 mb-3">
         <label for="name" class="form-label">
@@ -17,7 +35,7 @@
     </div>
 
     <!-- Catégorie -->
-    <div class="col-md-6 mb-3">
+    <div class="col-md-12 mb-3">
         <label for="category_id" class="form-label">
             <i class="bi bi-tags me-1"></i>
             Catégorie <span class="text-danger">*</span>

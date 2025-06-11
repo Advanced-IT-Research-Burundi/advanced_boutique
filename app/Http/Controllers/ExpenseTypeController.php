@@ -38,8 +38,8 @@ class ExpenseTypeController extends Controller
     {
         $data = $request->validate([
             'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'agency_id' => 'nullable|exists:agencies,id',
+            'description' => 'required|string',
+            'agency_id' => 'required|exists:agencies,id',
         ]);
         $data['created_by'] = auth()->id();
 
@@ -63,8 +63,8 @@ class ExpenseTypeController extends Controller
     {
         $data = $request->validate([
             'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'agency_id' => 'nullable|exists:agencies,id',
+            'description' => 'required|string',
+            'agency_id' => 'required|exists:agencies,id',
         ]);
         $expensetype->update($data);
 

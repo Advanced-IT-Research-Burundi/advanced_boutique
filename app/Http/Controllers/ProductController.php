@@ -76,6 +76,7 @@ class ProductController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
+            'code'=> 'required|string|max:100|unique:products,code',
             'name' => 'required|string|max:255',
             'category_id' => 'required|exists:categories,id',
             'description' => 'nullable|string',
@@ -101,6 +102,7 @@ class ProductController extends Controller
 
             // Créer le produit
             $product = new Product();
+            $product->code = $validated['code'];
             $product->name = $validated['name'];
             $product->category_id = $validated['category_id'];
             $product->description = $validated['description'];
@@ -168,6 +170,7 @@ class ProductController extends Controller
     public function update(Request $request, Product $product)
     {
         $validated = $request->validate([
+            'code'=> 'required|string|max:100|unique:products,code,' . $product->id,
             'name' => 'required|string|max:255',
             'category_id' => 'required|exists:categories,id',
             'description' => 'nullable|string',
@@ -201,6 +204,7 @@ class ProductController extends Controller
 
             // Mettre à jour le produit
             $product->update([
+                'code' => $validated['code'],
                 'name' => $validated['name'],
                 'category_id' => $validated['category_id'],
                 'description' => $validated['description'],

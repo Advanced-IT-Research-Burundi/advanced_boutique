@@ -28,52 +28,33 @@ Route::middleware('auth')->group(function () {
     Route::put('/parametrage/company/update', [App\Http\Controllers\ParametrageController::class, 'updateCompany'])->name('parametrage.company.update');
     Route::get('stocks/{stock}/show', [App\Http\Controllers\StockController::class, 'list'])->name('stocks.list');
     Route::get('stocks/{stock}/mouvement', [App\Http\Controllers\StockController::class, 'mouvement'])->name('stocks.mouvement');
+
+    Route::resource('companies', App\Http\Controllers\CompanyController::class);
+    Route::resource('agencies', App\Http\Controllers\AgencyController::class);
+    Route::resource('users', App\Http\Controllers\UserController::class);
+    Route::resource('stocks', App\Http\Controllers\StockController::class);
+    Route::resource('categories', App\Http\Controllers\CategoryController::class);
+    Route::resource('products', App\Http\Controllers\ProductController::class);
+    Route::resource('clients', App\Http\Controllers\ClientController::class);
+    Route::resource('suppliers', App\Http\Controllers\SupplierController::class);
+    Route::resource('purchases', App\Http\Controllers\PurchaseController::class);
+    Route::resource('sales', App\Http\Controllers\SaleController::class);
+    Route::get('/sales/{sale}/pdf', [App\Http\Controllers\SaleController::class, 'downloadPDF'])->name('sales.pdf');
+    Route::resource('cash-registers', App\Http\Controllers\CashRegisterController::class);
+    ;
+    Route::post('cash-register/{cashRegister}/close', [App\Http\Controllers\CashRegisterController::class, 'close'])->name('cash-register.close');
+    Route::resource('cash-transactions', App\Http\Controllers\CashTransactionController::class);
+    Route::get('cash-transactions/{cashRegister}/export', [App\Http\Controllers\CashTransactionController::class, 'export'])->name('cash-transactions.export');
+    Route::post('cash-transactions/{transaction}/cancel', [App\Http\Controllers\CashTransactionController::class, 'cancel'])->name('cash-transactions.cancel');
+    Route::resource('expenses', App\Http\Controllers\ExpenseController::class);
+    Route::resource('expense-types', App\Http\Controllers\ExpenseTypeController::class);
+    Route::resource('stock-transfers', App\Http\Controllers\StockTransferController::class);
+    Route::resource('payments', App\Http\Controllers\PaymentController::class);
+    Route::resource('user-stocks', App\Http\Controllers\UserStockController::class);
+    Route::resource('vehicules', App\Http\Controllers\VehiculeController::class);
+
 });
 
 require __DIR__.'/auth.php';
 
 
-Route::resource('companies', App\Http\Controllers\CompanyController::class);
-
-Route::resource('agencies', App\Http\Controllers\AgencyController::class);
-
-Route::resource('users', App\Http\Controllers\UserController::class);
-
-Route::resource('stocks', App\Http\Controllers\StockController::class);
-
-Route::resource('categories', App\Http\Controllers\CategoryController::class);
-
-Route::resource('products', App\Http\Controllers\ProductController::class);
-
-Route::resource('clients', App\Http\Controllers\ClientController::class);
-
-Route::resource('suppliers', App\Http\Controllers\SupplierController::class);
-
-Route::resource('purchases', App\Http\Controllers\PurchaseController::class);
-
-Route::resource('sales', App\Http\Controllers\SaleController::class);
-Route::get('/sales/{sale}/pdf', [App\Http\Controllers\SaleController::class, 'downloadPDF'])->name('sales.pdf');
-
-Route::resource('cash-registers', App\Http\Controllers\CashRegisterController::class);
-;
-Route::post('cash-register/{cashRegister}/close', [App\Http\Controllers\CashRegisterController::class, 'close'])->name('cash-register.close');
-
-Route::resource('cash-transactions', App\Http\Controllers\CashTransactionController::class);
-Route::get('cash-transactions/{cashRegister}/export', [App\Http\Controllers\CashTransactionController::class, 'export'])->name('cash-transactions.export');
-Route::post('cash-transactions/{transaction}/cancel', [App\Http\Controllers\CashTransactionController::class, 'cancel'])->name('cash-transactions.cancel');
-
-
-Route::resource('expenses', App\Http\Controllers\ExpenseController::class);
-
-Route::resource('expense-types', App\Http\Controllers\ExpenseTypeController::class);
-
-Route::resource('stock-transfers', App\Http\Controllers\StockTransferController::class);
-
-Route::resource('payments', App\Http\Controllers\PaymentController::class);
-
-Route::resource('user-stocks', App\Http\Controllers\UserStockController::class);
-
-
-
-
-Route::resource('vehicules', App\Http\Controllers\VehiculeController::class);

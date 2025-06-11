@@ -373,8 +373,12 @@ class SaleCreate extends Component
         if (!$this->validateStock()) {
             return;
         }
+
+
         $caisse = CashRegister::where('user_id', auth()->user()->id)->first();
+        //  dd(auth()->user()->id);
         if(!$caisse){
+            dd('Caisse introuvable pour l\'utilisateur actuel');
                  $this->addError('error', "Veuillez Nous excuse vous n'avez droit de créer une facture");
            return;
         }
