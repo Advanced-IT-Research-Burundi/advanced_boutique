@@ -381,18 +381,6 @@
             let lastScrollTop = 0;
             const header = document.querySelector('.modern-header');
 
-            window.addEventListener('scroll', function() {
-                let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-
-                if (scrollTop > lastScrollTop && scrollTop > 100) {
-                    // Scroll vers le bas
-                    header.style.transform = 'translateY(-100%)';
-                } else {
-                    // Scroll vers le haut
-                    header.style.transform = 'translateY(0)';
-                }
-                lastScrollTop = scrollTop;
-            });
 
             // Gestion des dropdowns au hover sur desktop
             if (window.innerWidth > 991) {

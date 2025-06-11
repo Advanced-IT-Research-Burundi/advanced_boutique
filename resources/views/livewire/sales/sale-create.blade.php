@@ -110,7 +110,7 @@
                                 <i class="bi bi-box-seam me-2"></i>
                                 Produits de la vente
                                 @if(count($items) > 0)
-                                    <span class="badge bg-success text-primary ms-2">{{ count($items) }}</span>
+                                    <span class="badge bg-light text-primary ms-2">{{ count($items) }}</span>
                                 @endif
                             </h5>
                             <div class="d-flex gap-2">
@@ -136,77 +136,194 @@
                     </div>
                     <div class="card-body p-4">
                         <!-- Recherche de produits -->
+
                         @if($show_product_search)
-                            <div class="card bg-light border-0 mb-4">
-                                <div class="card-body">
-                                    <div class="row g-3">
-                                        <div class="col-md-8">
-                                            <div class="position-relative">
-                                                <input type="text"
-                                                       class="form-control"
-                                                       wire:model.live.debounce.300ms="product_search"
-                                                       placeholder="Rechercher un produit par nom..."
-                                                       autocomplete="off">
-                                                <i class="bi bi-search position-absolute top-50 end-0 translate-middle-y me-3 text-muted"></i>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <button type="button" class="btn btn-outline-secondary w-100"
-                                                    wire:click="$set('show_product_search', false)">
-                                                <i class="bi bi-x me-1"></i>
-                                                Fermer
-                                            </button>
+                        <div class="card bg-light border-0 mb-4">
+                            <div class="card-body">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="position-relative">
+                                            <input type="text"
+                                                class="form-control"
+                                                wire:model.live.debounce.300ms="product_search"
+                                                placeholder="Rechercher un produit par nom..."
+                                                autocomplete="off">
+                                            <i class="bi bi-search position-absolute top-50 end-0 translate-middle-y me-3 text-muted"></i>
                                         </div>
                                     </div>
+                                    <div class="col-md-3">
+                                        <select class="form-select" wire:model="selected_category_id" wire:change="selectCategory">
+                                        <option value="">Toutes les catégories</option>
+                                        @foreach($categories as $category)
+                                            <option value="{{ $category->id }}">
+                                                {{ $category->name }} ({{ $category->products_count }})
+                                            </option>
+                                        @endforeach
+                                    </select>
 
-                                    @if($product_search && count($filtered_products) > 0)
-                                        <div class="row g-2 mt-2">
-                                            @foreach($filtered_products as $product)
-                                                <div class="col-md-6 col-lg-4">
-                                                    <div class="card h-100 border product-card"
-                                                         style="cursor: pointer;"
-                                                         wire:click="addProductToSale({{ $product->id }})">
-                                                        <div class="card-body p-3">
-                                                            <div class="d-flex align-items-start">
-                                                                @if($product->image)
-                                                                    <img src="{{ asset('storage/' . $product->image) }}"
-                                                                         alt="{{ $product->name }}"
-                                                                         class="rounded me-3"
-                                                                         style="width: 50px; height: 50px; object-fit: cover;">
-                                                                @else
-                                                                    <div class="bg-primary bg-opacity-10 rounded me-3 d-flex align-items-center justify-content-center"
-                                                                         style="width: 50px; height: 50px;">
-                                                                        <i class="bi bi-box text-primary"></i>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <button type="button" class="btn btn-outline-secondary w-100"
+                                                wire:click="$set('show_product_search', false)">
+                                            <i class="bi bi-x me-1"></i>
+                                            Fermer
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Filtres par catégorie -->
+                                @if(!$product_search && !$selected_category_id)
+                                    <div class="mt-3">
+                                        <div class="d-flex flex-wrap gap-2">
+                                            <button type="button"
+                                                    class="btn btn-sm {{ !$selected_category_id ? 'btn-primary' : 'btn-outline-primary' }}"
+                                                    wire:click="showAllProducts">
+                                                <i class="bi bi-grid me-1"></i>
+                                                Toutes les catégories
+                                            </button>
+                                            @foreach($categories as $category)
+                                                <button type="button"
+                                                        wire:key="category-{{ $category->id }}"
+                                                        class="btn btn-sm {{ $selected_category_id == $category->id ? 'btn-primary' : 'btn-outline-primary' }}"
+                                                        wire:click="selectCategory({{ $category->id }})">
+                                                    {{ $category->name }}
+                                                    <span class="badge bg-light text-dark ms-1">{{ $category->products_count }}</span>
+                                                </button>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                @endif
+
+                                <!-- Affichage des produits par catégorie -->
+                                @if(count($products_by_category) > 0)
+                                    <div class="mt-4">
+                                        @foreach($products_by_category as $category_data)
+                                            @if(count($category_data['products']) > 0)
+                                                <div class="category-section mb-4">
+                                                    <div class="d-flex align-items-center mb-3">
+                                                        <h6 class="mb-0 text-primary fw-bold">
+                                                            <i class="bi bi-tag me-2"></i>
+                                                            {{ $category_data['name'] }}
+                                                        </h6>
+                                                        <span class="badge bg-primary ms-2">{{ count($category_data['products']) }}</span>
+                                                        <hr class="flex-grow-1 ms-3">
+                                                    </div>
+
+                                                    <div class="row g-2">
+                                                        @foreach($category_data['products'] as $product)
+                                                            <div class="col-md-6 col-lg-4">
+                                                                <div class="card h-100 border product-card shadow-sm"
+                                                                    style="cursor: pointer;"
+                                                                    wire:click="addProductToSale({{ $product->id }})">
+                                                                    <div class="card-body p-3">
+                                                                        <div class="d-flex align-items-start">
+                                                                            @if($product->image)
+                                                                                <img src="{{ asset('storage/' . $product->image) }}"
+                                                                                    alt="{{ $product->name }}"
+                                                                                    class="rounded me-3"
+                                                                                    style="width: 50px; height: 50px; object-fit: cover;">
+                                                                            @else
+                                                                                <div class="bg-primary bg-opacity-10 rounded me-3 d-flex align-items-center justify-content-center"
+                                                                                    style="width: 50px; height: 50px;">
+                                                                                    <i class="bi bi-box text-primary"></i>
+                                                                                </div>
+                                                                            @endif
+                                                                            <div class="flex-grow-1">
+                                                                                <h6 class="card-title mb-1 fw-semibold">{{ $product->name }}</h6>
+                                                                                <p class="text-muted small mb-1">{{ number_format($product->sale_price, 0, ',', ' ') }} Fbu</p>
+                                                                                <div class="d-flex align-items-center justify-content-between">
+                                                                                    <span class="badge {{ $product->available_stock <= ($product->alert_quantity ?? 5) ? 'bg-warning' : 'bg-success' }}">
+                                                                                        Stock: {{ $product->available_stock }}
+                                                                                    </span>
+                                                                                    <i class="bi bi-plus-circle text-primary"></i>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
                                                                     </div>
-                                                                @endif
-                                                                <div class="flex-grow-1">
-                                                                    <h6 class="card-title mb-1 fw-semibold">{{ $product->name }}</h6>
-                                                                    <p class="text-muted small mb-1">{{ number_format($product->sale_price, 0, ',', ' ') }} Fbu</p>
-                                                                    <div class="d-flex align-items-center justify-content-between">
-                                                                        <span class="badge {{ $product->available_stock <= $product->alert_quantity ? 'bg-warning' : 'bg-success' }}">
-                                                                            Stock: {{ $product->available_stock }}
-                                                                        </span>
-                                                                        <i class="bi bi-plus-circle text-primary"></i>
-                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        @endforeach
+                                                    </div>
+
+                                                    @if(!$product_search && !$selected_category_id && isset($category_data['id']))
+                                                        <div class="text-center mt-3">
+                                                            <button type="button"
+                                                                    class="btn btn-outline-primary btn-sm"
+                                                                    wire:click="selectCategory({{ $category_data['id'] }})">
+                                                                <i class="bi bi-eye me-1"></i>
+                                                                Voir tous les produits de {{ $category_data['name'] }}
+                                                            </button>
+                                                        </div>
+                                                    @endif
+                                                </div>
+                                            @endif
+                                        @endforeach
+                                    </div>
+                                @endif
+
+                                <!-- Affichage des produits filtrés (quand une seule catégorie est sélectionnée) -->
+                                @if(count($filtered_products) > 0)
+                                    <div class="row g-2 mt-2">
+                                        @foreach($filtered_products as $product)
+                                            <div class="col-md-6 col-lg-4">
+                                                <div class="card h-100 border product-card shadow-sm"
+                                                    style="cursor: pointer;"
+                                                    wire:click="addProductToSale({{ $product->id }})">
+                                                    <div class="card-body p-3">
+                                                        <div class="d-flex align-items-start">
+                                                            @if($product->image)
+                                                                <img src="{{ asset('storage/' . $product->image) }}"
+                                                                    alt="{{ $product->name }}"
+                                                                    class="rounded me-3"
+                                                                    style="width: 50px; height: 50px; object-fit: cover;">
+                                                            @else
+                                                                <div class="bg-primary bg-opacity-10 rounded me-3 d-flex align-items-center justify-content-center"
+                                                                    style="width: 50px; height: 50px;">
+                                                                    <i class="bi bi-box text-primary"></i>
+                                                                </div>
+                                                            @endif
+                                                            <div class="flex-grow-1">
+                                                                <h6 class="card-title mb-1 fw-semibold">{{ $product->name }}</h6>
+                                                                <p class="text-muted small mb-1">{{ number_format($product->sale_price, 0, ',', ' ') }} Fbu</p>
+                                                                <div class="d-flex align-items-center justify-content-between">
+                                                                    <span class="badge {{ $product->available_stock <= ($product->alert_quantity ?? 5) ? 'bg-warning' : 'bg-success' }}">
+                                                                        Stock: {{ $product->available_stock }}
+                                                                    </span>
+                                                                    <i class="bi bi-plus-circle text-primary"></i>
                                                                 </div>
                                                             </div>
                                                         </div>
                                                     </div>
                                                 </div>
-                                            @endforeach
-                                        </div>
-                                    @elseif($product_search && count($filtered_products) == 0)
-                                        <div class="alert alert-info mt-3 border-0 rounded-3">
-                                            <i class="bi bi-info-circle me-2"></i>
-                                            Aucun produit disponible trouvé pour "{{ $product_search }}"
-                                            @if(count($selected_products) > 0)
-                                                <br><small class="text-muted">Les produits déjà ajoutés au panier ne sont pas affichés.</small>
-                                            @endif
-                                        </div>
-                                    @endif
-                                </div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                @endif
+
+                                <!-- Message si aucun produit trouvé -->
+                                @if($product_search && count($filtered_products) == 0 && count($products_by_category) == 0)
+                                    <div class="alert alert-info mt-3 border-0 rounded-3">
+                                        <i class="bi bi-info-circle me-2"></i>
+                                        Aucun produit disponible trouvé pour "{{ $product_search }}"
+                                        @if(count($selected_products) > 0)
+                                            <br><small class="text-muted">Les produits déjà ajoutés au panier ne sont pas affichés.</small>
+                                        @endif
+                                    </div>
+                                @endif
+
+                                {{-- @if(!$product_search && !$selected_category_id && count($products_by_category) == 0)
+                                    <div class="alert alert-info mt-3 border-0 rounded-3">
+                                        <i class="bi bi-info-circle me-2"></i>
+                                        {{ count($selected_products) > 0
+                                            ? ' Les produits déjà ajoutés au panier ne sont pas affichés.'
+                                            : (!$product_search == 0
+                                                ? 'chercher et ajouter des produits à votre vente'
+                                                : '') }}
+                                    </div>
+                                @endif --}}
                             </div>
-                        @endif
+                        </div>
+                    @endif
 
                         @if(empty($items))
                             <div class="text-center py-5 text-muted">
@@ -641,36 +758,5 @@
     }
 }
 </style>
-
-@endpush
-@push('scripts')
-<!-- Scripts JavaScript -->
-{{-- <script>
-document.addEventListener('livewire:init', () => {
-    // Écouter les événements Livewire
-    Livewire.on('productAdded', (event) => {
-        // Optionnel: Ajouter une notification toast
-        console.log(event.message);
-    });
-
-    Livewire.on('productRemoved', (event) => {
-        console.log(event.message);
-    });
-
-    Livewire.on('cartCleared', (event) => {
-        console.log(event.message);
-    });
-});
-
-// Fonction pour gérer le focus sur les inputs de quantité
-function handleQuantityInput(element) {
-    element.addEventListener('focus', function() {
-        this.select();
-    });
-}
-
-// Appliquer aux inputs de quantité existants
-document.querySelectorAll('input[type="number"]').forEach(handleQuantityInput);
-</script> --}}
 
 @endpush

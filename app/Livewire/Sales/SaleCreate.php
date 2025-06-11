@@ -7,6 +7,7 @@ use App\Models\Product;
 use App\Models\Sale;
 use App\Models\SaleItem;
 use App\Models\Stock;
+use App\Models\Category;
 use App\Models\StockProduct;
 use App\Models\CashRegister;
 use App\Models\CashTransaction;
@@ -48,6 +49,11 @@ class SaleCreate extends Component
     // Cart session identifier
     public $cart_session;
 
+    public $categories = [];
+    public $selected_category_id = null;
+    public $products_by_category = [];
+    public $show_all_categories = true;
+
     protected $rules = [
         'client_id' => 'required|exists:clients,id',
         'sale_date' => 'required|date',
@@ -81,6 +87,52 @@ class SaleCreate extends Component
         $this->cart_session = 'sale_' . Auth::id() . '_' . time();
         $this->loadData();
         $this->loadCartItems();
+        $this->loadCategories();
+
+    }
+
+    public function loadCategories()
+    {
+        $categories = Category::with('products')->get();
+
+        $this->categories = $categories->filter(function ($category) {
+            $filteredProducts = $category->products->filter(function ($product) {
+                return $product->available_stock > 0;
+            });
+
+            $category->setRelation('products', $filteredProducts);
+
+            return $filteredProducts->isNotEmpty();
+        })->values();
+    }
+    public function selectCategory($categoryId = null)
+    {
+
+        $categoryId = $categoryId ?? $this->selected_category_id;
+        if (!$this->selected_category_id && !$categoryId) {
+             return $this->showAllProducts();
+        }
+        // $this->selected_category_id = $categoryId;
+        $this->product_search = '';
+
+        // Charger tous les produits de cette catégorie
+        $this->filtered_products = $this->products->filter(function ($product) use ($categoryId) {
+            return $product->category_id == $categoryId &&
+                $product->available_stock > 0 &&
+                !in_array($product->id, $this->selected_products);
+        })->values();
+
+        // Vider les produits par catégorie
+        $this->products_by_category = [];
+    }
+    public function showAllProducts()
+    {
+        $this->selected_category_id = null;
+        $this->product_search = '';
+        $this->filtered_products = [];
+
+        // Recharger les produits par catégorie
+        $this->loadProductsByCategory();
     }
 
     public function loadData()
@@ -149,20 +201,49 @@ class SaleCreate extends Component
             $this->filtered_clients = [];
         }
     }
+    public function loadProductsByCategory()
+{
+    $this->products_by_category = [];
 
-    public function updatedProductSearch()
-    {
-        if (strlen($this->product_search) >= 2) {
-            // Filtrer les produits en excluant ceux déjà sélectionnés
-            $this->filtered_products = $this->products->filter(function ($product) {
-                $nameMatch = stripos($product->name, $this->product_search) !== false;
-                $notSelected = !in_array($product->id, $this->selected_products);
-                return $nameMatch && $notSelected;
-            })->take(12)->values();
-        } else {
-            $this->filtered_products = [];
+    if (!$this->selected_category_id && !$this->product_search) {
+        // Afficher les produits par catégorie (limité pour l'affichage initial)
+        foreach ($this->categories as $category) {
+            $categoryProducts = $this->products->filter(function ($product) use ($category) {
+                return $product->category_id == $category->id &&
+                       $product->available_stock > 0 &&
+                       !in_array($product->id, $this->selected_products);
+            })->take(6)->values(); // Limiter à 6 produits par catégorie
+
+            if ($categoryProducts->count() > 0) {
+                $this->products_by_category[] = [
+                    'id' => $category->id,
+                    'name' => $category->name,
+                    'products' => $categoryProducts
+                ];
+            }
         }
     }
+}
+
+    public function updatedProductSearch()
+{
+    if (strlen($this->product_search) >= 2) {
+        // Filtrer les produits par recherche
+        $this->filtered_products = $this->products->filter(function ($product) {
+            $nameMatch = stripos($product->name, $this->product_search) !== false;
+            $notSelected = !in_array($product->id, $this->selected_products);
+            $hasStock = $product->available_stock > 0;
+            return $nameMatch && $notSelected && $hasStock;
+        })->take(12)->values();
+
+        // Vider les produits par catégorie quand on fait une recherche
+        $this->products_by_category = [];
+    } else {
+        $this->filtered_products = [];
+        // Recharger les produits par catégorie
+        $this->loadProductsByCategory();
+    }
+}
 
     public function selectClient($clientId)
     {
