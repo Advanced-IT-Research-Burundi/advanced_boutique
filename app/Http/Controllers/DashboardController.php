@@ -28,7 +28,6 @@ class DashboardController extends Controller
         $recentActivities = $this->getRecentActivities($agency_id);
         $lowStockProducts = $this->getLowStockProducts($agency_id);
         $cashRegisterStatus = $this->getCashRegisterStatus($agency_id);
-        $performanceMetrics = $this->getPerformanceMetrics($agency_id, $startDate, $endDate);
         $salesTrend = $this->getSalesTrend($agency_id);
 
         // Agences pour le filtre
@@ -41,7 +40,6 @@ class DashboardController extends Controller
             'recentActivities',
             'lowStockProducts',
             'cashRegisterStatus',
-            'performanceMetrics',
             'salesTrend',
             'agencies',
             'agency_id',
@@ -304,56 +302,6 @@ class DashboardController extends Controller
         ];
     }
 
-    private function getPerformanceMetrics($agency_id, $startDate, $endDate)
-    {
-        $baseQuery = function($model) use ($agency_id) {
-            return $agency_id ? $model->where('agency_id', $agency_id) : $model;
-        };
-
-        // Objectif mensuel (peut être configuré)
-        $monthlyTarget = 10000000; // FBU
-        $currentRevenue = $baseQuery(Sale::query())
-            ->whereBetween('sale_date', [Carbon::now()->startOfMonth(), Carbon::now()])
-            ->sum('total_amount');
-
-        $targetProgress = ($currentRevenue / $monthlyTarget) * 100;
-
-        // Rotation du stock (approximative)
-        $averageStock = $baseQuery(StockProduct::query())->avg('quantity') ?? 1;
-        $soldQuantity = DB::table('sale_items')
-            ->join('sales', 'sale_items.sale_id', '=', 'sales.id')
-            ->whereBetween('sales.sale_date', [$startDate, $endDate]);
-
-        if ($agency_id) {
-            $soldQuantity->where('sales.agency_id', $agency_id);
-        }
-
-        $soldQuantity = $soldQuantity->sum('sale_items.quantity');
-        $stockRotation = $averageStock > 0 ? $soldQuantity / $averageStock : 0;
-
-        // Temps moyen de vente (simulé - vous pouvez l'améliorer)
-        $avgSaleTime = rand(2, 5) + (rand(0, 9) / 10); // 2.0 à 5.9 minutes
-
-        return [
-            'monthly_target' => [
-                'current' => $currentRevenue,
-                'target' => $monthlyTarget,
-                'progress' => min(100, $targetProgress)
-            ],
-            'stock_rotation' => [
-                'value' => round($stockRotation, 1),
-                'status' => $stockRotation >= 2 ? 'good' : 'low'
-            ],
-            'customer_satisfaction' => [
-                'rating' => 4.6,
-                'progress' => 92
-            ],
-            'avg_sale_time' => [
-                'minutes' => $avgSaleTime,
-                'status' => $avgSaleTime <= 4 ? 'fast' : 'slow'
-            ]
-        ];
-    }
 
     private function getSalesTrend($agency_id)
     {
