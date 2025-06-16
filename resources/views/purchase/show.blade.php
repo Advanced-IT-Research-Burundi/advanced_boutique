@@ -13,6 +13,10 @@
                         Détail de l'achat #{{ $purchase->id }}
                     </h4>
                     <div>
+                        <a href="{{ route('purchases.print', $purchase) }}" class="btn btn-success btn-sm me-2" target="_blank">
+                            <i class="bi bi-printer me-1"></i>
+                            Imprimer facture
+                        </a>
                         <a href="{{ route('purchases.edit', $purchase) }}" class="btn btn-warning btn-sm me-2">
                             <i class="bi bi-pencil-square me-1"></i>
                             Modifier
@@ -121,6 +125,10 @@
                         <a href="{{ route('purchases.edit', $purchase) }}" class="btn btn-warning">
                             <i class="bi bi-pencil-square me-1"></i>
                             Modifier cet achat
+                        </a>
+                        <a href="{{ route('purchases.print', $purchase) }}" class="btn btn-success" target="_blank">
+                            <i class="bi bi-printer me-1"></i>
+                            Imprimer facture
                         </a>
                     </div>
                 </div>

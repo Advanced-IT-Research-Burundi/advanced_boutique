@@ -169,4 +169,15 @@ class PurchaseController extends Controller
         return redirect()->route('purchases.index')
             ->with('success', 'Achat supprimé avec succès!');
     }
+
+    /**
+ * Afficher la page d'impression pour un achat
+ */
+    public function print(Purchase $purchase)
+    {
+        // Charger les relations nécessaires
+        $purchase->load(['supplier', 'purchaseItems.product', 'stock', 'agency']);
+
+        return view('purchase.print', compact('purchase'));
+    }
 }

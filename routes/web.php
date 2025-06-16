@@ -38,6 +38,7 @@ Route::middleware('auth')->group(function () {
     Route::resource('clients', App\Http\Controllers\ClientController::class);
     Route::resource('suppliers', App\Http\Controllers\SupplierController::class);
     Route::resource('purchases', App\Http\Controllers\PurchaseController::class);
+    Route::get('/purchases/{purchase}/print', [App\Http\Controllers\PurchaseController::class, 'print'])->name('purchases.print');
     Route::resource('sales', App\Http\Controllers\SaleController::class);
     Route::get('/sales/{sale}/pdf', [App\Http\Controllers\SaleController::class, 'downloadPDF'])->name('sales.pdf');
     Route::resource('cash-registers', App\Http\Controllers\CashRegisterController::class);
