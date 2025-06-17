@@ -84,10 +84,10 @@ class StockController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'location' => 'nullable|string|max:255',
+            'location' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'agency_id' => 'nullable|exists:agencies,id',
-            'user_id' => 'nullable|exists:users,id',
+            'agency_id' => 'required|exists:agencies,id',
+            'user_id' => 'required|exists:users,id',
         ]);
 
         $validated['created_by'] = Auth::id();
@@ -139,11 +139,13 @@ class StockController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'location' => 'nullable|string|max:255',
+            'location' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'agency_id' => 'nullable|exists:agencies,id',
-            'user_id' => 'nullable|exists:users,id',
+            'agency_id' => 'required|exists:agencies,id',
+            'user_id' => 'required|exists:users,id',
         ]);
+
+        $validated['created_by'] = Auth::id();
 
         $stock->update($validated);
 
