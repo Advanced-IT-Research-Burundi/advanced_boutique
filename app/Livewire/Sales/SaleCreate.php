@@ -144,7 +144,7 @@ class SaleCreate extends Component
 
         // Charger les produits avec leur stock disponible
         $this->products = Product::with(['stockProducts.stock'])
-            ->select('id', 'name', 'sale_price', 'unit', 'alert_quantity', 'image', 'agency_id')
+            ->select('id', 'name', 'sale_price_ttc', 'unit', 'alert_quantity', 'image', 'agency_id')
             ->orderBy('name')
             ->get();
 
@@ -488,7 +488,7 @@ class SaleCreate extends Component
                     'sale_id' => $sale->id,
                     'product_id' => $item['product_id'],
                     'quantity' => $item['quantity'],
-                    'sale_price' => $item['sale_price'],
+                    'sale_price_ttc' => $item['sale_price'],
                     'discount' => $item['discount'] ?? 0,
                     'subtotal' => $item['subtotal'],
                     'agency_id' => Auth::user()->agency_id,

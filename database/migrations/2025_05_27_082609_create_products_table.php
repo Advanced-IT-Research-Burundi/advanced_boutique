@@ -20,7 +20,7 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->foreignId('category_id')->constrained();
             $table->double('purchase_price');
-            $table->double('sale_price_ht');
+            $table->double('sale_price_ht')->nullable();
             $table->double('sale_price_ttc');
             $table->string('unit');
             $table->float('alert_quantity');
