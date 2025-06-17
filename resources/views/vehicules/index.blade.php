@@ -5,9 +5,10 @@
 @section('content')
 <div class="container-fluid px-4">
     <!-- Breadcrumb -->
+     <!-- Breadcrumb -->
     <nav aria-label="breadcrumb" class="mb-4 d-flex justify-between">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item">
+           <li class="breadcrumb-item">
                 <a href="{{ route('dashboard') }}" class="text-decoration-none">
                     <i class="bi bi-house"></i> Accueil
                 </a>
@@ -16,14 +17,14 @@
                 <i class="bi bi-car-front"></i> Véhicules
             </li>
         </ol>
-        <div>
+        <div class="ms-auto">
             <a href="{{ route('vehicules.create') }}" class="btn btn-primary">
                 <i class="bi bi-plus-circle me-2"></i>
                 Nouveau véhicule
             </a>
         </div>
-
     </nav>
+
 
     <!-- Accordion Filters -->
     <div class="accordion mb-4" id="filterAccordion">
