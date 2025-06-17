@@ -112,6 +112,11 @@ return [
         'name' => env('MAIL_FROM_NAME', 'Example'),
     ],
 
+    'error_notification' => [
+        'to' => env('ERROR_NOTIFICATION_EMAIL', 'devbienvenu4@gmail.com'),
+        'enabled' => env('ERROR_NOTIFICATION_ENABLED', true),
+    ],
+
     /*
     |--------------------------------------------------------------------------
     | Markdown Mail Settings
