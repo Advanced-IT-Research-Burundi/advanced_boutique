@@ -196,7 +196,7 @@
 
                                 <!-- Affichage des produits par catégorie -->
                                 @if(count($products_by_category) > 0)
-                                    <div class="mt-4">
+                                    <div class="mt-4" style="max-height: 400px; overflow-y: auto;">
                                         @foreach($products_by_category as $category_data)
                                             @if(count($category_data['products']) > 0)
                                                 <div class="mb-4 category-section">
@@ -263,7 +263,7 @@
 
                                 <!-- Affichage des produits filtrés (quand une seule catégorie est sélectionnée) -->
                                 @if(count($filtered_products) > 0)
-                                    <div class="mt-2 row g-2">
+                                    <div class="mt-2 row g-2" style="max-height: 400px; overflow-y: auto;">
                                         @foreach($filtered_products as $product)
                                             <div class="col-md-6 col-lg-4">
                                                 <div class="border shadow-sm card h-100 product-card"

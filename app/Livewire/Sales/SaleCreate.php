@@ -230,7 +230,7 @@ class SaleCreate extends Component
     if (strlen($this->product_search) >= 2) {
         // Filtrer les produits par recherche
         $this->filtered_products = $this->products->filter(function ($product) {
-            $nameMatch = stripos($product->name, $this->product_search) !== false;
+            $nameMatch = stripos($product->code, $this->product_search) !== false;
             $notSelected = !in_array($product->id, $this->selected_products);
             $hasStock = $product->available_stock > 0;
             return $nameMatch && $notSelected && $hasStock;
