@@ -177,7 +177,7 @@ class SaleCreate extends Component
                 $this->items[] = [
                     'product_id' => $cartItem->id,
                     'quantity' => $quantity,
-                    'sale_price' => $price,
+                    'sale_price' => $price ?? 0,
                     'discount' => $discount,
                     'subtotal' => $subtotal_after_discount,
                     'unit' => $product->unit,
@@ -280,7 +280,7 @@ class SaleCreate extends Component
             Cart::session($this->cart_session)->add([
                 'id' => $productId,
                 'name' => $product->name,
-                'price' => $product->sale_price,
+                'price' => $product->sale_price ?? 0,
                 'quantity' => 1,
                 'attributes' => [
                     'unit' => $product->unit,
@@ -488,7 +488,7 @@ class SaleCreate extends Component
                     'sale_id' => $sale->id,
                     'product_id' => $item['product_id'],
                     'quantity' => $item['quantity'],
-                    'sale_price_ttc' => $item['sale_price'],
+                    'sale_price' => $item['sale_price'] ?? 0,
                     'discount' => $item['discount'] ?? 0,
                     'subtotal' => $item['subtotal'],
                     'agency_id' => Auth::user()->agency_id,
