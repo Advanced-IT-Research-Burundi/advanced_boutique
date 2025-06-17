@@ -25,7 +25,7 @@ class SaleCreate extends Component
     public $filtered_clients = [];
 
     public $product_search = '';
-    public $show_product_search = false;
+    public $show_product_search = true;
     public $filtered_products = [];
     public $selected_products = []; // Produits actuellement dans le panier
 
