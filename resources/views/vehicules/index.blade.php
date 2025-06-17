@@ -16,10 +16,13 @@
                 <i class="bi bi-car-front"></i> Véhicules
             </li>
         </ol>
-        <a href="{{ route('vehicules.create') }}" class="btn btn-primary">
-            <i class="bi bi-plus-circle me-2"></i>
-            Nouveau véhicule
-        </a>
+        <div>
+            <a href="{{ route('vehicules.create') }}" class="btn btn-primary">
+                <i class="bi bi-plus-circle me-2"></i>
+                Nouveau véhicule
+            </a>
+        </div>
+
     </nav>
 
     <!-- Accordion Filters -->
