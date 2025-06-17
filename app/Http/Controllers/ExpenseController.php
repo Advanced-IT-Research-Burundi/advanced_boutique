@@ -56,7 +56,6 @@ class ExpenseController extends Controller
     {
         $data = $request->validate([
             'stock_id' => 'required|exists:stocks,id',
-            'user_id' => 'required|exists:users,id',
             'expense_type_id' => 'required|exists:expense_types,id',
             'amount' => 'required|numeric|min:0',
             'description' => 'required|string',
@@ -64,6 +63,7 @@ class ExpenseController extends Controller
             'agency_id' => 'nullable|exists:agencies,id',
         ]);
         $data['created_by'] = auth()->id();
+        $data['user_id'] = auth()->id();
 
         Expense::create($data);
 

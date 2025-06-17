@@ -21,6 +21,7 @@ class StockProduct extends Model
         'product_id',
         'quantity',
         'agency_id',
+        'product_name',
     ];
 
     /**

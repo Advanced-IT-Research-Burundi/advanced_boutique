@@ -1,11 +1,11 @@
-<div class="container-fluid px-4 py-3">
+<div class="px-4 py-3 container-fluid">
     <form wire:submit.prevent="save">
         <div class="row g-4">
             <!-- Colonne principale -->
             <div class="col-xl-8">
                 <!-- Section Client -->
-                <div class="card border-0 shadow-sm mb-4 hover-lift">
-                    <div class="card-header bg-gradient-primary text-white border-0 rounded-top">
+                <div class="mb-4 border-0 shadow-sm card hover-lift">
+                    <div class="text-white border-0 card-header bg-gradient-primary rounded-top">
                         <div class="d-flex align-items-center justify-content-between">
                             <h5 class="mb-0">
                                 <i class="bi bi-person-circle me-2"></i>
@@ -17,7 +17,7 @@
                             </a>
                         </div>
                     </div>
-                    <div class="card-body p-4">
+                    <div class="p-4 card-body">
                         <div class="row g-3">
                             <div class="col-md-8">
                                 <label for="client_search" class="form-label fw-semibold">
@@ -33,11 +33,11 @@
                                     <i class="bi bi-search position-absolute top-50 end-0 translate-middle-y me-3 text-muted"></i>
 
                                     @if($client_search && count($filtered_clients) > 0)
-                                        <div  class="dropdown-menu show w-100 shadow-lg border-0 mt-1" style="z-index: 1000; max-height: 300px; overflow-y: auto;">
+                                        <div  class="mt-1 border-0 shadow-lg dropdown-menu show w-100" style="z-index: 1000; max-height: 300px; overflow-y: auto;">
                                             @foreach($filtered_clients as $client)
-                                                <a href="#" class="dropdown-item d-flex align-items-center py-2 px-3"
+                                                <a href="#" class="px-3 py-2 dropdown-item d-flex align-items-center"
                                                    wire:click="selectClient({{ $client->id }})">
-                                                    <div class="avatar-sm bg-primary bg-opacity-10 rounded-circle me-3 d-flex align-items-center justify-content-center">
+                                                    <div class="bg-opacity-10 avatar-sm bg-primary rounded-circle me-3 d-flex align-items-center justify-content-center">
                                                         <i class="bi bi-person text-primary"></i>
                                                     </div>
                                                     <div class="flex-grow-1">
@@ -72,14 +72,14 @@
                         </div>
 
                         @if($selected_client)
-                            <div class="alert alert-info border-0 mt-3 bg-info bg-opacity-10 rounded-3">
+                            <div class="mt-3 bg-opacity-10 border-0 alert alert-info bg-info rounded-3">
                                 <div class="d-flex align-items-center">
-                                    <div class="avatar bg-info bg-opacity-20 rounded-circle me-3 p-2 d-flex align-items-center justify-content-center">
+                                    <div class="p-2 bg-opacity-20 avatar bg-info rounded-circle me-3 d-flex align-items-center justify-content-center">
                                         <i class="bi bi-person fs-2"></i>
                                     </div>
                                     <div class="flex-grow-1">
                                         <h6 class="mb-1">{{ $selected_client->name }}</h6>
-                                        <div class="d-flex flex-wrap gap-3">
+                                        <div class="flex-wrap gap-3 d-flex">
                                             @if($selected_client->phone)
                                                 <span class="text-muted small">
                                                     <i class="bi bi-telephone me-1"></i>{{ $selected_client->phone }}
@@ -103,8 +103,8 @@
                 </div>
 
                 <!-- Section Produits -->
-                <div class="card border-0 shadow-sm hover-lift">
-                    <div class="card-header bg-gradient-primary text-white border-0 rounded-top">
+                <div class="border-0 shadow-sm card hover-lift">
+                    <div class="text-white border-0 card-header bg-gradient-primary rounded-top">
                         <div class="d-flex align-items-center justify-content-between">
                             <h5 class="mb-0">
                                 <i class="bi bi-box-seam me-2"></i>
@@ -113,7 +113,7 @@
                                     <span class="badge bg-light text-primary ms-2">{{ count($items) }}</span>
                                 @endif
                             </h5>
-                            <div class="d-flex gap-2">
+                            <div class="gap-2 d-flex">
                                 <button type="button" class="btn btn-outline-light btn-sm"
                                         wire:click="$set('show_product_search', true)">
                                     <i class="bi bi-search me-1"></i>
@@ -134,11 +134,11 @@
                             </div>
                         </div>
                     </div>
-                    <div class="card-body p-4">
+                    <div class="p-4 card-body">
                         <!-- Recherche de produits -->
 
                         @if($show_product_search)
-                        <div class="card bg-light border-0 mb-4">
+                        <div class="mb-4 border-0 card bg-light">
                             <div class="card-body">
                                 <div class="row g-3">
                                     <div class="col-md-6">
@@ -174,7 +174,7 @@
                                 <!-- Filtres par catégorie -->
                                 @if(!$product_search && !$selected_category_id)
                                     <div class="mt-3">
-                                        <div class="d-flex flex-wrap gap-2">
+                                        <div class="flex-wrap gap-2 d-flex">
                                             <button type="button"
                                                     class="btn btn-sm {{ !$selected_category_id ? 'btn-primary' : 'btn-outline-primary' }}"
                                                     wire:click="showAllProducts">
@@ -199,8 +199,8 @@
                                     <div class="mt-4">
                                         @foreach($products_by_category as $category_data)
                                             @if(count($category_data['products']) > 0)
-                                                <div class="category-section mb-4">
-                                                    <div class="d-flex align-items-center mb-3">
+                                                <div class="mb-4 category-section">
+                                                    <div class="mb-3 d-flex align-items-center">
                                                         <h6 class="mb-0 text-primary fw-bold">
                                                             <i class="bi bi-tag me-2"></i>
                                                             {{ $category_data['name'] }}
@@ -212,10 +212,10 @@
                                                     <div class="row g-2">
                                                         @foreach($category_data['products'] as $product)
                                                             <div class="col-md-6 col-lg-4">
-                                                                <div class="card h-100 border product-card shadow-sm"
+                                                                <div class="border shadow-sm card h-100 product-card"
                                                                     style="cursor: pointer;"
                                                                     wire:click="addProductToSale({{ $product->id }})">
-                                                                    <div class="card-body p-3">
+                                                                    <div class="p-3 card-body">
                                                                         <div class="d-flex align-items-start">
                                                                             @if($product->image)
                                                                                 <img src="{{ asset('storage/' . $product->image) }}"
@@ -223,14 +223,14 @@
                                                                                     class="rounded me-3"
                                                                                     style="width: 50px; height: 50px; object-fit: cover;">
                                                                             @else
-                                                                                <div class="bg-primary bg-opacity-10 rounded me-3 d-flex align-items-center justify-content-center"
+                                                                                <div class="bg-opacity-10 rounded bg-primary me-3 d-flex align-items-center justify-content-center"
                                                                                     style="width: 50px; height: 50px;">
                                                                                     <i class="bi bi-box text-primary"></i>
                                                                                 </div>
                                                                             @endif
                                                                             <div class="flex-grow-1">
-                                                                                <h6 class="card-title mb-1 fw-semibold">{{ $product->name }}</h6>
-                                                                                <p class="text-muted small mb-1">{{ number_format($product->sale_price, 0, ',', ' ') }} Fbu</p>
+                                                                                <h6 class="mb-1 card-title fw-semibold">{{ $product->name }}</h6>
+                                                                                <p class="mb-1 text-muted small">{{ number_format($product->sale_price, 0, ',', ' ') }} Fbu</p>
                                                                                 <div class="d-flex align-items-center justify-content-between">
                                                                                     <span class="badge {{ $product->available_stock <= ($product->alert_quantity ?? 5) ? 'bg-warning' : 'bg-success' }}">
                                                                                         Stock: {{ $product->available_stock }}
@@ -246,7 +246,7 @@
                                                     </div>
 
                                                     @if(!$product_search && !$selected_category_id && isset($category_data['id']))
-                                                        <div class="text-center mt-3">
+                                                        <div class="mt-3 text-center">
                                                             <button type="button"
                                                                     class="btn btn-outline-primary btn-sm"
                                                                     wire:click="selectCategory({{ $category_data['id'] }})">
@@ -263,13 +263,13 @@
 
                                 <!-- Affichage des produits filtrés (quand une seule catégorie est sélectionnée) -->
                                 @if(count($filtered_products) > 0)
-                                    <div class="row g-2 mt-2">
+                                    <div class="mt-2 row g-2">
                                         @foreach($filtered_products as $product)
                                             <div class="col-md-6 col-lg-4">
-                                                <div class="card h-100 border product-card shadow-sm"
+                                                <div class="border shadow-sm card h-100 product-card"
                                                     style="cursor: pointer;"
                                                     wire:click="addProductToSale({{ $product->id }})">
-                                                    <div class="card-body p-3">
+                                                    <div class="p-3 card-body">
                                                         <div class="d-flex align-items-start">
                                                             @if($product->image)
                                                                 <img src="{{ asset('storage/' . $product->image) }}"
@@ -277,14 +277,14 @@
                                                                     class="rounded me-3"
                                                                     style="width: 50px; height: 50px; object-fit: cover;">
                                                             @else
-                                                                <div class="bg-primary bg-opacity-10 rounded me-3 d-flex align-items-center justify-content-center"
+                                                                <div class="bg-opacity-10 rounded bg-primary me-3 d-flex align-items-center justify-content-center"
                                                                     style="width: 50px; height: 50px;">
                                                                     <i class="bi bi-box text-primary"></i>
                                                                 </div>
                                                             @endif
                                                             <div class="flex-grow-1">
-                                                                <h6 class="card-title mb-1 fw-semibold">{{ $product->name }}</h6>
-                                                                <p class="text-muted small mb-1">{{ number_format($product->sale_price, 0, ',', ' ') }} Fbu</p>
+                                                                <h6 class="mb-1 card-title fw-semibold">{{ $product->name }}</h6>
+                                                                <p class="mb-1 text-muted small">{{ number_format($product->sale_price, 0, ',', ' ') }} Fbu</p>
                                                                 <div class="d-flex align-items-center justify-content-between">
                                                                     <span class="badge {{ $product->available_stock <= ($product->alert_quantity ?? 5) ? 'bg-warning' : 'bg-success' }}">
                                                                         Stock: {{ $product->available_stock }}
@@ -302,7 +302,7 @@
 
                                 <!-- Message si aucun produit trouvé -->
                                 @if($product_search && count($filtered_products) == 0 && count($products_by_category) == 0)
-                                    <div class="alert alert-info mt-3 border-0 rounded-3">
+                                    <div class="mt-3 border-0 alert alert-info rounded-3">
                                         <i class="bi bi-info-circle me-2"></i>
                                         Aucun produit disponible trouvé pour "{{ $product_search }}"
                                         @if(count($selected_products) > 0)
@@ -312,7 +312,7 @@
                                 @endif
 
                                 {{-- @if(!$product_search && !$selected_category_id && count($products_by_category) == 0)
-                                    <div class="alert alert-info mt-3 border-0 rounded-3">
+                                    <div class="mt-3 border-0 alert alert-info rounded-3">
                                         <i class="bi bi-info-circle me-2"></i>
                                         {{ count($selected_products) > 0
                                             ? ' Les produits déjà ajoutés au panier ne sont pas affichés.'
@@ -326,9 +326,9 @@
                     @endif
 
                         @if(empty($items))
-                            <div class="text-center py-5 text-muted">
+                            <div class="py-5 text-center text-muted">
                                 <div class="mb-4">
-                                    <i class="bi bi-basket display-1 opacity-25"></i>
+                                    <i class="opacity-25 bi bi-basket display-1"></i>
                                 </div>
                                 <h5 class="mb-2">Aucun produit ajouté</h5>
                                 <p class="mb-3">Commencez par rechercher et ajouter des produits à votre vente</p>
@@ -340,7 +340,7 @@
                             </div>
                         @else
                             <div class="table-responsive">
-                                <table class="table table-hover align-middle">
+                                <table class="table align-middle table-hover">
                                     <thead class="bg-light">
                                         <tr>
                                             <th width="35%">Produit</th>
@@ -366,7 +366,7 @@
                                                                 class="rounded me-2"
                                                                 style="width: 40px; height: 40px; object-fit: cover;">
                                                         @else
-                                                            <div class="bg-primary bg-opacity-10 rounded me-2 d-flex align-items-center justify-content-center"
+                                                            <div class="bg-opacity-10 rounded bg-primary me-2 d-flex align-items-center justify-content-center"
                                                                 style="width: 40px; height: 40px;">
                                                                 <i class="bi bi-box text-primary"></i>
                                                             </div>
@@ -445,8 +445,8 @@
                                             </tr>
                                         @empty
                                             <tr>
-                                                <td colspan="7" class="text-center text-muted py-4">
-                                                    <i class="bi bi-cart-x fs-1 d-block mb-2"></i>
+                                                <td colspan="7" class="py-4 text-center text-muted">
+                                                    <i class="mb-2 bi bi-cart-x fs-1 d-block"></i>
                                                     Aucun produit dans le panier
                                                 </td>
                                             </tr>
@@ -456,7 +456,7 @@
                             </div>
 
                             <!-- Totaux -->
-                            <div class="card bg-light border-0 mt-3">
+                            <div class="mt-3 border-0 card bg-light">
                                 <div class="card-body">
                                     <div class="row g-3">
                                         <div class="col-md-6">
@@ -489,37 +489,37 @@
 <!-- Colonne latérale -->
 <div class="col-xl-4">
     <!-- Résumé de la vente -->
-    <div class="card border-0 shadow-sm mb-4 hover-lift">
-        <div class="card-header bg-gradient-success text-white border-0 rounded-top">
+    <div class="mb-4 border-0 shadow-sm card hover-lift">
+        <div class="text-white border-0 card-header bg-gradient-success rounded-top">
             <h5 class="mb-0">
                 <i class="bi bi-calculator me-2"></i>
                 Résumé de la vente
             </h5>
         </div>
-        <div class="card-body p-4">
+        <div class="p-4 card-body">
             @if(count($items) > 0)
-                <div class="summary-item d-flex justify-content-between mb-3">
+                <div class="mb-3 summary-item d-flex justify-content-between">
                     <span class="text-muted">Articles:</span>
                     <span class="fw-semibold">{{ count($items) }}</span>
                 </div>
-                <div class="summary-item d-flex justify-content-between mb-3">
+                <div class="mb-3 summary-item d-flex justify-content-between">
                     <span class="text-muted">Sous-total:</span>
                     <span class="fw-semibold">{{ number_format($total_subtotal, 0, ',', ' ') }} Fbu</span>
                 </div>
                 @if($total_discount > 0)
-                    <div class="summary-item d-flex justify-content-between mb-3">
+                    <div class="mb-3 summary-item d-flex justify-content-between">
                         <span class="text-muted">Remise:</span>
                         <span class="fw-semibold text-warning">-{{ number_format($total_discount, 0, ',', ' ') }} F</span>
                     </div>
                 @endif
                 <hr>
-                <div class="summary-item d-flex justify-content-between mb-4">
+                <div class="mb-4 summary-item d-flex justify-content-between">
                     <span class="fw-bold fs-5">Total:</span>
                     <span class="fw-bold fs-5 text-success">{{ number_format($total_amount, 0, ',', ' ') }} F</span>
                 </div>
             @else
-                <div class="text-center text-muted py-4">
-                    <i class="bi bi-calculator display-4 opacity-25"></i>
+                <div class="py-4 text-center text-muted">
+                    <i class="opacity-25 bi bi-calculator display-4"></i>
                     <p class="mt-3 mb-0">Le résumé apparaîtra<br>après ajout des produits</p>
                 </div>
             @endif
@@ -527,14 +527,14 @@
     </div>
 
     <!-- Section Paiement -->
-    <div class="card border-0 shadow-sm mb-4 hover-lift">
-        <div class="card-header bg-gradient-info text-white border-0 rounded-top">
+    <div class="mb-4 border-0 shadow-sm card hover-lift">
+        <div class="text-white border-0 card-header bg-gradient-info rounded-top">
             <h5 class="mb-0">
                 <i class="bi bi-credit-card me-2"></i>
                 Paiement
             </h5>
         </div>
-        <div class="card-body p-4">
+        <div class="p-4 card-body">
             <div class="mb-3">
             <label for="paid_amount" class="form-label fw-semibold">
                 Montant payé <span class="text-danger">*</span>
@@ -568,7 +568,7 @@
                 <!-- Boutons de montant rapide -->
                 <div class="mb-3">
                     <label class="form-label fw-semibold small">Montant rapide:</label>
-                    <div class="d-flex flex-wrap gap-2">
+                    <div class="flex-wrap gap-2 d-flex">
                         <button type="button" class="btn btn-outline-secondary btn-sm"
                                 wire:click="setExactAmount">
                             Exact
@@ -612,9 +612,9 @@
     </div>
 
     <!-- Actions -->
-    <div class="card border-0 shadow-sm hover-lift">
-        <div class="card-body p-4">
-            <div class="d-grid gap-2">
+    <div class="border-0 shadow-sm card hover-lift">
+        <div class="p-4 card-body">
+            <div class="gap-2 d-grid">
                 <button type="submit"
                         class="btn btn-success btn-lg"
                         wire:target="save"
@@ -657,7 +657,7 @@
             </div>
 
             @if(empty($items) || !$client_id)
-                <div class="alert alert-warning border-0 mt-3 rounded-3">
+                <div class="mt-3 border-0 alert alert-warning rounded-3">
                     <small>
                         <i class="bi bi-info-circle me-1"></i>
                         @if(!$client_id && empty($items))
@@ -672,8 +672,8 @@
             @endif
 
             @error('stock_error')
-                <div class="alert alert-danger border-0 mt-3 rounded-3">
-                    <div class="fw-semibold mb-1">
+                <div class="mt-3 border-0 alert alert-danger rounded-3">
+                    <div class="mb-1 fw-semibold">
                         <i class="bi bi-exclamation-triangle me-1"></i>
                         Erreurs de stock:
                     </div>
