@@ -27,77 +27,93 @@
     </nav>
 
     <!-- Accordion Filters -->
-    <div class="accordion mb-4" id="filterAccordion">
-        <div class="accordion-item shadow-sm">
-            <h2 class="accordion-header" id="headingFilters">
-                <button class="accordion-button bg-light" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFilters" aria-expanded="false" aria-controls="collapseFilters">
-                    <i class="bi bi-funnel me-2"></i> Filtres de recherche
-                </button>
-            </h2>
-            <div id="collapseFilters" class="accordion-collapse collapse show" aria-labelledby="headingFilters" data-bs-parent="#filterAccordion">
-                <div class="accordion-body">
-                    <form method="GET" action="{{ route('cash-registers.index') }}" class="row g-3">
-                        <div class="col-md-3">
-                            <label for="search" class="form-label">Recherche</label>
-                            <div class="input-group">
-                                <span class="input-group-text">
-                                    <i class="bi bi-search"></i>
-                                </span>
-                                <input type="text"
-                                    class="form-control"
-                                    id="search"
-                                    name="search"
-                                    value="{{ request('search') }}"
-                                    placeholder="Utilisateur, stock, statut...">
-                            </div>
-                        </div>
-
-                        <div class="col-md-2">
-                            <label for="agency_id" class="form-label">Agence</label>
-                            <select class="form-select" id="agency_id" name="agency_id">
-                                <option value="">Toutes</option>
-                                @foreach($agencies as $agency)
-                                    <option value="{{ $agency->id }}"
-                                            {{ request('agency_id') == $agency->id ? 'selected' : '' }}>
-                                        {{ $agency->name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <div class="col-md-2">
-                            <label for="status" class="form-label">Statut</label>
-                            <select class="form-select" id="status" name="status">
-                                <option value="">Tous</option>
-                                <option value="open" {{ request('status') == 'open' ? 'selected' : '' }}>Ouverte</option>
-                                <option value="closed" {{ request('status') == 'closed' ? 'selected' : '' }}>Fermée</option>
-                                <option value="suspended" {{ request('status') == 'suspended' ? 'selected' : '' }}>Suspendue</option>
-                            </select>
-                        </div>
-
-                        <div class="col-md-2">
-                            <label for="date_from" class="form-label">Date début</label>
-                            <input type="date" class="form-control" id="date_from" name="date_from" value="{{ request('date_from') }}">
-                        </div>
-
-                        <div class="col-md-2">
-                            <label for="date_to" class="form-label">Date fin</label>
-                            <input type="date" class="form-control" id="date_to" name="date_to" value="{{ request('date_to') }}">
-                        </div>
-
-                        <div class="col-md-1 d-flex align-items-end">
-                            <button type="submit" class="btn btn-outline-primary me-2">
+    @php
+    $filtersActive = request()->hasAny(['search', 'agency_id', 'status', 'date_from', 'date_to']);
+@endphp
+@php
+    $filtersActive = request()->hasAny(['search', 'agency_id', 'status', 'date_from', 'date_to']);
+@endphp
+<!-- Accordion Filters -->
+<div class="accordion mb-4" id="filterAccordion">
+    <div class="accordion-item shadow-sm">
+        <h2 class="accordion-header" id="headingFilters">
+            <button class="accordion-button bg-light {{ $filtersActive ? '' : 'collapsed' }}"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#collapseFilters"
+                    aria-expanded="{{ $filtersActive ? 'true' : 'false' }}"
+                    aria-controls="collapseFilters">
+                <i class="bi bi-funnel me-2"></i> Filtres de recherche
+            </button>
+        </h2>
+        <div id="collapseFilters"
+             class="accordion-collapse collapse {{ $filtersActive ? 'show' : '' }}"
+             aria-labelledby="headingFilters"
+             data-bs-parent="#filterAccordion">
+            <div class="accordion-body">
+                <form method="GET" action="{{ route('cash-registers.index') }}" class="row g-3">
+                    <div class="col-md-3">
+                        <label for="search" class="form-label">Recherche</label>
+                        <div class="input-group">
+                            <span class="input-group-text">
                                 <i class="bi bi-search"></i>
-                            </button>
-                            <a href="{{ route('cash-registers.index') }}" class="btn btn-outline-secondary">
-                                <i class="bi bi-arrow-clockwise"></i>
-                            </a>
+                            </span>
+                            <input type="text"
+                                   class="form-control"
+                                   id="search"
+                                   name="search"
+                                   value="{{ request('search') }}"
+                                   placeholder="Utilisateur, stock, statut...">
                         </div>
-                    </form>
-                </div>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label for="agency_id" class="form-label">Agence</label>
+                        <select class="form-select" id="agency_id" name="agency_id">
+                            <option value="">Toutes</option>
+                            @foreach($agencies as $agency)
+                                <option value="{{ $agency->id }}"
+                                        {{ request('agency_id') == $agency->id ? 'selected' : '' }}>
+                                    {{ $agency->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label for="status" class="form-label">Statut</label>
+                        <select class="form-select" id="status" name="status">
+                            <option value="">Tous</option>
+                            <option value="open" {{ request('status') == 'open' ? 'selected' : '' }}>Ouverte</option>
+                            <option value="closed" {{ request('status') == 'closed' ? 'selected' : '' }}>Fermée</option>
+                            <option value="suspended" {{ request('status') == 'suspended' ? 'selected' : '' }}>Suspendue</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label for="date_from" class="form-label">Date début</label>
+                        <input type="date" class="form-control" id="date_from" name="date_from" value="{{ request('date_from') }}">
+                    </div>
+
+                    <div class="col-md-2">
+                        <label for="date_to" class="form-label">Date fin</label>
+                        <input type="date" class="form-control" id="date_to" name="date_to" value="{{ request('date_to') }}">
+                    </div>
+
+                    <div class="col-md-1 d-flex align-items-end">
+                        <button type="submit" class="btn btn-outline-primary me-2">
+                            <i class="bi bi-search"></i>
+                        </button>
+                        <a href="{{ route('cash-registers.index') }}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-clockwise"></i>
+                        </a>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
+</div>
+
 
     <!-- Results Card -->
     <div class="card shadow-sm">
@@ -114,8 +130,9 @@
                         <thead class="table-light">
                             <tr>
                                 <th>Utilisateur</th>
-                                <th>Solde ouverture</th>
-                                <th>Solde fermeture</th>
+                                {{-- <th>Solde ouverture</th>
+                                <th>Solde fermeture</th> --}}
+                                <th>Solde actuel</th>
                                 <th>Statut</th>
                                 <th>Dates</th>
                                 <th>Agence</th>
@@ -137,7 +154,7 @@
                                         </div>
                                     </td>
 
-                                    <td>
+                                    {{-- <td>
                                         <span class="badge bg-success">
                                             <i class="bi bi-cash me-1"></i>
                                             {{ number_format($cashRegister->opening_balance, 2) }} Fbu
@@ -152,6 +169,12 @@
                                         @else
                                             <span class="text-muted">Non défini</span>
                                         @endif
+                                    </td> --}}
+                                    <td>
+                                        <span class="badge bg-info">
+                                            <i class="bi bi-cash-stack me-1"></i>
+                                            {{ number_format($cashRegister->balance, 2) }} Fbu
+                                        </span>
                                     </td>
                                     <td>
                                         @switch($cashRegister->status)

@@ -25,6 +25,7 @@ class Category extends Model
         'user_id',
     ];
 
+   
     /**
      * Get the attributes that should be cast.
      *

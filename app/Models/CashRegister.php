@@ -29,6 +29,8 @@ class CashRegister extends Model
         'created_by',
     ];
 
+    public $appends = ['balance'];
+
     /**
      * Get the attributes that should be cast.
      *
@@ -47,6 +49,11 @@ class CashRegister extends Model
             'agency_id' => 'integer',
             'created_by' => 'integer',
         ];
+    }
+
+    public function getBalanceAttribute()
+    {
+        return $this->cashTransactions()->sum('amount');
     }
 
     public function user(): BelongsTo

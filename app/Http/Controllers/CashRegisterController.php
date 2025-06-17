@@ -21,7 +21,8 @@ class CashRegisterController extends Controller
         if ($request->filled('search')) {
             $query->where(function ($q) use ($request) {
                 $q->whereHas('user', function ($userQuery) use ($request) {
-                    $userQuery->where('name', 'like', '%' . $request->search . '%')
+                    $userQuery->where('first_name', 'like', '%' . $request->search . '%')
+                             ->orWhere('last_name', 'like', '%' . $request->search . '%')
                              ->orWhere('email', 'like', '%' . $request->search . '%');
                 })
                 ->orWhereHas('stock', function ($stockQuery) use ($request) {
