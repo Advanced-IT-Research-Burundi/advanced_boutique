@@ -24,7 +24,8 @@ class Product extends Model
         'description',
         'category_id',
         'purchase_price',
-        'sale_price',
+        'sale_price_ht',
+        'sale_price_ttc',
         'unit',
         'image',
         'alert_quantity',
@@ -32,6 +33,8 @@ class Product extends Model
         'created_by',
         'user_id',
     ];
+
+    protected $appends = ['sale_price'];
 
     /**
      * Get the attributes that should be cast.
@@ -52,6 +55,10 @@ class Product extends Model
         ];
     }
 
+    public function getSalePriceAttribute()
+    {
+        return $this->sale_price_ttc;
+    }
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class, 'category_id');
