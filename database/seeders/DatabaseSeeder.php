@@ -47,6 +47,15 @@ class DatabaseSeeder extends Seeder
         $user->agency_id = $agency->id;
         $user->save();
 
+        $stock = \App\Models\Stock::create([
+            'name' => 'Stock Principal',
+            'location' => 'Avenue de la Croix Rouge , N° 3688',
+            'description' => 'Stock Principal',
+            'agency_id' => $agency->id,
+            'created_by' => $user->id,
+            'user_id' => $user->id,
+        ]);
+
 
         // \App\Models\Company::factory(1)->create();
         // \App\Models\Stock::factory(1)->create();
