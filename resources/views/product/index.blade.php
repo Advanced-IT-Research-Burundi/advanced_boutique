@@ -78,31 +78,7 @@
                             </select>
                         </div>
 
-                        {{-- <div class="col-md-2">
-                            <label for="created_by" class="form-label">Créé par</label>
-                            <select class="form-select" id="created_by" name="created_by">
-                                <option value="">Tous</option>
-                                @foreach($creators as $creator)
-                                    <option value="{{ $creator->id }}"
-                                            {{ request('created_by') == $creator->id ? 'selected' : '' }}>
-                                        {{ $creator->name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
 
-                        <div class="col-md-2">
-                            <label for="user_id" class="form-label">Assigné à</label>
-                            <select class="form-select" id="user_id" name="user_id">
-                                <option value="">Tous</option>
-                                @foreach($users as $user)
-                                    <option value="{{ $user->id }}"
-                                            {{ request('user_id') == $user->id ? 'selected' : '' }}>
-                                        {{ $user->name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div> --}}
 
                         <div class="col-md-1 d-flex align-items-end">
                             <button type="submit" class="btn btn-outline-primary me-2">
@@ -266,7 +242,7 @@
                                 Affichage de {{ $products->firstItem() }} à {{ $products->lastItem() }}
                                 sur {{ $products->total() }} résultats
                             </div>
-                            {{ $products->links() }}
+                            {{ $products->appends(request()->query())->links() }}
                         </div>
                     </div>
                 @endif

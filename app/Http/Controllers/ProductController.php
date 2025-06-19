@@ -37,21 +37,12 @@ class ProductController extends Controller
             $query->where('agency_id', $request->agency_id);
         }
 
-        // if ($request->filled('created_by')) {
-        //     $query->where('created_by', $request->created_by);
-        // }
-
-        // if ($request->filled('user_id')) {
-        //     $query->where('user_id', $request->user_id);
-        // }
 
         $products = $query->orderBy('created_at', 'desc')->paginate(15);
 
         // Données pour les filtres
         $categories = Category::orderBy('name')->get();
         $agencies = Agency::orderBy('name')->get();
-        // $creators = User::whereIn('id', Product::distinct()->pluck('created_by'))->latest()->get();
-        // $users = User::latest()->get();
 
         return view('product.index', compact('products', 'categories', 'agencies'));
     }

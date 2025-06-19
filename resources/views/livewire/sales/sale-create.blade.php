@@ -498,6 +498,56 @@
         </div>
         <div class="p-4 card-body">
             @if(count($items) > 0)
+                <!-- Liste des produits sélectionnés -->
+                <div class="mb-3">
+                    <h6 class="mb-2 fw-semibold text-muted">Produits sélectionnés:</h6>
+                    <div style="max-height: 250px; overflow-y: auto;">
+                        @foreach($items as $item)
+                            @php
+                                $product = $products->find($item['product_id']);
+                                $quantity = floatval($item['quantity']);
+                                $price = floatval($item['sale_price']);
+                                $discount = floatval($item['discount'] ?? 0);
+                                $subtotal = $quantity * $price;
+                                $discountAmount = ($subtotal * $discount) / 100;
+                                $finalAmount = $subtotal - $discountAmount;
+                            @endphp
+                            <div class="mb-2 border rounded p-2 bg-light">
+                                <div class="d-flex align-items-center">
+                                    @if($product && $product->image)
+                                        <img src="{{ asset('storage/' . $product->image) }}"
+                                            alt="{{ $product->name }}"
+                                            class="rounded me-2"
+                                            style="width: 30px; height: 30px; object-fit: cover;">
+                                    @else
+                                        <div class="bg-opacity-10 rounded bg-primary me-2 d-flex align-items-center justify-content-center"
+                                            style="width: 30px; height: 30px;">
+                                            <i class="bi bi-box text-primary small"></i>
+                                        </div>
+                                    @endif
+                                    <div class="flex-grow-1">
+                                        <div class="fw-semibold small">{{ $product->name ?? 'Produit inconnu' }}</div>
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span class="text-muted small">
+                                                {{ $quantity }} × {{ number_format($price, 0, ',', ' ') }} Fbu
+                                                @if($discount > 0)
+                                                    <span class="text-warning">(-{{ $discount }}%)</span>
+                                                @endif
+                                            </span>
+                                            <span class="fw-semibold small text-success">
+                                                {{ number_format($finalAmount, 0, ',', ' ') }} Fbu
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+
+                <hr class="my-3">
+
+                <!-- Totaux -->
                 <div class="mb-3 summary-item d-flex justify-content-between">
                     <span class="text-muted">Articles:</span>
                     <span class="fw-semibold">{{ count($items) }}</span>
@@ -508,14 +558,14 @@
                 </div>
                 @if($total_discount > 0)
                     <div class="mb-3 summary-item d-flex justify-content-between">
-                        <span class="text-muted">Remise:</span>
-                        <span class="fw-semibold text-warning">-{{ number_format($total_discount, 0, ',', ' ') }} F</span>
+                        <span class="text-muted">Remise totale:</span>
+                        <span class="fw-semibold text-warning">-{{ number_format($total_discount, 0, ',', ' ') }} Fbu</span>
                     </div>
                 @endif
                 <hr>
                 <div class="mb-4 summary-item d-flex justify-content-between">
                     <span class="fw-bold fs-5">Total:</span>
-                    <span class="fw-bold fs-5 text-success">{{ number_format($total_amount, 0, ',', ' ') }} F</span>
+                    <span class="fw-bold fs-5 text-success">{{ number_format($total_amount, 0, ',', ' ') }} Fbu</span>
                 </div>
             @else
                 <div class="py-4 text-center text-muted">
