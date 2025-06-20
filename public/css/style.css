@@ -101,7 +101,7 @@ body {
     height: var(--navbar-height);
     background: linear-gradient(135deg, #ffffff 0%, #f8fbff 100%);
     border-bottom: 2px solid var(--border-color);
-    padding: 0 2rem;
+    padding: 2rem 2rem;
     display: flex;
     align-items: center;
     justify-content: between;

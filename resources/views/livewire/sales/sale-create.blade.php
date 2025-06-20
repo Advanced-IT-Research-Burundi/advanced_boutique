@@ -390,12 +390,19 @@
                                 @endif
                             </h5>
                             @if(count($items) > 0)
+                            <div class="d-flex">
+                                <button type="button" wire:click="validateSale" class="btn btn-primary btn-sm mr-2">
+                                            <i class="bi bi-check me-1"></i>
+                                            Valider
+                                 </button>
                                 <button type="button" class="btn btn-outline-light btn-sm"
                                         wire:click="clearCart"
                                         wire:confirm="Êtes-vous sûr de vouloir vider le panier ?">
                                     <i class="bi bi-trash me-1"></i>
                                     Vider
                                 </button>
+                            </div>
+
                             @endif
                         </div>
                     </div>
@@ -632,6 +639,7 @@
                                 </div>
                                 <div class="col-6">
                                     @if(count($items) > 0)
+
                                         <button type="button"
                                                 class="btn btn-outline-warning w-100"
                                                 wire:click="clearCart"
@@ -640,6 +648,7 @@
                                             Vider
                                         </button>
                                     @else
+
                                         <button type="button" class="btn btn-outline-secondary w-100" disabled>
                                             <i class="bi bi-trash me-1"></i>
                                             Vider

@@ -522,6 +522,10 @@ class SaleCreate extends Component
         }
     }
 
+    public function validateSale(){
+        $this->calculateTotals();
+    }
+
     public function save()
     {
         // Synchroniser les items du panier
@@ -636,4 +640,4 @@ class SaleCreate extends Component
 
         return view('livewire.sales.sale-create');
     }
-} 
+}
