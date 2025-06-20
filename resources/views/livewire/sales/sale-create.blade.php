@@ -400,7 +400,7 @@
                         </div>
                     </div>
                     <div class="p-0 card-body">
-                        @if(empty($items))
+                        @if(count($items) == 0)
                             <div class="p-4 py-5 text-center text-muted">
                                 <div class="mb-3">
                                     <i class="opacity-25 bi bi-cart-x display-4"></i>
@@ -409,103 +409,98 @@
                                 <p class="mb-0 small">Ajoutez des produits pour commencer</p>
                             </div>
                         @else
-                            <div style="max-height: 400px; overflow-y: auto;">
-                                @foreach($items as $item)
-                                    @php
-                                        $product = $products->find($item['product_id']);
-                                        $quantity = floatval($item['quantity']);
-                                        $price = floatval($item['sale_price']);
-                                        $discount = floatval($item['discount'] ?? 0);
-                                        $subtotal = $quantity * $price;
-                                        $discountAmount = ($subtotal * $discount) / 100;
-                                        $finalAmount = $subtotal - $discountAmount;
-                                    @endphp
-                                    <div class="p-3 border-bottom cart-item" wire:key="cart-item-{{ $item['product_id'] }}">
-                                        <div class="d-flex align-items-start">
-                                            @if($product && $product->image)
-                                                <img src="{{ asset('storage/' . $product->image) }}"
-                                                    alt="{{ $product->name }}"
-                                                    class="rounded me-3"
-                                                    style="width: 40px; height: 40px; object-fit: cover;">
-                                            @else
-                                                <div class="bg-opacity-10 rounded bg-primary me-3 d-flex align-items-center justify-content-center"
-                                                    style="width: 40px; height: 40px;">
-                                                    <i class="bi bi-box text-primary"></i>
-                                                </div>
-                                            @endif
-                                            <div class="flex-grow-1">
-                                                <h6 class="mb-1 fw-semibold">{{ $product->name ?? 'Produit inconnu' }}</h6>
-
-                                                <!-- Quantité -->
-                                                <div class="mb-2">
-                                                    <label class="form-label small">Quantité:</label>
-                                                    <input type="number"
-                                                        class="form-control form-control-sm"
-                                                        wire:change="updateItemQuantity({{ $item['product_id'] }}, $event.target.value)"
-                                                        value="{{ $item['quantity'] }}"
-                                                        min="0.01"
-                                                        step="0.01"
-                                                        style="width: 80px;">
-                                                </div>
-
-                                                <!-- Prix unitaire -->
-                                                <div class="mb-2">
-                                                    <label class="form-label small">Prix:</label>
-                                                    <div class="input-group input-group-sm">
-                                                        <input type="number"
-                                                            class="form-control"
-                                                            wire:change="updateItemPrice({{ $item['product_id'] }}, $event.target.value)"
-                                                            value="{{ $item['sale_price'] }}"
-                                                            min="0"
-                                                            step="0.01">
-                                                        <span class="input-group-text">Fbu</span>
+                            <table class="table table-sm table-striped">
+                                <thead>
+                                    <tr>
+                                        <th class="text-center" style="width: 40px;">Image</th>
+                                        <th>Nom</th>
+                                        <th class="text-center" style="width: 100px;">Quantité</th>
+                                        <th class="text-center" style="width: 100px;">Prix</th>
+                                        <th class="text-center" style="width: 70px;">Remise</th>
+                                        <th class="text-center" style="width: 120px;">Total</th>
+                                        <th class="text-center" style="width: 40px;"></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($items as $item)
+                                        @php
+                                            $product = $products->find($item['product_id']);
+                                            $quantity = floatval($item['quantity']);
+                                            $price = floatval($item['sale_price']);
+                                            $discount = floatval($item['discount'] ?? 0);
+                                            $subtotal = $quantity * $price;
+                                            $discountAmount = ($subtotal * $discount) / 100;
+                                            $finalAmount = $subtotal - $discountAmount;
+                                        @endphp
+                                        <tr wire:key="cart-item-{{ $item['product_id'] }}">
+                                            <td class="text-center">
+                                                @if($product && $product->image)
+                                                    <img src="{{ asset('storage/' . $product->image) }}"
+                                                        alt="{{ $product->name }}"
+                                                        class="rounded"
+                                                        style="width: 40px; height: 40px; object-fit: cover;">
+                                                @else
+                                                    <div class="bg-opacity-10 rounded bg-primary d-flex align-items-center justify-content-center"
+                                                        style="width: 40px; height: 40px;">
+                                                        <i class="bi bi-box text-primary"></i>
                                                     </div>
-                                                </div>
+                                                @endif
+                                            </td>
+                                            <td>{{ $product->name ?? 'Produit inconnu' }}
 
-                                                <!-- Remise -->
-                                                <div class="mb-2">
-                                                    <label class="form-label small">Remise (%):</label>
+                                            <span class="badge {{ $item['available_stock'] <= ($product->alert_quantity ?? 5) ? 'bg-warning' : 'bg-success' }}">
+                                                {{ $item['available_stock'] }}
+                                            </span>
+                                            </td>
+                                            <td class="text-center">
+                                                <input type="number"
+                                                    class="text-center form-control form-control-sm"
+                                                    wire:change="updateItemQuantity({{ $item['product_id'] }}, $event.target.value)"
+                                                    value="{{ $item['quantity'] }}"
+                                                    min="0.01"
+                                                    step="0.01"
+                                                    style="width: 80px;">
+                                            </td>
+                                            <td class="text-center">
+                                                <div class="input-group input-group-sm">
                                                     <input type="number"
-                                                        class="form-control form-control-sm"
-                                                        wire:change="updateItemDiscount({{ $item['product_id'] }}, $event.target.value)"
-                                                        value="{{ $item['discount'] ?? 0 }}"
+                                                        class="text-center form-control"
+                                                        wire:change="updateItemPrice({{ $item['product_id'] }}, $event.target.value)"
+                                                        value="{{ $item['sale_price'] }}"
                                                         min="0"
-                                                        max="100"
-                                                        step="0.01"
-                                                        style="width: 70px;">
-                                                </div>
+                                                        step="0.01" style="width: 120px;">
 
-                                                <!-- Total et stock -->
-                                                <div class="d-flex justify-content-between align-items-center">
-                                                    <div>
-                                                        <div class="fw-bold text-success">{{ number_format($finalAmount, 0, ',', ' ') }} Fbu</div>
-                                                        @if($discount > 0)
-                                                            <small class="text-muted text-decoration-line-through">{{ number_format($subtotal, 0, ',', ' ') }} Fbu</small>
-                                                        @endif
-                                                    </div>
-                                                    <div class="text-end">
-                                                        <span class="badge {{ $item['available_stock'] <= ($product->alert_quantity ?? 5) ? 'bg-warning' : 'bg-success' }} d-block mb-1">
-                                                            Stock: {{ $item['available_stock'] }}
-                                                        </span>
-                                                        @if($item['quantity'] > $item['available_stock'])
-                                                            <small class="text-danger d-block">
-                                                                <i class="bi bi-exclamation-triangle"></i>
-                                                                Insuffisant
-                                                            </small>
-                                                        @endif
-                                                    </div>
                                                 </div>
-                                            </div>
-                                            <button type="button"
+                                            </td>
+                                            <td class="text-center">
+                                                <input type="number"
+                                                    class="text-center form-control form-control-sm"
+                                                    wire:change="updateItemDiscount({{ $item['product_id'] }}, $event.target.value)"
+                                                    value="{{ $item['discount'] ?? 0 }}"
+                                                    min="0"
+                                                    max="100"
+                                                    step="0.01"
+                                                    style="width: 70px;">
+                                            </td>
+                                            <td class="text-right">
+                                                <span class="fw-bold text-success">{{ number_format($finalAmount, 0, ',', ' ') }} </span>
+                                                @if($discount > 0)
+                                                    <small class="text-muted text-decoration-line-through">{{ number_format($subtotal, 0, ',', ' ') }} </small>
+                                                @endif
+                                            </td>
+
+                                            <td class="text-center">
+                                                <button type="button"
                                                     class="btn btn-outline-danger btn-sm ms-2"
                                                     wire:click="removeItem({{ $item['product_id'] }})"
                                                     title="Supprimer">
-                                                <i class="bi bi-trash"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                @endforeach
-                            </div>
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
 
                             <!-- Totaux dans le panier -->
                             <div class="p-3 border-top bg-light">
@@ -526,7 +521,7 @@
                                 </div>
                             </div>
                         @endif
-                    </div>
+                    </table>
                 </div>
 
                 <!-- Section Paiement -->
