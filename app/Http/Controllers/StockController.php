@@ -15,6 +15,11 @@ class StockController extends Controller
      * Display a listing of the resource.
      */
 
+     public function transfer()
+     {
+        return view('stock.transfer');
+     }
+
     public function mouvement($stock)
     {
         $stock = StockProduct::with(['stock', 'product', 'agency', 'stockProductMouvements'])->findOrFail($stock);

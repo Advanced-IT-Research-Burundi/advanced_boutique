@@ -489,7 +489,7 @@
                                                     step="0.01"
                                                     style="width: 70px;">
                                             </td>
-                                            <td class="text-right">
+                                            <td class="text-center">
                                                 <span class="fw-bold text-success">{{ number_format($finalAmount, 0, ',', ' ') }} </span>
                                                 @if($discount > 0)
                                                     <small class="text-muted text-decoration-line-through">{{ number_format($subtotal, 0, ',', ' ') }} </small>
