@@ -154,7 +154,6 @@
                 <button class="btn btn-outline-secondary sidebar-toggle me-3" id="sidebarToggle" type="button">
                     <i class="bi bi-list"></i>
                 </button>
-
                 <h5 class="mb-0 d-none d-md-block text-primary">@yield('page-title', 'Dashboard')</h5>
             </div>
 
@@ -532,6 +531,62 @@
         if (localStorage.getItem('theme') === 'dark') {
             document.body.classList.add('dark-theme');
         }
+
+        // Fonction pour basculer la barre latérale
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebar = document.getElementById('sidebar');
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            const mainWrapper = document.querySelector('.main-wrapper');
+
+            // Vérifier si l'état est sauvegardé dans localStorage
+            const isSidebarCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+
+            // Appliquer l'état initial
+            if (isSidebarCollapsed) {
+                sidebar.style.transform = 'translateX(-100%)';
+                mainWrapper.style.marginLeft = '0';
+                document.body.classList.add('sidebar-collapsed');
+            }
+
+            // Gérer le clic sur le bouton de bascule
+            sidebarToggle.addEventListener('click', function() {
+                const isCollapsed = sidebar.style.transform === 'translateX(-100%)' ||
+                                 getComputedStyle(sidebar).transform === 'matrix(1, 0, 0, 1, -280, 0)';
+
+                if (isCollapsed) {
+                    // Afficher la barre latérale
+                    sidebar.style.transform = 'translateX(0)';
+                    mainWrapper.style.marginLeft = 'var(--sidebar-width)';
+                    document.body.classList.remove('sidebar-collapsed');
+                    localStorage.setItem('sidebarCollapsed', 'false');
+                } else {
+                    // Cacher la barre latérale
+                    sidebar.style.transform = 'translateX(-100%)';
+                    mainWrapper.style.marginLeft = '0';
+                    document.body.classList.add('sidebar-collapsed');
+                    localStorage.setItem('sidebarCollapsed', 'true');
+                }
+            });
+
+            // Gérer le redimensionnement de la fenêtre
+            function handleResize() {
+                if (window.innerWidth < 992) {
+                    // Sur mobile, cacher la barre latérale par défaut
+                    sidebar.style.transform = 'translateX(-100%)';
+                    mainWrapper.style.marginLeft = '0';
+                    document.body.classList.add('sidebar-collapsed');
+                } else {
+                    // Sur desktop, afficher la barre latérale si elle n'était pas masquée manuellement
+                    if (localStorage.getItem('sidebarCollapsed') !== 'true') {
+                        sidebar.style.transform = 'translateX(0)';
+                        mainWrapper.style.marginLeft = 'var(--sidebar-width)';
+                        document.body.classList.remove('sidebar-collapsed');
+                    }
+                }
+            }
+
+            window.addEventListener('resize', handleResize);
+        });
     </script>
 
     @stack('scripts')
