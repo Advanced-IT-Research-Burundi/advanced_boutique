@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Client;
 use App\Models\Product;
 use App\Models\StockProduct;
 use Illuminate\Console\Command;
@@ -28,17 +29,20 @@ class UpdateDatabaseCommand extends Command
     public function handle()
     {
         //
-        $products = Product::all();
+
         // add progress indicator
-        $this->output->progressStart(count($products));
-        //StockProduct::truncate();
-        foreach ($products as $product) {
-            StockProduct::create([
-                'stock_id' => 1,
-                'product_name' => $product->name,
-                'product_id' => $product->id,
-                'quantity' => 10,
+        $this->output->progressStart(100);
+        //Ajouter la liste des clients de test
+        for($i=0; $i<100; $i++){
+            Client::create([
+                'name' => 'Client ' . $i,
+                'phone' => '0606060606',
+                'email' => 'client' . $i . '@gmail.com',
+                'address' => '123 Main St',
                 'agency_id' => 1,
+                'created_by' => 1,
+
+
             ]);
             $this->output->progressAdvance();
         }
