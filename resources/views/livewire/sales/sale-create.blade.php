@@ -2,7 +2,7 @@
     <form wire:submit.prevent="save">
         <div class="row g-4">
             <!-- Colonne principale gauche -->
-            <div class="col-xl-8">
+            <div class="col-md-6">
                 <!-- Section Client -->
                 <div class="mb-4 border-0 shadow-sm card hover-lift">
                     <div class="text-white border-0 card-header bg-gradient-primary rounded-top">
@@ -177,10 +177,10 @@
                                             $selectedCategory = $categories->firstWhere('id', $selected_category_id);
                                         @endphp
                                         @if($selectedCategory)
-                                            <div class="mt-3 p-3 bg-primary bg-opacity-10 border border-primary border-opacity-25 rounded-3">
+                                            <div class="p-3 mt-3 bg-opacity-10 border border-opacity-25 bg-primary border-primary rounded-3">
                                                 <div class="d-flex align-items-center justify-content-between">
                                                     <div class="d-flex align-items-center">
-                                                        <div class="p-2 bg-primary bg-opacity-20 rounded-circle me-3">
+                                                        <div class="p-2 bg-opacity-20 bg-primary rounded-circle me-3">
                                                             <i class="bi bi-funnel text-primary"></i>
                                                         </div>
                                                         <div>
@@ -286,8 +286,8 @@
                                         <div class="mt-2 row g-2" style="max-height: 500px; overflow-y: auto;">
                                             <!-- En-tête avec indicateur pour les produits filtrés -->
                                             @if($selected_category_id || $product_search)
-                                                <div class="col-12 mb-3">
-                                                    <div class="d-flex align-items-center justify-content-between p-3 bg-light rounded-3">
+                                                <div class="mb-3 col-12">
+                                                    <div class="p-3 d-flex align-items-center justify-content-between bg-light rounded-3">
                                                         <div class="d-flex align-items-center">
                                                             <i class="bi bi-funnel text-primary me-2"></i>
                                                             <span class="fw-semibold">
@@ -377,7 +377,7 @@
             </div>
 
             <!-- Colonne droite - Panier et Paiement -->
-            <div class="col-xl-4">
+            <div class="col-xl-6">
                 <!-- Section Produits Sélectionnés -->
                 <div class="mb-4 border-0 shadow-sm card hover-lift">
                     <div class="text-white border-0 card-header bg-gradient-success rounded-top">
@@ -399,7 +399,7 @@
                             @endif
                         </div>
                     </div>
-                    <div class="card-body p-0">
+                    <div class="p-0 card-body">
                         @if(empty($items))
                             <div class="p-4 py-5 text-center text-muted">
                                 <div class="mb-3">
@@ -509,12 +509,12 @@
 
                             <!-- Totaux dans le panier -->
                             <div class="p-3 border-top bg-light">
-                                <div class="d-flex justify-content-between mb-2">
+                                <div class="mb-2 d-flex justify-content-between">
                                     <span class="small">Sous-total:</span>
                                     <span class="fw-semibold">{{ number_format($total_subtotal, 0, ',', ' ') }} Fbu</span>
                                 </div>
                                 @if($total_discount > 0)
-                                    <div class="d-flex justify-content-between mb-2">
+                                    <div class="mb-2 d-flex justify-content-between">
                                         <span class="small">Remise:</span>
                                         <span class="fw-semibold text-warning">-{{ number_format($total_discount, 0, ',', ' ') }} Fbu</span>
                                     </div>
