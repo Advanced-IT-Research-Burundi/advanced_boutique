@@ -66,13 +66,8 @@ class SaleController extends Controller
 
     public function create()
     {
-        $clients = Client::orderBy('name')->get();
-        $products = Product::with('stocks')
-                          ->where('alert_quantity', '>', 0)
-                          ->orderBy('name')
-                          ->get();
 
-        return view('sale.create', compact('clients', 'products'));
+        return view('sale.create');
     }
 
     public function store(Request $request)
