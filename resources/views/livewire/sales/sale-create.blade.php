@@ -441,8 +441,11 @@
                                                 $subtotal = $quantity * $price;
                                                 $discountAmount = ($subtotal * $discount) / 100;
                                                 $finalAmount = $subtotal - $discountAmount;
+                                                $availableStock = $item['available_stock'] ?? 0;
+                                                $isOverStock = $quantity > $availableStock;
                                             @endphp
-                                            <tr wire:key="cart-item-{{ $item['product_id'] }}-{{ $index }}">
+                                            <tr wire:key="cart-item-{{ $item['product_id'] }}-{{ $index }}"
+                                                class="{{ $isOverStock ? 'table-danger border-danger' : '' }}">
                                                 <td class="text-center">
                                                     @if(isset($item['image']) && $item['image'])
                                                         <img src="{{ asset('storage/' . $item['image']) }}"
@@ -459,19 +462,39 @@
                                                 <td>
                                                     <div class="d-flex flex-column">
                                                         <span class="fw-semibold">Produit #{{ $item['product_id'] }}</span>
-                                                        <span class="badge {{ $item['available_stock'] <= 5 ? 'bg-warning' : 'bg-success' }} badge-sm">
-                                                            Stock: {{ $item['available_stock'] }}
-                                                        </span>
+                                                        <div class="d-flex align-items-center gap-2">
+                                                            <span class="badge {{ $availableStock <= 5 ? 'bg-warning' : 'bg-success' }} badge-sm">
+                                                                Stock: {{ $availableStock }}
+                                                            </span>
+                                                            @if($isOverStock)
+                                                                <span class="badge bg-danger badge-sm">
+                                                                    <i class="bi bi-exclamation-triangle me-1"></i>
+                                                                    Stock dépassé
+                                                                </span>
+                                                            @endif
+                                                        </div>
                                                     </div>
                                                 </td>
                                                 <td class="text-center">
-                                                    <input type="number"
-                                                        class="text-center form-control form-control-sm"
-                                                        wire:change="updateItemQuantity({{ $item['product_id'] }}, $event.target.value)"
-                                                        value="{{ $item['quantity'] }}"
-                                                        min="0.01"
-                                                        step="0.01"
-                                                        style="width: 80px;">
+                                                    <div class="position-relative">
+                                                        <input type="number"
+                                                            class="text-center form-control form-control-sm {{ $isOverStock ? 'is-invalid' : '' }}"
+                                                            wire:change="updateItemQuantity({{ $item['product_id'] }}, $event.target.value)"
+                                                            value="{{ $item['quantity'] }}"
+                                                            min="0.01"
+                                                            max="{{ $availableStock }}"
+                                                            step="0.01"
+                                                            style="width: 80px;"
+                                                            data-product-id="{{ $item['product_id'] }}"
+                                                            data-available-stock="{{ $availableStock }}"
+                                                            onkeyup="validateQuantity(this)">
+
+                                                        @if($isOverStock)
+                                                            <div class="invalid-tooltip">
+                                                                Max: {{ $availableStock }}
+                                                            </div>
+                                                        @endif
+                                                    </div>
                                                 </td>
                                                 <td class="text-center">
                                                     <input type="number"
@@ -493,10 +516,22 @@
                                                         style="width: 70px;">
                                                 </td>
                                                 <td class="text-center">
-                                                    <span class="fw-bold text-success">{{ number_format($finalAmount, 0, ',', ' ') }} Fbu</span>
-                                                    @if($discount > 0)
-                                                        <small class="text-muted text-decoration-line-through d-block">{{ number_format($subtotal, 0, ',', ' ') }} Fbu</small>
-                                                    @endif
+                                                    <div class="d-flex flex-column align-items-center">
+                                                        <span class="fw-bold {{ $isOverStock ? 'text-danger' : 'text-success' }}">
+                                                            {{ number_format($finalAmount, 0, ',', ' ') }} Fbu
+                                                        </span>
+                                                        @if($discount > 0)
+                                                            <small class="text-muted text-decoration-line-through">
+                                                                {{ number_format($subtotal, 0, ',', ' ') }} Fbu
+                                                            </small>
+                                                        @endif
+                                                        @if($isOverStock)
+                                                            <small class="text-danger">
+                                                                <i class="bi bi-exclamation-triangle"></i>
+                                                                Stock insuffisant
+                                                            </small>
+                                                        @endif
+                                                    </div>
                                                 </td>
                                                 <td class="text-center">
                                                     <button type="button"
@@ -510,6 +545,29 @@
                                         @endforeach
                                     </tbody>
                                 </table>
+
+                                <!-- Alerte globale pour les stocks insuffisants -->
+                                @php
+                                    $hasOverStockItems = collect($items)->contains(function($item) {
+                                        return floatval($item['quantity']) > ($item['available_stock'] ?? 0);
+                                    });
+                                @endphp
+
+                                @if($hasOverStockItems)
+                                    <div class="mx-3 mb-3 alert alert-danger border-0 rounded-3" role="alert">
+                                        <div class="d-flex align-items-center">
+                                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                                            <div>
+                                                <strong>Attention!</strong>
+                                                Certains produits ont une quantité supérieure au stock disponible.
+                                                <br>
+                                                <small>
+                                                    Veuillez ajuster les quantités avant de procéder à la vente.
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endif
                             </div>
 
                             <!-- Totaux dans le panier -->
@@ -616,14 +674,20 @@
                 <div class="border-0 shadow-sm card hover-lift">
                     <div class="p-4 card-body">
                         <div class="gap-2 d-grid">
+                            @php
+                                $hasStockErrors = collect($items)->contains(function($item) {
+                                    return floatval($item['quantity']) > ($item['available_stock'] ?? 0);
+                                });
+                            @endphp
+
                             <button type="submit"
                                     class="btn btn-success btn-lg"
                                     wire:target="save"
                                     wire:loading.attr="disabled"
-                                    {{ empty($items) || !$client_id ? 'disabled' : '' }}>
+                                    {{ empty($items) || !$client_id || $hasStockErrors ? 'disabled' : '' }}>
                                 <span wire:loading.remove wire:target="save">
                                     <i class="bi bi-check-circle me-2"></i>
-                                    Enregistrer la vente
+                                    {{ $hasStockErrors ? 'Corriger les stocks avant de sauvegarder' : 'Enregistrer la vente' }}
                                 </span>
                                 <span wire:loading wire:target="save">
                                     <i class="spinner-border spinner-border-sm me-2"></i>
@@ -663,7 +727,7 @@
                             </div>
                         </div>
 
-                        @if(empty($items) || !$client_id)
+                        @if(empty($items) || !$client_id || $hasStockErrors)
                             <div class="mt-3 border-0 alert alert-warning rounded-3">
                                 <small>
                                     <i class="bi bi-info-circle me-1"></i>
@@ -671,12 +735,24 @@
                                         Sélectionnez un client et ajoutez des produits pour continuer
                                     @elseif(!$client_id)
                                         Sélectionnez un client pour continuer
-                                    @else
+                                    @elseif(empty($items))
                                         Ajoutez des produits pour continuer
+                                    @elseif($hasStockErrors)
+                                        Corrigez les quantités supérieures au stock disponible avant de continuer
                                     @endif
                                 </small>
                             </div>
                         @endif
+
+                        @error('stock_validation')
+                            <div class="mt-3 border-0 alert alert-danger rounded-3">
+                                <div class="mb-1 fw-semibold">
+                                    <i class="bi bi-exclamation-triangle me-1"></i>
+                                    Erreur de validation:
+                                </div>
+                                <small>{{ $message }}</small>
+                            </div>
+                        @enderror
 
                         @error('stock_error')
                             <div class="mt-3 border-0 alert alert-danger rounded-3">
@@ -962,11 +1038,94 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Amélioration de l'UX avec des feedbacks visuels
+    // Validation en temps réel de la quantité
+    window.validateQuantity = function(input) {
+        const quantity = parseFloat(input.value) || 0;
+        const availableStock = parseFloat(input.dataset.availableStock) || 0;
+        const productId = input.dataset.productId;
 
-    // Animation lors de l'ajout au panier
+        // Supprimer les classes précédentes
+        input.classList.remove('is-invalid', 'is-valid');
+
+        // Supprimer l'ancien tooltip s'il existe
+        const existingTooltip = input.parentNode.querySelector('.invalid-tooltip');
+        if (existingTooltip) {
+            existingTooltip.remove();
+        }
+
+        if (quantity > availableStock) {
+            // Ajouter la classe d'erreur
+            input.classList.add('is-invalid');
+
+            // Créer le tooltip d'erreur
+            const tooltip = document.createElement('div');
+            tooltip.className = 'invalid-tooltip';
+            tooltip.textContent = `Max: ${availableStock}`;
+            input.parentNode.appendChild(tooltip);
+
+            // Marquer la ligne en rouge
+            const row = input.closest('tr');
+            if (row) {
+                row.classList.add('table-danger', 'border-danger');
+            }
+
+            // Afficher une alerte toast (optionnel)
+            showStockAlert(productId, quantity, availableStock);
+        } else if (quantity > 0) {
+            // Quantité valide
+            input.classList.add('is-valid');
+
+            // Retirer la couleur rouge de la ligne
+            const row = input.closest('tr');
+            if (row) {
+                row.classList.remove('table-danger', 'border-danger');
+            }
+        }
+    };
+
+    // Fonction pour afficher une alerte toast
+    window.showStockAlert = function(productId, quantity, availableStock) {
+        // Éviter les alertes répétitives
+        if (window.lastAlertTime && Date.now() - window.lastAlertTime < 2000) {
+            return;
+        }
+        window.lastAlertTime = Date.now();
+
+        // Créer un toast personnalisé
+        const toast = document.createElement('div');
+        toast.className = 'toast-custom alert alert-warning position-fixed';
+        toast.style.cssText = `
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            min-width: 300px;
+            animation: slideInRight 0.3s ease;
+        `;
+
+        toast.innerHTML = `
+            <div class="d-flex align-items-center">
+                <i class="bi bi-exclamation-triangle me-2"></i>
+                <div>
+                    <strong>Stock insuffisant!</strong><br>
+                    <small>Produit #${productId}: Stock disponible ${availableStock}, quantité demandée ${quantity}</small>
+                </div>
+                <button type="button" class="btn-close ms-auto" onclick="this.parentElement.parentElement.remove()"></button>
+            </div>
+        `;
+
+        document.body.appendChild(toast);
+
+        // Auto-supprimer après 5 secondes
+        setTimeout(() => {
+            if (toast.parentNode) {
+                toast.style.animation = 'slideOutRight 0.3s ease';
+                setTimeout(() => toast.remove(), 300);
+            }
+        }, 5000);
+    };
+
+    // Amélioration de l'UX avec des feedbacks visuels
     Livewire.on('productAdded', () => {
-        // Petit effet visuel pour confirmer l'ajout
         const cartBadge = document.querySelector('.badge.bg-light.text-success');
         if (cartBadge) {
             cartBadge.classList.add('badge-pulse');
@@ -975,6 +1134,51 @@ document.addEventListener('DOMContentLoaded', function() {
             }, 2000);
         }
     });
+
+    // Gestion des événements Livewire pour les alertes
+    Livewire.on('error', (event) => {
+        showToast(event.message, 'error');
+    });
+
+    Livewire.on('success', (event) => {
+        showToast(event.message, 'success');
+    });
+
+    // Fonction générique pour afficher des toasts
+    window.showToast = function(message, type = 'info') {
+        const toast = document.createElement('div');
+        const alertClass = type === 'error' ? 'alert-danger' :
+                          type === 'success' ? 'alert-success' : 'alert-info';
+
+        toast.className = `toast-custom alert ${alertClass} position-fixed`;
+        toast.style.cssText = `
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            min-width: 300px;
+            animation: slideInRight 0.3s ease;
+        `;
+
+        const icon = type === 'error' ? 'bi-exclamation-triangle' :
+                    type === 'success' ? 'bi-check-circle' : 'bi-info-circle';
+
+        toast.innerHTML = `
+            <div class="d-flex align-items-center">
+                <i class="bi ${icon} me-2"></i>
+                <div class="flex-grow-1">${message}</div>
+                <button type="button" class="btn-close ms-2" onclick="this.parentElement.parentElement.remove()"></button>
+            </div>
+        `;
+
+        document.body.appendChild(toast);
+
+        setTimeout(() => {
+            if (toast.parentNode) {
+                toast.style.animation = 'slideOutRight 0.3s ease';
+                setTimeout(() => toast.remove(), 300);
+            }
+        }, type === 'error' ? 7000 : 4000);
+    };
 
     // Smooth scroll pour les sections
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {

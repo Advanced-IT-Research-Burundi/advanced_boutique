@@ -659,7 +659,28 @@ class SaleCreate extends Component
 
         $this->validate();
 
+        // Vérifier le stock avant de procéder
         if (!$this->validateStock()) {
+            return;
+        }
+
+        // Vérification supplémentaire des quantités en temps réel
+        $hasStockErrors = false;
+        foreach ($this->items as $item) {
+            $quantity = floatval($item['quantity']);
+            $availableStock = floatval($item['available_stock'] ?? 0);
+
+            if ($quantity > $availableStock) {
+                $hasStockErrors = true;
+                break;
+            }
+        }
+
+        if ($hasStockErrors) {
+            $this->addError('stock_validation', 'Impossible de procéder à la vente. Certains produits ont une quantité supérieure au stock disponible.');
+            $this->dispatch('error', [
+                'message' => 'Veuillez corriger les quantités avant de sauvegarder la vente.'
+            ]);
             return;
         }
 
