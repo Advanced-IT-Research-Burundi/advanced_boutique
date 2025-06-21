@@ -206,7 +206,7 @@ class SaleCreate extends Component
     {
         $currentPage = $loadMore ? $this->getPage() + 1 : 1;
 
-        $products = Product::select('id', 'name', 'sale_price_ttc', 'unit', 'alert_quantity', 'image', 'category_id')
+        $products = Product::select('id', 'code','name', 'sale_price_ttc', 'unit', 'alert_quantity', 'image', 'category_id')
             ->where('category_id', $categoryId)
             ->whereHas('stockProducts', function ($query) {
                 $query->where('quantity', '>', 0);
@@ -249,8 +249,8 @@ class SaleCreate extends Component
 
         try {
             if (strlen($this->product_search) >= 2) {
-                $products = Product::select('id', 'name', 'sale_price_ttc', 'unit', 'alert_quantity', 'image', 'category_id')
-                    ->where('name', 'like', '%' . $this->product_search . '%')
+                $products = Product::select('id', 'name','code', 'sale_price_ttc', 'unit', 'alert_quantity', 'image', 'category_id')
+                    ->where('code', 'like', '%' . $this->product_search . '%')
                     ->whereHas('stockProducts', function ($query) {
                         $query->where('quantity', '>', 0);
                     })
@@ -301,7 +301,7 @@ class SaleCreate extends Component
 
                 // Charger tous les produits en une seule requête
                 $products = Product::whereIn('id', $productIds)
-                    ->select('id', 'name', 'unit')
+                    ->select('id','code', 'name', 'unit')
                     ->get()
                     ->keyBy('id');
 
@@ -314,9 +314,10 @@ class SaleCreate extends Component
                 foreach ($cartContent->sortBy('id') as $cartItem) {
                     $product = $products->get($cartItem->id);
                     $stockProduct = $stockProducts->get($cartItem->id);
-
+                    // dd($cartItem);
                     if ($product) {
                         $discount = floatval($cartItem->attributes->get('discount', 0));
+                        $code = $cartItem->attributes->get('code') ?? '';
                         $quantity = floatval($cartItem->quantity);
                         $price = floatval($cartItem->price);
                         $availableStock = $stockProduct ? $stockProduct->quantity : 0;
@@ -328,6 +329,8 @@ class SaleCreate extends Component
                         $this->items[] = [
                             'product_id' => $cartItem->id,
                             'quantity' => $quantity,
+                            'name' => $product->name,
+                            'code' => $code,
                             'sale_price' => $price,
                             'discount' => $discount,
                             'subtotal' => $subtotal_after_discount,
@@ -400,7 +403,7 @@ class SaleCreate extends Component
                     'quantity' => ['relative' => false, 'value' => $newQuantity]
                 ]);
             } else {
-                $product = Product::select('id', 'name', 'sale_price_ttc', 'unit', 'image')
+                $product = Product::select('id', 'code','name', 'sale_price_ttc', 'unit', 'image')
                     ->find($productId);
 
                 if (!$product) return;
@@ -408,11 +411,13 @@ class SaleCreate extends Component
                 Cart::session($this->cart_session)->add([
                     'id' => $productId,
                     'name' => $product->name,
+                    'code' => $product->code,
                     'price' => $product->sale_price_ttc ?? 0,
                     'quantity' => 1,
                     'attributes' => [
                         'unit' => $product->unit,
                         'available_stock' => $stockProduct->quantity,
+                        'code' => $product->code,
                         'discount' => 0,
                         'image' => $product->image,
                     ]

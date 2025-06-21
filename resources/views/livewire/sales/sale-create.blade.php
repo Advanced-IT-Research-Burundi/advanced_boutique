@@ -434,6 +434,7 @@
                                     </thead>
                                     <tbody>
                                         @foreach($items as $index => $item)
+                                        {{-- @dump($item) --}}
                                             @php
                                                 $quantity = floatval($item['quantity']);
                                                 $price = floatval($item['sale_price']);
@@ -461,7 +462,7 @@
                                                 </td>
                                                 <td>
                                                     <div class="d-flex flex-column">
-                                                        <span class="fw-semibold">Produit #{{ $item['product_id'] }}</span>
+                                                        <span class="fw-semibold">{{ Str::limit($item['name'], 10, '...') }} #{{ $item['code'] }}</span>
                                                         <div class="d-flex align-items-center gap-2">
                                                             <span class="badge {{ $availableStock <= 5 ? 'bg-warning' : 'bg-success' }} badge-sm">
                                                                 Stock: {{ $availableStock }}
