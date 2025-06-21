@@ -51,6 +51,7 @@
                                 <thead class="table-light">
                                     <tr>
                                         <th>Produit</th>
+                                        <th>Code</th>
                                         <th>Quantité</th>
                                         <th>Date d'ajout</th>
                                         <th>Actions</th>
@@ -79,6 +80,11 @@
                                                         <small class="text-muted">{{ $stockProduct->product->unit ?? 'N/A' }}</small>
                                                     </div>
                                                 </div>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-secondary">
+                                                    {{ $stockProduct->product->code ?? 'N/A' }}
+                                                </span>
                                             </td>
                                             <td>
                                                 <span class="badge bg-primary">{{ number_format($stockProduct->quantity, 2) }}</span>
