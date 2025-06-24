@@ -117,13 +117,7 @@ class Stock extends Model
     }
 
 
-    /**
-     * Scope pour filtrer par agence
-     */
-    public function scopeByAgency($query, $agencyId)
-    {
-        return $query->where('agency_id', $agencyId);
-    }
+
 
     /**
      * Scope pour filtrer par utilisateur créateur
@@ -176,8 +170,119 @@ class Stock extends Model
     {
         return $this->user_id ? 'Assigné' : 'Non assigné';
     }
+/**
+     * Vérifier si un utilisateur a accès à ce stock
+     */
+    public function hasUser($userId)
+    {
+        return $this->users()->where('user_id', $userId)->exists();
+    }
 
+    /**
+     * Obtenir le nombre d'utilisateurs assignés
+     */
+    public function getUsersCountAttribute()
+    {
+        return $this->users()->count();
+    }
 
+    /**
+     * Scope pour les stocks avec des utilisateurs assignés
+     */
+    public function scopeWithUsers($query)
+    {
+        return $query->whereHas('users');
+    }
 
+    /**
+     * Scope pour les stocks sans utilisateurs assignés
+     */
+    public function scopeWithoutUsers($query)
+    {
+        return $query->whereDoesntHave('users');
+    }
+
+    /**
+     * Scope pour filtrer par statut
+     */
+    public function scopeByStatus($query, $status)
+    {
+        return $query->where('status', $status);
+    }
+
+    /**
+     * Scope pour les stocks actifs
+     */
+    public function scopeActive($query)
+    {
+        return $query->where('status', 'active');
+    }
+
+    /**
+     * Scope pour filtrer par type
+     */
+    public function scopeByType($query, $type)
+    {
+        return $query->where('type', $type);
+    }
+
+    /**
+     * Scope pour filtrer par agence
+     */
+    public function scopeByAgency($query, $agencyId)
+    {
+        return $query->where('agency_id', $agencyId);
+    }
+
+    /**
+     * Accessor pour le pourcentage de capacité utilisée
+     */
+    public function getCapacityPercentageAttribute()
+    {
+        if ($this->capacity <= 0) {
+            return 0;
+        }
+
+        return round(($this->current_quantity / $this->capacity) * 100, 2);
+    }
+
+    /**
+     * Accessor pour vérifier si le stock est plein
+     */
+    public function getIsFullAttribute()
+    {
+        return $this->current_quantity >= $this->capacity;
+    }
+
+    /**
+     * Accessor pour vérifier si le stock est vide
+     */
+    public function getIsEmptyAttribute()
+    {
+        return $this->current_quantity <= 0;
+    }
+
+    /**
+     * Accessor pour le statut de disponibilité
+     */
+    public function getAvailabilityStatusAttribute()
+    {
+        if ($this->status !== 'active') {
+            return 'inactive';
+        }
+
+        $percentage = $this->capacity_percentage;
+
+        if ($percentage >= 90) {
+            return 'full';
+        } elseif ($percentage >= 70) {
+            return 'high';
+        } elseif ($percentage >= 30) {
+            return 'medium';
+        } elseif ($percentage > 0) {
+            return 'low';
+        } else {
+            return 'empty';
+        }
+    }
 }
-

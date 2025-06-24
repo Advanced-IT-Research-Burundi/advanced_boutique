@@ -50,7 +50,7 @@ class UserStockController extends Controller
         $stocks = Stock::select('id', 'name', 'code', 'description')->get();
         $agencies = Agency::select('id', 'name')->get();
 
-        return view('userStock.create', compact('users', 'stocks', 'agencies'));
+        return view('userStocks.create', compact('users', 'stocks', 'agencies'));
     }
 
     /**
@@ -161,18 +161,7 @@ class UserStockController extends Controller
         return back()->with('success', "$count associations supprimées.");
     }
 
-    /**
-     * API pour obtenir les stocks d'un utilisateur
-     */
-    public function getUserStocks($userId)
-    {
-        $userStocks = UserStock::with('stock')
-            ->where('user_id', $userId)
-            ->get()
-            ->pluck('stock');
 
-        return response()->json($userStocks);
-    }
 
     /**
      * API pour obtenir les utilisateurs d'un stock
@@ -185,5 +174,258 @@ class UserStockController extends Controller
             ->pluck('user');
 
         return response()->json($stockUsers);
+    }
+
+     /**
+     * Afficher la page de gestion des stocks pour un utilisateur
+     */
+    public function manage(User $user)
+    {
+        // Vérifier les autorisations
+        // $this->authorize('manage-user-stocks');
+
+        // Récupérer les stocks assignés à l'utilisateur
+        $assignedStocks = $user->stocks()->withPivot('created_at')->get();
+
+        // Récupérer les stocks disponibles (non assignés à cet utilisateur)
+        $assignedStockIds = $assignedStocks->pluck('id')->toArray();
+        $availableStocks = Stock::whereNotIn('id', $assignedStockIds)
+            ->get();
+
+        return view('userStock.manage', compact('user', 'assignedStocks', 'availableStocks'));
+    }
+
+    /**
+     * Assigner des stocks à un utilisateur
+     */
+    public function attach(Request $request, User $user)
+    {
+        $request->validate([
+            'stock_ids' => 'required|array|min:1',
+            'stock_ids.*' => 'exists:stocks,id'
+        ], [
+            'stock_ids.required' => 'Veuillez sélectionner au moins un stock.',
+            'stock_ids.min' => 'Veuillez sélectionner au moins un stock.',
+            'stock_ids.*.exists' => 'Un ou plusieurs stocks sélectionnés sont invalides.'
+        ]);
+
+        try {
+            \DB::beginTransaction();
+
+            $attachedCount = 0;
+            $alreadyAssigned = [];
+
+            foreach ($request->stock_ids as $stockId) {
+                // Vérifier si le stock n'est pas déjà assigné
+                $existingAssignment = UserStock::where('user_id', $user->id)
+                    ->where('stock_id', $stockId)
+                    ->first();
+
+                if (!$existingAssignment) {
+                    // Récupérer le stock pour obtenir l'agence
+                    $stock = Stock::findOrFail($stockId);
+
+                    UserStock::create([
+                        'user_id' => $user->id,
+                        'stock_id' => $stockId,
+                        'agency_id' => $stock->agency_id ?? $user->agency_id,
+                        'created_by' => Auth::id(),
+                    ]);
+
+                    $attachedCount++;
+                } else {
+                    $stock = Stock::find($stockId);
+                    $alreadyAssigned[] = $stock->name;
+                }
+            }
+
+            \DB::commit();
+
+            $message = "Stock(s) assigné(s) avec succès.";
+            if ($attachedCount > 0) {
+                $message = "{$attachedCount} stock(s) assigné(s) avec succès.";
+            }
+
+            if (!empty($alreadyAssigned)) {
+                $message .= " Attention: " . implode(', ', $alreadyAssigned) . " étai(en)t déjà assigné(s).";
+            }
+
+            return redirect()->route('users.stocks.manage', $user)
+                ->with('success', $message);
+
+        } catch (\Exception $e) {
+            \DB::rollBack();
+            return redirect()->back()
+                ->with('error', 'Erreur lors de l\'assignation des stocks: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Désassigner un stock d'un utilisateur
+     */
+    public function detach(User $user, Stock $stock)
+    {
+        try {
+            $userStock = UserStock::where('user_id', $user->id)
+                ->where('stock_id', $stock->id)
+                ->first();
+
+            if (!$userStock) {
+                return redirect()->back()
+                    ->with('error', 'Ce stock n\'est pas assigné à cet utilisateur.');
+            }
+
+            $userStock->delete();
+
+            return redirect()->route('users.stocks.manage', $user)
+                ->with('success', "Le stock \"{$stock->name}\" a été désassigné avec succès.");
+
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Erreur lors de la désassignation du stock: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Désassigner tous les stocks d'un utilisateur
+     */
+    public function detachAll(User $user)
+    {
+        try {
+            $deletedCount = UserStock::where('user_id', $user->id)->delete();
+
+            return redirect()->route('users.stocks.manage', $user)
+                ->with('success', "{$deletedCount} stock(s) désassigné(s) avec succès.");
+
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Erreur lors de la désassignation des stocks: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Afficher l'historique des assignations de stocks pour un utilisateur
+     */
+    public function history(User $user)
+    {
+        $stockHistory = UserStock::withTrashed()
+            ->where('user_id', $user->id)
+            ->with(['stock', 'agency', 'createdBy'])
+            ->orderBy('created_at', 'desc')
+            ->paginate(15);
+
+        return view('userStock.history', compact('user', 'stockHistory'));
+    }
+
+    /**
+     * API: Obtenir les stocks d'un utilisateur en JSON
+     */
+    public function getUserStocks(User $user)
+    {
+        $stocks = $user->stocks()
+            ->with('agency')
+            ->withPivot('created_at')
+            ->get();
+
+        return response()->json([
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->first_name . ' ' . $user->last_name,
+                'email' => $user->email
+            ],
+            'stocks' => $stocks->map(function ($stock) {
+                return [
+                    'id' => $stock->id,
+                    'name' => $stock->name,
+                    'agency' => $stock->agency ? $stock->agency->name : null,
+                    'assigned_at' => $stock->pivot->created_at->format('Y-m-d H:i:s')
+                ];
+            })
+        ]);
+    }
+
+    /**
+     * Assigner un stock via AJAX
+     */
+    public function attachAjax(Request $request, User $user)
+    {
+        $request->validate([
+            'stock_id' => 'required|exists:stocks,id'
+        ]);
+
+        try {
+            $existingAssignment = UserStock::where('user_id', $user->id)
+                ->where('stock_id', $request->stock_id)
+                ->first();
+
+            if ($existingAssignment) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Ce stock est déjà assigné à cet utilisateur.'
+                ], 400);
+            }
+
+            $stock = Stock::findOrFail($request->stock_id);
+
+            UserStock::create([
+                'user_id' => $user->id,
+                'stock_id' => $request->stock_id,
+                'agency_id' => $stock->agency_id ?? $user->agency_id,
+                'created_by' => Auth::id(),
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Stock assigné avec succès.',
+                'stock' => [
+                    'id' => $stock->id,
+                    'name' => $stock->name,
+                    'agency' => $stock->agency ? $stock->agency->name : null
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur lors de l\'assignation: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Désassigner un stock via AJAX
+     */
+    public function detachAjax(Request $request, User $user)
+    {
+        $request->validate([
+            'stock_id' => 'required|exists:stocks,id'
+        ]);
+
+        try {
+            $userStock = UserStock::where('user_id', $user->id)
+                ->where('stock_id', $request->stock_id)
+                ->first();
+
+            if (!$userStock) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Ce stock n\'est pas assigné à cet utilisateur.'
+                ], 400);
+            }
+
+            $userStock->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Stock désassigné avec succès.'
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur lors de la désassignation: ' . $e->getMessage()
+            ], 500);
+        }
+
     }
 }
