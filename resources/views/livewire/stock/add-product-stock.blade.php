@@ -1,16 +1,22 @@
 <div>
     {{-- Do your work, then step back. --}}
-    <h1>Stock</h1>
+
+    <div class="row">
+    <div class="col"><h6>Stock {{ $stock->name }}</h6></div>
+    <div class="col">
+        <a href="{{ route('entre_multiple', $stock->id)}}">Entre Multiple en Stock </a>
+    </div>
+    </div>
     <div class="mt-2">
         <input type="text" wire:model="search" wire:keyup="searchProduct" placeholder="Rechercher un produit">
         <ul>
             @foreach ($products as $product)
-                <li class=" d-flex justify-content-between align-items-center gap-2 mt-2 ">
-                    <strong>{{ $product->name }}</strong>
-                    <span>{{ $product->description }}</span>
-                    <button wire:click="addProduct({{ $product->id }})" class="btn btn-primary btn-sm"> <i class="bi bi-cart-plus"></i> Ajouter au stock</button>
-                </li>
-                <hr>
+            <li class="gap-2 mt-2 d-flex justify-content-between align-items-center">
+                <strong>{{ $product->name }}</strong>
+                <span>{{ $product->description }}</span>
+                <button wire:click="addProduct({{ $product->id }})" class="btn btn-primary btn-sm"> <i class="bi bi-cart-plus"></i> Ajouter au stock</button>
+            </li>
+            <hr>
             @endforeach
         </ul>
     </div>
@@ -48,33 +54,8 @@
                         @endforeach
                     </tbody>
                 </table>
+                {{ $stockProducts->links() }}
             </div>
         </div>
-
-        @push('scripts')
-        <script>
-            $(document).ready(function() {
-                $('#stockProductsTable').DataTable({
-                    "responsive": true,
-                    "autoWidth": false,
-                    "order": [[0, 'desc']],
-                    "language": {
-                        "search": "Rechercher:",
-                        "lengthMenu": "Afficher _MENU_ entrées par page",
-                        "zeroRecords": "Aucun enregistrement trouvé",
-                        "info": "Affichage de _START_ à _END_ sur _TOTAL_ entrées",
-                        "infoEmpty": "Aucune entrée disponible",
-                        "infoFiltered": "(filtré à partir de _MAX_ entrées totales)",
-                        "paginate": {
-                            "first": "Premier",
-                            "last": "Dernier",
-                            "next": "Suivant",
-                            "previous": "Précédent"
-                        }
-                    }
-                });
-            });
-        </script>
-        @endpush
     </div>
 </div>

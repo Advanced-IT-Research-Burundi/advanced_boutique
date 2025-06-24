@@ -20,6 +20,11 @@ class StockController extends Controller
         return view('stock.transfer');
      }
 
+     public function entreMultiple($stock){
+
+        return view('stock.entre_multiple', compact('stock'));
+     }
+
     public function mouvement($stock)
     {
         $stock = StockProduct::with(['stock', 'product', 'agency', 'stockProductMouvements'])->findOrFail($stock);
