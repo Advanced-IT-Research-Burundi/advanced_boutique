@@ -50,6 +50,7 @@ class SaleCreate extends Component
 
     // Collections (optimized)
     public $current_stock;
+    public $availablestocks = [];
     public $cart_session;
 
     // Category and pagination
@@ -113,6 +114,12 @@ class SaleCreate extends Component
             ->latest()
             ->select('id', 'agency_id', 'created_at')
             ->first();
+
+       $this->availablestocks = Auth::user()
+                            ->stocks()
+                            ->withCount('products')
+                            ->get();
+
     }
 
     /**

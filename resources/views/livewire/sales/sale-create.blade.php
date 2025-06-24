@@ -1,5 +1,6 @@
 <div class="px-4 py-3 container-fluid">
     <form wire:submit.prevent="save">
+
         <div class="row g-4">
             <!-- Colonne principale gauche -->
             <div class="col-md-6">
@@ -202,11 +203,13 @@
                                             </div>
                                             <div class="col-md-4">
                                                 <select class="form-select" wire:model="selected_category_id" wire:change="selectCategory">
-                                                    <option value="">Toutes les catégories</option>
-                                                    @if($categories)
-                                                        @foreach($categories as $category)
-                                                            <option value="{{ $category->id }}">
-                                                                {{ $category->name }} ({{ $category->products_count }})
+                                                    <option value="">Selection stocks</option>
+                                                    @if($availablestocks)
+                                                        @foreach($availablestocks as $stock)
+                                                            <option value="{{ $stock->id }}">
+                                                                {{ $stock->name }}
+                                                                {{-- ({{ $stock->products_count??0 }} --}}
+                                                                {{-- ) --}}
                                                             </option>
                                                         @endforeach
                                                     @endif

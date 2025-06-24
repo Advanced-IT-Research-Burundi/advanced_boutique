@@ -17,10 +17,14 @@ class UserStock extends Model
         'created_by',
     ];
 
-    protected $dates = ['deleted_at'];
+    protected $dates = [
+        'created_at',
+        'updated_at',
+        'deleted_at',
+    ];
 
     /**
-     * Relation avec User
+     * Relation avec l'utilisateur assigné
      */
     public function user()
     {
@@ -28,7 +32,7 @@ class UserStock extends Model
     }
 
     /**
-     * Relation avec Stock
+     * Relation avec le stock
      */
     public function stock()
     {
@@ -36,7 +40,7 @@ class UserStock extends Model
     }
 
     /**
-     * Relation avec Agency
+     * Relation avec l'agence
      */
     public function agency()
     {
@@ -44,9 +48,9 @@ class UserStock extends Model
     }
 
     /**
-     * Relation avec le créateur
+     * Relation avec l'utilisateur créateur
      */
-    public function creator()
+    public function createdBy()
     {
         return $this->belongsTo(User::class, 'created_by');
     }
@@ -60,18 +64,18 @@ class UserStock extends Model
     }
 
     /**
+     * Scope pour filtrer par stock
+     */
+    public function scopeForStock($query, $stockId)
+    {
+        return $query->where('stock_id', $stockId);
+    }
+
+    /**
      * Scope pour filtrer par agence
      */
     public function scopeForAgency($query, $agencyId)
     {
         return $query->where('agency_id', $agencyId);
-    }
-
-    /**
-     * Scope pour obtenir les stocks actifs
-     */
-    public function scopeActive($query)
-    {
-        return $query->whereNull('deleted_at');
     }
 }

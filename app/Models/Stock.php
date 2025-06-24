@@ -96,16 +96,25 @@ class Stock extends Model
         return $this->hasMany(Expense::class);
     }
 
-    public function users(): BelongsToMany
+    public function users()
     {
-        return $this->belongsToMany(User::class);
+        return $this->belongsToMany(User::class, 'user_stocks')
+                    ->withTimestamps()
+                    ->withPivot('agency_id', 'created_by');
     }
 
-    public function products(): BelongsToMany
+
+
+    public function scopeWithProductCount($query)
     {
-        return $this->belongsToMany(Product::class);
+        return $query->withCount('products');
     }
 
+    public function products()
+    {
+        return $this->belongsToMany(Product::class, 'stock_products', 'stock_id', 'product_id')
+                    ->withTimestamps();
+    }
 
 
     /**
@@ -167,12 +176,7 @@ class Stock extends Model
     {
         return $this->user_id ? 'Assigné' : 'Non assigné';
     }
-    //  public function products()
-    // {
-    //     return $this->belongsToMany(Product::class, 'stock_products')
-    //                 ->withPivot('quantity', 'agency_id')
-    //                 ->withTimestamps();
-    // }
+
 
 
 }

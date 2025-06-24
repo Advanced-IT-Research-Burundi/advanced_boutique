@@ -117,16 +117,14 @@ class User extends Authenticatable
         return $this->hasMany(Agency::class);
     }
 
-    public function stocks(): HasMany
+    public function stocks()
     {
-        return $this->hasMany(Stock::class);
+        return $this->belongsToMany(Stock::class, 'user_stocks')
+                    ->withTimestamps()
+                    ->withPivot('agency_id', 'created_by')
+                    ->whereNull('user_stocks.deleted_at');
     }
 
-
-    public function userStocks(): HasMany
-    {
-        return $this->hasMany(UserStock::class);
-    }
 
     public function categories(): HasMany
     {
@@ -193,28 +191,12 @@ class User extends Authenticatable
         return $this->hasMany(User::class);
     }
 
-
-
     /**
-     * Relation many-to-many avec Stock via UserStock
+     * Relation avec UserStock - Stocks assignés à l'utilisateur
      */
-    public function assignedStocks()
+    public function userStocks()
     {
-        return $this->belongsToMany(Stock::class, 'user_stocks')
-                    ->withPivot('agency_id', 'created_by')
-                    ->withTimestamps()
-                    ->whereNull('user_stocks.deleted_at');
-    }
-
-    /**
-     * Obtenir les stocks disponibles pour l'utilisateur dans son agence
-     */
-    public function getAvailableStocksAttribute()
-    {
-        return $this->assignedStocks()
-                    ->where('stocks.agency_id', $this->agency_id)
-                    ->orderBy('stocks.created_at', 'desc')
-                    ->get();
+        return $this->hasMany(UserStock::class);
     }
 
 }

@@ -44,7 +44,7 @@ class StockProduct extends Model
 
     public function stock(): BelongsTo
     {
-        return $this->belongsTo(Stock::class);
+        return $this->belongsTo(Stock::class, 'stock_id');
     }
 
     public function stockProductMouvements()
@@ -54,7 +54,7 @@ class StockProduct extends Model
 
     public function product(): BelongsTo
     {
-        return $this->belongsTo(Product::class);
+        return $this->belongsTo(Product::class, 'product_id');
     }
 
     public function agency(): BelongsTo
