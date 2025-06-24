@@ -20,6 +20,7 @@ return new class extends Migration
             $table->text("product_name");
             $table->float('quantity');
             $table->foreignId('agency_id')->nullable()->constrained();
+            $table->foreignId('user_id')->nullable()->constrained();
             $table->timestamps();
             $table->softDeletes();
             $table->index(['stock_id', 'product_id']);

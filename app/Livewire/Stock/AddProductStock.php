@@ -4,6 +4,7 @@ namespace App\Livewire\Stock;
 
 use App\Models\Product;
 use App\Models\StockProduct;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
 class AddProductStock extends Component
@@ -31,6 +32,8 @@ class AddProductStock extends Component
         $stockProduct->product_id = $productId;
         $stockProduct->quantity = 0;
         $stockProduct->agency_id = $this->stock->agency_id;
+        $stockProduct->user_id = Auth::user()->id;
+        $stockProduct->product_name = Product::find($productId)->name;
         $stockProduct->save();
         $this->dispatch('stock-product-added', stockId: $this->stock->id);
 

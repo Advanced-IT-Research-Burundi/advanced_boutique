@@ -25,11 +25,19 @@ class DatabaseSeeder extends Seeder
             CompanySeeder::class,
         ]);
 
+
         $user = new User();
         $user->id = 1;
         $user->last_name = 'UBWIZA ';
         $user->first_name = 'BURUNDI';
         $user->email = 'ubwizaburundi@gmail.com';
+        $user->password = Hash::make('password');
+        $user->save();
+        $user = new User();
+        $user->id = 2;
+        $user->last_name = 'JEAN LIONEL';
+        $user->first_name = 'NININAHAZWE';
+        $user->email = 'nijelionel@gmail.com';
         $user->password = Hash::make('password');
         $user->save();
 

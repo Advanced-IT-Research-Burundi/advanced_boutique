@@ -22,6 +22,7 @@ class StockProduct extends Model
         'quantity',
         'agency_id',
         'product_name',
+        'user_id'
     ];
 
     /**
@@ -37,6 +38,7 @@ class StockProduct extends Model
             'product_id' => 'integer',
             'quantity' => 'float',
             'agency_id' => 'integer',
+            'user_id' => 'integer',
         ];
     }
 
