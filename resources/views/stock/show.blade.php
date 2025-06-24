@@ -3,9 +3,9 @@
 @section('title', 'Détails du Stock')
 
 @section('content')
-<div class="container-fluid px-4">
+<div class="px-4 container-fluid">
     <!-- Breadcrumb -->
-    <nav aria-label="breadcrumb" class="mb-4 d-flex justify-between">
+    <nav aria-label="breadcrumb" class="justify-between mb-4 d-flex">
         <ol class="breadcrumb">
             <li class="breadcrumb-item">
                 <a href="{{ route('dashboard') }}" class="text-decoration-none">
@@ -33,9 +33,9 @@
         <!-- Informations principales -->
         <div class="col-lg-8">
             <!-- Section des 5 derniers produits ajoutés -->
-            <div class="card shadow-sm mb-4">
-                <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
-                    <h6 class="card-title mb-0">
+            <div class="mb-4 shadow-sm card">
+                <div class="text-white card-header bg-success d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0 card-title">
                         <i class="bi bi-clock-history me-2"></i>
                         Derniers produits ajoutés
                     </h6>
@@ -68,9 +68,9 @@
                                                              class="rounded me-2"
                                                              style="width: 32px; height: 32px; object-fit: cover;">
                                                     @else
-                                                        <div class="bg-secondary rounded me-2 d-flex align-items-center justify-content-center"
+                                                        <div class="rounded bg-secondary me-2 d-flex align-items-center justify-content-center"
                                                              style="width: 32px; height: 32px;">
-                                                            <i class="bi bi-box text-white"></i>
+                                                            <i class="text-white bi bi-box"></i>
                                                         </div>
                                                     @endif
                                                     <div>
@@ -107,9 +107,9 @@
                             </table>
                         </div>
                     @else
-                        <div class="text-center py-4">
+                        <div class="py-4 text-center">
                             <i class="bi bi-inbox display-4 text-muted"></i>
-                            <p class="text-muted mt-2">Aucun produit dans ce stock</p>
+                            <p class="mt-2 text-muted">Aucun produit dans ce stock</p>
                             <a href="{{ route('stocks.list', $stock) }}" class="btn btn-primary">
                                 <i class="bi bi-plus-circle me-2"></i>
                                 Ajouter des produits
@@ -118,9 +118,9 @@
                     @endif
                 </div>
             </div>
-            <div class="card shadow-sm mb-4">
-                <div class="card-header bg-info text-white">
-                    <h5 class="card-title mb-0">
+            <div class="mb-4 shadow-sm card">
+                <div class="text-white card-header bg-info">
+                    <h5 class="mb-0 card-title">
                         <i class="bi bi-box-fill me-2"></i>
                         {{ $stock->name }}
                     </h5>
@@ -128,7 +128,7 @@
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-6">
-                            <h6 class="text-muted mb-3">Informations générales</h6>
+                            <h6 class="mb-3 text-muted">Informations générales</h6>
 
                             <div class="mb-3">
                                 <label class="fw-bold text-muted">Nom:</label>
@@ -160,7 +160,7 @@
                         </div>
 
                         <div class="col-md-6">
-                            <h6 class="text-muted mb-3">Assignations</h6>
+                            <h6 class="mb-3 text-muted">Assignations</h6>
 
                             <div class="mb-3">
                                 <label class="fw-bold text-muted">Agence:</label>
@@ -205,9 +205,9 @@
 
         <!-- Informations système et Actions -->
         <div class="col-lg-4">
-            <div class="card shadow-sm mb-4">
-                <div class="card-header bg-secondary text-white">
-                    <h6 class="card-title mb-0">
+            <div class="mb-4 shadow-sm card">
+                <div class="text-white card-header bg-secondary">
+                    <h6 class="mb-0 card-title">
                         <i class="bi bi-info-circle me-2"></i>
                         Informations système
                     </h6>
@@ -249,23 +249,23 @@
             </div>
 
             <!-- Statistiques rapides -->
-            <div class="card shadow-sm mb-4">
-                <div class="card-header bg-primary text-white">
-                    <h6 class="card-title mb-0">
+            <div class="mb-4 shadow-sm card">
+                <div class="text-white card-header bg-primary">
+                    <h6 class="mb-0 card-title">
                         <i class="bi bi-graph-up me-2"></i>
                         Statistiques
                     </h6>
                 </div>
                 <div class="card-body">
-                    <div class="row text-center">
+                    <div class="text-center row">
                         <div class="col-6">
                             <div class="border-end">
-                                <h4 class="text-primary mb-0">{{ $stockProducts->count() }}</h4>
+                                <h4 class="mb-0 text-primary">{{ $stockProducts->count() }}</h4>
                                 <small class="text-muted">Produits</small>
                             </div>
                         </div>
                         <div class="col-6">
-                            <h4 class="text-success mb-0">{{ number_format($stockProducts->sum('quantity'), 0) }}</h4>
+                            <h4 class="mb-0 text-success">{{ number_format($stockProducts->sum('quantity'), 0) }}</h4>
                             <small class="text-muted">Quantité totale</small>
                         </div>
                     </div>
@@ -273,15 +273,15 @@
             </div>
 
             <!-- Actions rapides -->
-            <div class="card shadow-sm">
-                <div class="card-header bg-dark text-white">
-                    <h6 class="card-title mb-0">
+            <div class="shadow-sm card">
+                <div class="text-white card-header bg-dark">
+                    <h6 class="mb-0 card-title">
                         <i class="bi bi-lightning me-2"></i>
                         Actions rapides
                     </h6>
                 </div>
                 <div class="card-body">
-                    <div class="d-grid gap-2">
+                    <div class="gap-2 d-grid">
                         <a href="{{ route('stocks.list', $stock) }}" class="btn btn-outline-primary">
                             <i class="bi bi-boxes me-2"></i>
                             Gérer les produits
@@ -316,7 +316,7 @@
     </div>
 
     <!-- Bouton retour -->
-    <div class="row mt-4">
+    <div class="mt-4 row">
         <div class="col-12">
             <a href="{{ route('stocks.index') }}" class="btn btn-secondary">
                 <i class="bi bi-arrow-left me-2"></i>

@@ -30,8 +30,6 @@ Route::middleware('auth')->group(function () {
     Route::get('stocks/{stock}/show', [App\Http\Controllers\StockController::class, 'list'])->name('stocks.list');
     Route::get('stocks/{stock}/mouvement', [App\Http\Controllers\StockController::class, 'mouvement'])->name('stocks.mouvement');
     Route::get('stocks/transfer', [App\Http\Controllers\StockController::class, 'transfer'])->name('stocks.transfer');
-
-
     Route::resource('companies', App\Http\Controllers\CompanyController::class);
     Route::resource('agencies', App\Http\Controllers\AgencyController::class);
     Route::resource('users', App\Http\Controllers\UserController::class);
@@ -56,6 +54,8 @@ Route::middleware('auth')->group(function () {
     Route::resource('payments', App\Http\Controllers\PaymentController::class);
     Route::resource('user-stocks', App\Http\Controllers\UserStockController::class);
     Route::resource('vehicules', App\Http\Controllers\VehiculeController::class);
+
+    Route::get("entre_multiple/{stock}", [App\Http\Controllers\StockController::class, "entreMultiple"])->name("entre_multiple");
 
 });
 

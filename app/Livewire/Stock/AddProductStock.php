@@ -21,7 +21,8 @@ class AddProductStock extends Component
     public function render()
     {
         // Recuperer la liste des produits qui ne sont pa lies avec ce stock en Passant par le model StockProduit
-        $stockProducts = StockProduct::with(['product'])->where('stock_id', $this->stock->id)->get();
+        $stockProducts = StockProduct::with(['product'])
+        ->where('stock_id', $this->stock->id)->paginate();
         return view('livewire.stock.add-product-stock', compact( 'stockProducts'));
     }
 
@@ -43,7 +44,7 @@ class AddProductStock extends Component
 
     public function searchProduct(){
 
-        $this->products = Product::where('name', 'like', "%{$this->search}%")->get();
+        $this->products = Product::where('name', 'like', "%{$this->search}%")->take(5)->get();
         $stockProducts = StockProduct::with(['product'])->where('stock_id', $this->stock->id)->get();
 
         $this->products = $this->products->filter(function ($product) use ($stockProducts) {
