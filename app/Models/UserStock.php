@@ -4,18 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class UserStock extends Model
 {
     use HasFactory, SoftDeletes;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array
-     */
     protected $fillable = [
         'user_id',
         'stock_id',
@@ -23,44 +17,61 @@ class UserStock extends Model
         'created_by',
     ];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
-    {
-        return [
-            'id' => 'integer',
-            'user_id' => 'integer',
-            'stock_id' => 'integer',
-            'agency_id' => 'integer',
-            'created_by' => 'integer',
-        ];
-    }
+    protected $dates = ['deleted_at'];
 
-    public function user(): BelongsTo
+    /**
+     * Relation avec User
+     */
+    public function user()
     {
         return $this->belongsTo(User::class);
     }
 
-    public function stock(): BelongsTo
+    /**
+     * Relation avec Stock
+     */
+    public function stock()
     {
         return $this->belongsTo(Stock::class);
     }
 
-    public function agency(): BelongsTo
+    /**
+     * Relation avec Agency
+     */
+    public function agency()
     {
         return $this->belongsTo(Agency::class);
     }
 
-    public function user(): BelongsTo
+    /**
+     * Relation avec le créateur
+     */
+    public function creator()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'created_by');
     }
 
-    public function createdBy(): BelongsTo
+    /**
+     * Scope pour filtrer par utilisateur
+     */
+    public function scopeForUser($query, $userId)
     {
-        return $this->belongsTo(User::class);
+        return $query->where('user_id', $userId);
+    }
+
+    /**
+     * Scope pour filtrer par agence
+     */
+    public function scopeForAgency($query, $agencyId)
+    {
+        return $query->where('agency_id', $agencyId);
+    }
+
+    /**
+     * Scope pour obtenir les stocks actifs
+     */
+    public function scopeActive($query)
+    {
+        return $query->whereNull('deleted_at');
     }
 }

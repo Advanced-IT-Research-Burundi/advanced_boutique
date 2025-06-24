@@ -193,4 +193,28 @@ class User extends Authenticatable
         return $this->hasMany(User::class);
     }
 
+
+
+    /**
+     * Relation many-to-many avec Stock via UserStock
+     */
+    public function assignedStocks()
+    {
+        return $this->belongsToMany(Stock::class, 'user_stocks')
+                    ->withPivot('agency_id', 'created_by')
+                    ->withTimestamps()
+                    ->whereNull('user_stocks.deleted_at');
+    }
+
+    /**
+     * Obtenir les stocks disponibles pour l'utilisateur dans son agence
+     */
+    public function getAvailableStocksAttribute()
+    {
+        return $this->assignedStocks()
+                    ->where('stocks.agency_id', $this->agency_id)
+                    ->orderBy('stocks.created_at', 'desc')
+                    ->get();
+    }
+
 }
