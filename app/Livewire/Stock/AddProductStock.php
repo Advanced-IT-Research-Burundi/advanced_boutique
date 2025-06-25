@@ -66,6 +66,6 @@ class AddProductStock extends Component
             return !$stockProducts->contains('product_id', $product->id);
         });
 
-        return view('livewire.stock.add-product-stock', compact('stockProducts'));
+       // return view('livewire.stock.add-product-stock', compact('stockProducts'));
     }
 }

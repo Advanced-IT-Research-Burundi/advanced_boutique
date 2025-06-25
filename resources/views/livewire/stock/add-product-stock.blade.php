@@ -1,19 +1,23 @@
 <div>
     {{-- Do your work, then step back. --}}
 
-    <div class="row">
-    <div class="col"><h6>Stock {{ $stock->name }}</h6></div>
-    <div class="col">
-        <a href="{{ route('entre_multiple', $stock->id)}}">Entre Multiple en Stock </a>
-    </div>
+    <div class="mb-3 row align-items-center">
+        <div class="col">
+            <h6 class="mb-0">Stock {{ $stock->name }}</h6>
+        </div>
+        <div class="col text-end">
+            <a href="{{ route('entre_multiple', $stock->id)}}" class="btn btn-primary btn-sm">
+                Entre Multiple en Stock
+            </a>
+        </div>
     </div>
     <div class="mt-2">
         <input type="text" wire:model="search" wire:keyup="searchProduct" placeholder="Rechercher un produit">
         <ul>
             @foreach ($products as $product)
             <li class="gap-2 mt-2 d-flex justify-content-between align-items-center">
-                <strong>{{ $product->name }}</strong>
-                <span>{{ $product->description }}</span>
+                <strong>{{ $product->code }}</strong>
+                <span>{{ $product->name }}</span>
                 <button wire:click="addProduct({{ $product->id }})" class="btn btn-primary btn-sm"> <i class="bi bi-cart-plus"></i> Ajouter au stock</button>
             </li>
             <hr>
