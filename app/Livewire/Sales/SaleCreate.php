@@ -59,11 +59,13 @@ class SaleCreate extends Component
     public $products_per_page = 12;
     public $categories_loading = false;
     public $products_loading = false;
+    public $selectedStock = null;
 
     // Cache properties
     public $clients_cache = null;
     public $filtered_clients = [];
     public $filtered_products = [];
+    public $listeCategories = [];
 
     protected $rules = [
         'client_id' => 'required|exists:clients,id',
@@ -92,10 +94,21 @@ class SaleCreate extends Component
         'items.*.discount.max' => 'La remise ne peut pas dépasser 100%.',
     ];
 
+    public function currentSelectStock()
+    {
+        $this->listeCategories = StockProduct::where('stock_id', $this->selectedStock)
+                                            ->with('product.category')
+                                            ->get()
+                                            ->pluck('product.category.name', 'product.category.id');
+
+        //dd($this->listeCategories);
+    }
+
     public function mount()
     {
         $this->sale_date = now()->format('Y-m-d\TH:i');
         $this->cart_session = 'sale_create_' . Auth::id() . '_' . session()->getId();
+       // $this->selectedStock = $stockId;
 
         if (!session()->has('cart_sessions')) {
             session()->put('cart_sessions', []);

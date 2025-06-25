@@ -19,6 +19,7 @@ class StockProduct extends Model
     protected $fillable = [
         'stock_id',
         'product_id',
+        'category_id',
         'quantity',
         'agency_id',
         'product_name',
@@ -61,5 +62,8 @@ class StockProduct extends Model
     {
         return $this->belongsTo(Agency::class);
     }
+
+
+
 
 }
