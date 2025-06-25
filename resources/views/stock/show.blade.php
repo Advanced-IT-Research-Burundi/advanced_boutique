@@ -124,6 +124,7 @@
                     @endif
                 </div>
             </div>
+
             <div class="mb-4 shadow-sm card">
                 <div class="text-white card-header bg-info">
                     <h5 class="mb-0 card-title">
@@ -183,13 +184,22 @@
                             </div>
 
                             <div class="mb-3">
-                                <label class="fw-bold text-muted">Assigné à:</label>
+                                <label class="fw-bold text-muted">Utilisateurs associés:</label>
                                 <p class="mb-1">
-                                    @if($stock->user)
-                                        <i class="bi bi-person-check text-warning me-1"></i>
-                                        {{ $stock->user->name }}
+                                    @if($stock->users->count() > 0)
+                                        <i class="bi bi-people text-success me-1"></i>
+                                        <span class="badge bg-success">{{ $stock->users->count() }} utilisateur(s)</span>
+                                        <br>
+                                        <small class="text-muted">
+                                            @foreach($stock->users->take(3) as $user)
+                                                {{ $user->first_name }} {{ $user->last_name }}@if(!$loop->last), @endif
+                                            @endforeach
+                                            @if($stock->users->count() > 3)
+                                                et {{ $stock->users->count() - 3 }} autre(s)...
+                                            @endif
+                                        </small>
                                     @else
-                                        <span class="text-muted">Non assigné</span>
+                                        <span class="text-muted">Aucun utilisateur associé</span>
                                     @endif
                                 </p>
                             </div>
@@ -205,8 +215,6 @@
                     </div>
                 </div>
             </div>
-
-
         </div>
 
         <!-- Informations système et Actions -->
@@ -264,15 +272,21 @@
                 </div>
                 <div class="card-body">
                     <div class="text-center row">
-                        <div class="col-6">
+                        <div class="col-4">
                             <div class="border-end">
                                 <h4 class="mb-0 text-primary">{{ $stockProducts->count() }}</h4>
                                 <small class="text-muted">Produits</small>
                             </div>
                         </div>
-                        <div class="col-6">
-                            <h4 class="mb-0 text-success">{{ number_format($stockProducts->sum('quantity'), 0) }}</h4>
-                            <small class="text-muted">Quantité totale</small>
+                        <div class="col-4">
+                            <div class="border-end">
+                                <h4 class="mb-0 text-success">{{ number_format($stockProducts->sum('quantity'), 0) }}</h4>
+                                <small class="text-muted">Quantité totale</small>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <h4 class="mb-0 text-info">{{ $stock->users->count() }}</h4>
+                            <small class="text-muted">Utilisateurs</small>
                         </div>
                     </div>
                 </div>
@@ -292,6 +306,13 @@
                             <i class="bi bi-boxes me-2"></i>
                             Gérer les produits
                         </a>
+
+                        @can('manageUserStocks', $stock)
+                            <a href="{{ route('stocks.users.manage', $stock) }}" class="btn btn-outline-info">
+                                <i class="bi bi-people me-2"></i>
+                                Gérer les utilisateurs
+                            </a>
+                        @endcan
 
                         <a href="{{ route('stocks.edit', $stock) }}" class="btn btn-warning">
                             <i class="bi bi-pencil me-2"></i>
@@ -320,7 +341,138 @@
             </div>
         </div>
     </div>
+    <!-- Section des 5 premiers utilisateurs associés -->
+            <div class="mb-4 shadow-sm card">
+                <div class="text-white card-header bg-info d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0 card-title">
+                        <i class="bi bi-people me-2"></i>
+                        Utilisateurs associés à ce stock
+                    </h6>
+                    <div class="btn-group">
+                        <span class="badge bg-light text-dark me-2">
+                            {{ $stock->users->count() }} utilisateur(s)
+                        </span>
+                        @if($stock->users->count() > 5)
+                            <a href="{{ route('stocks.users.manage', $stock) }}" class="btn btn-outline-light btn-sm">
+                                <i class="bi bi-people me-1"></i>
+                                Voir tous les utilisateurs
+                            </a>
+                        @endif
+                    </div>
+                </div>
+                <div class="card-body">
+                    @if($stock->users->count() > 0)
+                        <div class="table-responsive">
+                            <table class="table table-sm table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Utilisateur</th>
+                                        <th>Rôle</th>
+                                        <th>Agence</th>
+                                        <th>Date d'assignation</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($stock->users->take(5) as $user)
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    @if($user->profile_photo)
+                                                        <img src="{{ Storage::url($user->profile_photo) }}"
+                                                             alt="{{ $user->full_name }}"
+                                                             class="rounded-circle me-2"
+                                                             style="width: 32px; height: 32px; object-fit: cover;">
+                                                    @else
+                                                        <div class="rounded-circle bg-primary me-2 d-flex align-items-center justify-content-center text-white"
+                                                             style="width: 32px; height: 32px;">
+                                                            {{ $user->initials }}
+                                                        </div>
+                                                    @endif
+                                                    <div>
+                                                        <strong>{{ $user->first_name }} {{ $user->last_name }}</strong>
+                                                        <br>
+                                                        <small class="text-muted">{{ $user->email }}</small>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-secondary">
+                                                    {{ ucfirst($user->role) }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                @if($user->agency)
+                                                    <i class="bi bi-geo-alt text-warning me-1"></i>
+                                                    {{ $user->agency->name }}
+                                                @else
+                                                    <span class="text-muted">Aucune agence</span>
+                                                @endif
+                                            </td>
+                                            <td>
+                                                <small>
+                                                    <i class="bi bi-calendar me-1"></i>
+                                                    {{ $user->pivot->created_at->format('d/m/Y') }}
+                                                    <br>
+                                                    <i class="bi bi-clock me-1"></i>
+                                                    {{ $user->pivot->created_at->format('H:i') }}
+                                                </small>
+                                            </td>
+                                            <td>
+                                                <div class="btn-group btn-group-sm">
+                                                    <a href="{{ route('users.show', $user) }}"
+                                                       class="btn btn-outline-primary"
+                                                       title="Voir le profil">
+                                                        <i class="bi bi-eye"></i>
+                                                    </a>
+                                                    @can('detach', [App\Models\UserStock::class, $user->pivot])
+                                                        <form action="{{ route('stocks.users.detach', [$stock, $user]) }}"
+                                                              method="POST"
+                                                              class="d-inline"
+                                                              onsubmit="return confirm('Êtes-vous sûr de vouloir désassigner cet utilisateur ?')">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button type="submit"
+                                                                    class="btn btn-outline-danger"
+                                                                    title="Désassigner">
+                                                                <i class="bi bi-x-circle"></i>
+                                                            </button>
+                                                        </form>
+                                                    @endcan
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
 
+                        @if($stock->users->count() > 10)
+                            <div class="text-center mt-3">
+                                <p class="text-muted mb-2">
+                                    Affichage de 10 utilisateurs sur {{ $stock->users->count() }}
+                                </p>
+                                <a href="{{ route('users.index') }}" class="btn btn-outline-info btn-sm">
+                                    <i class="bi bi-arrow-right me-1"></i>
+                                    Voir tous les {{ $stock->users->count() }} utilisateurs
+                                </a>
+                            </div>
+                        @endif
+                    @else
+                        <div class="py-4 text-center">
+                            <i class="bi bi-people display-4 text-muted"></i>
+                            <p class="mt-2 text-muted">Aucun utilisateur associé à ce stock</p>
+                            @can('attach', [App\Models\UserStock::class, $stock])
+                                <a href="{{ route('stocks.users.manage', $stock) }}" class="btn btn-primary">
+                                    <i class="bi bi-person-plus me-2"></i>
+                                    Assigner des utilisateurs
+                                </a>
+                            @endcan
+                        </div>
+                    @endif
+                </div>
+            </div>
+    </div>
     <!-- Bouton retour -->
     <div class="mt-4 row">
         <div class="col-12">
