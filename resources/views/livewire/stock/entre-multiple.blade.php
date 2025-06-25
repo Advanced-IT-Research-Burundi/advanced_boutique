@@ -20,26 +20,48 @@
                 </div>
             @endif
 
-            <div class="mb-4">
-                <button
-                    wire:click="entreMultiple"
-                    class="btn btn-primary"
-                    wire:loading.attr="disabled"
-                    wire:loading.class="disabled"
-                >
-                    <span wire:loading.class="visually-hidden">Valider les entrées</span>
-                    <span class="spinner-border spinner-border-sm me-1 visually-hidden" wire:loading wire:target="entreMultiple"></span>
-                    <span wire:loading wire:target="entreMultiple">Traitement en cours...</span>
-                </button>
+            <div class="mb-4 d-flex justify-content-between align-items-center">
+                <div class="gap-3 d-flex w-75">
+                    <div class="w-50">
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-search"></i></span>
+                            <input
+                                type="text"
+                                class="form-control"
+                                placeholder="Rechercher un produit..."
+                                wire:model.live="search"
+                            >
+                        </div>
+                    </div>
+                    <div class="w-50">
+                        <select class="form-select" wire:model.live="selectedCategory">
+                            @foreach($categories as $id => $name)
+                                <option value="{{ $id }}">{{ $name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <button
+                        wire:click="entreMultiple"
+                        class="btn btn-primary"
+                        wire:loading.attr="disabled"
+                        wire:loading.class="disabled"
+                    >
+                        <span wire:loading.class="visually-hidden">Valider les entrées</span>
+                        <span class="spinner-border spinner-border-sm me-1 visually-hidden" wire:loading wire:target="entreMultiple"></span>
+                        <span wire:loading wire:target="entreMultiple">Traitement en cours...</span>
+                    </button>
+                </div>
             </div>
 
             <div class="table-responsive">
                 <table class="table table-hover table-striped">
                     <thead class="table-light">
                         <tr>
-                            <th>Code du Produit</th>
-                            <th>Categorie</th>
+                            <th>Code</th>
                             <th>Produit</th>
+                            <th>Catégorie</th>
                             <th>Quantité Actuelle</th>
                             <th>Quantité Entrée</th>
                             <th>Unité</th>
@@ -48,11 +70,11 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse ($stockProducts as $product)
+                        @forelse($products as $product)
                             <tr>
                                 <td>{{ $product->product_id }}</td>
-                                <td>{{ $product->product->category->name ?? 'N/A' }}</td>
                                 <td>{{ $product->product->name }}</td>
+                                <td>{{ $product->product->category->name ?? 'N/A' }}</td>
                                 <td>
                                     <span class="badge bg-primary">{{ $product->quantity }}</span>
                                 </td>
@@ -68,7 +90,14 @@
                                 </td>
                                 <td>{{ $product->product->unit }}</td>
                                 <td>
-                                <input type="number" wire:model="prices.{{ $product->id }}" class="form-control form-control-sm" min="0" step="1" placeholder="0" value="{{ $product->product->sale_price }}">
+                                    <input
+                                        type="number"
+                                        wire:model="prices.{{ $product->id }}"
+                                        class="form-control form-control-sm"
+                                        min="0"
+                                        step="1"
+                                        placeholder="0"
+                                        value="{{ $product->product->sale_price }}">
                                 </td>
                                 <td>
                                     <button
@@ -83,7 +112,7 @@
                         @empty
                             <tr>
                                 <td colspan="8" class="py-4 text-center">
-                                    <div class="text-muted">Aucun produit trouvé dans ce stock.</div>
+                                    <div class="text-muted">Aucun produit trouvé.</div>
                                 </td>
                             </tr>
                         @endforelse
@@ -93,5 +122,3 @@
         </div>
     </div>
 </div>
-
-

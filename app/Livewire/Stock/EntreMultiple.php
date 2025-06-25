@@ -13,14 +13,31 @@ class EntreMultiple extends Component
 {
     public $stockID;
     public $quantities = [];
+    public $prices = [];
     public $stock;
+    public $search = '';
+    public $selectedCategory = '';
+    public $availableCategories = [];
 
     public function mount($stock)
     {
         $this->stockID = $stock;
         $this->stock = Stock::findOrFail($stock);
+        $this->loadCategories();
         // Initialiser le tableau des quantités
         $this->initializeQuantities();
+    }
+
+    public function loadCategories()
+    {
+        $this->availableCategories = StockProduct::with('product.category')
+            ->where('stock_id', $this->stockID)
+            ->get()
+            ->pluck('product.category')
+            ->unique('id')
+            ->filter()
+            ->pluck('name', 'id')
+            ->prepend('Toutes les catégories', '');
     }
 
     public function initializeQuantities()
@@ -32,6 +49,7 @@ class EntreMultiple extends Component
         ->get();
         foreach ($stockProducts as $product) {
             $this->quantities[$product->id] = 0;
+            $this->prices[$product->id] = $product->product->sale_price;
         }
     }
 
@@ -60,7 +78,6 @@ class EntreMultiple extends Component
                 if (!$quantity || $quantity <= 0) {
                     continue;
                 }
-
                 // Trouver le produit
                 $stockProduct = StockProduct::find($productId);
 
@@ -73,7 +90,7 @@ class EntreMultiple extends Component
                     $entriesCount++;
 
                     // Optionnel : Créer un historique des mouvements de stock
-                    // $this->createStockMovement($stockProduct, $quantity, 'ENTREE');
+                    $this->createStockMovement($stockProduct, $quantity, 'EN' , $this->prices[$productId]);
                 }
             }
 
@@ -96,7 +113,7 @@ class EntreMultiple extends Component
     /**
      * Optionnel : Créer un historique des mouvements de stock
      */
-    private function createStockMovement($stockProduct, $quantity, $type)
+    private function createStockMovement($stockProduct, $quantity, $type, $price)
     {
         // Si vous avez une table stock_movements pour l'historique
 
@@ -104,26 +121,42 @@ class EntreMultiple extends Component
         $movement = StockProductMouvement::create([
             'agency_id' => auth()->user()->agency_id ?? 1,
             'stock_id' => $this->stock->id,
-            'stock_product_id' => $this->stock->stock_id, // Adjust if needed
-            'item_code' => $this->stock->id ?? 'N/A',
-            'item_designation' => $this->stock->product->name ?? 'N/A',
+            'stock_product_id' => $stockProduct->id, // Adjust if needed
+            'item_code' => $stockProduct->product->id ?? 'N/A',
+            'item_designation' => $stockProduct->product->name ?? 'N/A',
             'item_quantity' => $quantity,
-            'item_measurement_unit' => $this->stock->measurement_unit ?? 'pcs',
-            'item_purchase_or_sale_price' => $this->item_purchase_or_sale_price,
-            'item_purchase_or_sale_currency' => $this->item_purchase_or_sale_currency,
+            'item_measurement_unit' => $stockProduct->product->unit ?? 'pcs',
+            'item_purchase_or_sale_price' => $price,
+            'item_purchase_or_sale_currency' => 'FBU',
             'item_movement_type' => $type,
-            'item_movement_date' => $this->item_movement_date,
-            'item_movement_note' => $this->item_movement_note,
+            'item_movement_date' => now(),
+            'item_movement_note' => 'Entrée multiple',
             'user_id' => auth()->id(),
         ]);
     }
 
     public function render()
     {
-        $stockProducts = StockProduct::where('stock_id', $this->stockID)
-            ->orderBy('product_name')
-            ->get();
+        $query = StockProduct::with(['product', 'product.category'])
+            ->where('stock_id', $this->stockID)
+            ->when($this->search, function($query) {
+                $query->whereHas('product', function($q) {
+                    $q->where('name', 'like', '%' . $this->search . '%')
+                      ->orWhere('code', 'like', '%' . $this->search . '%');
+                });
+            })
+            ->when($this->selectedCategory, function($query) {
+                $query->whereHas('product', function($q) {
+                    $q->where('category_id', $this->selectedCategory);
+                });
+            })
+            ->orderBy('product_name');
 
-        return view('livewire.stock.entre-multiple', compact('stockProducts'));
+        $products = $query->get();
+
+        return view('livewire.stock.entre-multiple', [
+            'products' => $products,
+            'categories' => $this->availableCategories
+        ]);
     }
 }
