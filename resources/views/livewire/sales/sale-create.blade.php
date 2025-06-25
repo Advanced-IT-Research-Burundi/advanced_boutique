@@ -7,7 +7,7 @@
             <!-- Colonne principale gauche -->
 
             <div class="col-md-6">
-            <select  wire:model="selectedStock" wire:change="currentSelectStock">
+            <select class="form-select mb-2"  wire:model="selectedStock" wire:change="currentSelectStock">
                     <option value="">Selection stocks</option>
                     @if($availablestocks)
                     @foreach($availablestocks as $stock)
@@ -208,12 +208,9 @@
                                                     placeholder="Rechercher un produit par nom..."
                                                     autocomplete="off">
 
-                                                <!-- Loading indicator pour la recherche produit -->
+                                                <!-- Icône de recherche simple -->
                                                 <div class="position-absolute top-50 end-0 translate-middle-y me-3">
-                                                    <div wire:loading wire:target="updatedProductSearch,searchProducts" class="spinner-border spinner-border-sm text-primary" role="status">
-                                                        <span class="visually-hidden">Recherche...</span>
-                                                    </div>
-                                                    <i wire:loading.remove wire:target="updatedProductSearch,searchProducts" class="bi bi-search text-muted"></i>
+                                                    <i class="bi bi-search text-muted"></i>
                                                 </div>
                                             </div>
                                         </div>
@@ -238,21 +235,17 @@
                                                 Toutes les catégories
                                             </button>
                                             @foreach($listeCategories as $id => $category)
-
-                                           <button type="button"
+                                            <button type="button"
                                                 class="btn btn-sm {{ $selected_category_id == $id ? 'btn-primary' : 'btn-outline-primary' }}"
                                                 wire:click="selectCategory({{ $id }})">
-                                                <span wire:loading.remove wire:target="selectCategory">
                                                 {{ $category }}
-                                                </span>
-                                                <span wire:loading wire:target="selectCategory" class="spinner-border spinner-border-sm"></span>
                                             </button>
                                             @endforeach
                                         </div>
                                     </div>
                                     @endif
 
-                                    <!-- Loading pour les produits -->
+                                    <!-- Loading pour les produits seulement -->
                                     <div wire:loading wire:target="selectCategory,loadProductsByCategory,searchProducts" class="py-5 mt-4 text-center">
                                         <div class="spinner-border text-primary me-2" role="status"></div>
                                         <span class="text-muted">Chargement des produits...</span>
@@ -328,21 +321,21 @@
                                             </div>
 
                                             <!-- Bouton charger plus -->
-                                            @if($selected_category_id && count($filtered_products) >= $products_per_page)
-                                            <div class="mt-3 text-center">
-                                                <button type="button" class="btn btn-outline-primary"
-                                                    wire:click="loadMoreProducts">
-                                                    <span wire:loading.remove wire:target="loadMoreProducts">
-                                                        <i class="bi bi-arrow-down-circle me-1"></i>
-                                                        Charger plus de produits
-                                                    </span>
-                                                    <span wire:loading wire:target="loadMoreProducts">
-                                                        <i class="spinner-border spinner-border-sm me-1"></i>
-                                                        Chargement...
-                                                    </span>
-                                                </button>
-                                            </div>
-                                            @endif
+                                             @if($selected_category_id && count($filtered_products) >= $products_per_page)
+                                                <div class="mt-3 text-center">
+                                                    <button type="button" class="btn btn-outline-primary"
+                                                        wire:click="loadMoreProducts">
+                                                        <span wire:loading.remove wire:target="loadMoreProducts">
+                                                            <i class="bi bi-arrow-down-circle me-1"></i>
+                                                            Charger plus de produits
+                                                        </span>
+                                                        <span wire:loading wire:target="loadMoreProducts">
+                                                            <div class="spinner-border spinner-border-sm me-1" role="status"></div>
+                                                            Chargement...
+                                                        </span>
+                                                    </button>
+                                                </div>
+                                                @endif
                                         </div>
                                         @endif
 
@@ -391,6 +384,13 @@
                                 @if(count($items) > 0)
                                 <span class="badge bg-light text-success ms-2">{{ count($items) }}</span>
                                 @endif
+
+                                <!-- Indicateur de chargement dans le header -->
+                                <span wire:loading wire:target="updateItemQuantity,updateItemPrice,updateItemDiscount,removeItem,addToCart,clearCart,validateSale" class="ms-2">
+                                    <div class="spinner-border spinner-border-sm text-light" role="status" style="width: 1rem; height: 1rem;">
+                                        <span class="visually-hidden">Chargement...</span>
+                                    </div>
+                                </span>
                             </h5>
                             @if(count($items) > 0)
                             <div class="gap-2 d-flex">
@@ -418,13 +418,7 @@
                             <p class="mb-0 small">Ajoutez des produits pour commencer</p>
                         </div>
                         @else
-                        <!-- Loading pour les actions du panier -->
-                        <div wire:loading wire:target="updateItemQuantity,updateItemPrice,updateItemDiscount,removeItem" class="p-3 text-center bg-light">
-                            <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>
-                            <span class="text-muted small">Mise à jour du panier...</span>
-                        </div>
-
-                        <div wire:loading.remove wire:target="updateItemQuantity,updateItemPrice,updateItemDiscount,removeItem">
+                        <div>
                             <table class="table table-sm table-striped">
                                 <thead>
                                     <tr>
