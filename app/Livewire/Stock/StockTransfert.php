@@ -13,43 +13,103 @@ class StockTransfert extends Component
     public $stock_id;
     public $stockSource;
     public $destination_stock_id;
-    public $product_id;
-    public $quantity;
+    public $search = '';
     public $products = [];
     public $categories = [];
+    public $selectedCategory;
+    public $quantities = [];
+    public $selectedProducts = [];
 
     public function mount()
     {
         $this->stock_id = auth()->user()->stock_id;
     }
+
     public function render()
     {
         $stocks = Stock::all();
-
-        return view('livewire.stock.stock-transfert', compact('stocks'  ));
+        return view('livewire.stock.stock-transfert', compact('stocks'));
     }
+
     public function updateStockSource()
     {
-
         $this->categories = Category::with('products.stockProducts')
             ->whereHas('products.stockProducts', function ($query) {
                 $query->where('stock_id', $this->stockSource);
-            })  ->get();
+            })->get();
 
+        if ($this->categories->isNotEmpty()) {
+            $this->updateProductListe($this->categories->first()->id);
+        } else {
+            $this->products = [];
+        }
     }
 
-    public function updateProductListe($category_id)
+    public function updateProductListe($category_id = null)
     {
-        $stock_source = $this->stockSource;
-        $this->products = Product::with('stockProducts')
-            ->whereHas('stockProducts', function ($query) use ( $stock_source) {
-                $query->where('stock_id', $stock_source);
-            })
-            ->where('category_id', $category_id)
-            ->get();
+        $this->selectedCategory = $category_id;
+
+        $query = Product::with(['stockProducts', 'category'])
+            ->whereHas('stockProducts', function ($query) {
+                $query->where('stock_id', $this->stockSource);
+            });
+
+        if ($category_id) {
+            $query->where('category_id', $category_id);
+        }
+
+        if (!empty($this->search)) {
+            $query->where(function($q) {
+                $q->where('name', 'like', '%' . $this->search . '%')
+                  ->orWhere('code', 'like', '%' . $this->search . '%')
+                  ->orWhere('description', 'like', '%' . $this->search . '%');
+            });
+        }
+
+        $this->products = $query->get();
     }
-    public function updatedStockDestination()
+
+    public function updatedSearch()
     {
-        dd($this->destination_stock_id);
+        $this->updateProductListe($this->selectedCategory);
+    }
+
+    public function addToTransfer($productId)
+    {
+        if (!in_array($productId, $this->selectedProducts)) {
+            $this->selectedProducts[] = $productId;
+            $this->quantities[$productId] = 1;
+        }
+    }
+
+    public function removeFromTransfer($productId)
+    {
+        if (($key = array_search($productId, $this->selectedProducts)) !== false) {
+            unset($this->selectedProducts[$key]);
+            unset($this->quantities[$productId]);
+        }
+    }
+
+    public function transfer()
+    {
+        // Implémentez la logique de transfert ici
+        // Parcourir $this->selectedProducts et $this->quantities
+
+        // Réinitialiser après le transfert
+        $this->selectedProducts = [];
+        $this->quantities = [];
+        $this->updateProductListe($this->selectedCategory);
+
+        session()->flash('message', 'Transfert effectué avec succès!');
+    }
+
+    public function addProduct($productId)
+    {
+        $this->addToTransfer($productId);
+    }
+
+    public function updatedDestinationStockId()
+    {
+        // Logique spécifique lors du changement de stock de destination si nécessaire
     }
 }
