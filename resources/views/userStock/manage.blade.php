@@ -198,7 +198,7 @@
                                                                 <small class="text-muted">{{ Str::limit($stock->description, 50) }}</small>
                                                             @endif
                                                         </div>
-                                                        <span class="badge bg-primary">{{ $stock->type ?? 'Standard' }}</span>
+                                                        <span class="badge bg-primary">{{ $stock->agency->name ?? 'Standard' }}</span>
                                                     </div>
                                                 </label>
                                             </div>
