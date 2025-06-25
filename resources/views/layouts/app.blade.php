@@ -224,7 +224,7 @@
         <main class="main-content">
             <!-- Breadcrumb (optionnel) -->
             @if(isset($breadcrumbs) || View::hasSection('breadcrumb'))
-                <nav aria-label="breadcrumb" class="mb-4">
+                <nav aria-label="breadcrumb">
                     <ol class="breadcrumb">
                         <li class="breadcrumb-item">
                             <a href="{{ route('dashboard') }}">

@@ -12,18 +12,33 @@ class AddProductStock extends Component
     public $stock;
     public $search;
     public $products = [];
+    public $stockProductSearch = '';
 
     public function mount($stock)
     {
         $this->stock = $stock;
     }
+    // Ajoutez cette méthode pour la recherche des produits du stock
+    public function searchStockProducts()
+    {
+        $query = StockProduct::with(['product'])
+            ->where('stock_id', $this->stock->id);
+
+        if ($this->stockProductSearch) {
+            $query->whereHas('product', function ($q) {
+                $q->where('name', 'like', '%' . $this->stockProductSearch . '%')
+                    ->orWhere('description', 'like', '%' . $this->stockProductSearch . '%');
+            });
+        }
+
+        return $query->paginate(10);
+    }
 
     public function render()
     {
         // Recuperer la liste des produits qui ne sont pa lies avec ce stock en Passant par le model StockProduit
-        $stockProducts = StockProduct::with(['product'])
-        ->where('stock_id', $this->stock->id)->paginate();
-        return view('livewire.stock.add-product-stock', compact( 'stockProducts'));
+        $stockProducts = $this->searchStockProducts();
+        return view('livewire.stock.add-product-stock', compact('stockProducts'));
     }
 
     public function addProduct($productId)
@@ -38,11 +53,11 @@ class AddProductStock extends Component
         $stockProduct->save();
         $this->dispatch('stock-product-added', stockId: $this->stock->id);
 
-      $this->searchProduct();
-
+        $this->searchProduct();
     }
 
-    public function searchProduct(){
+    public function searchProduct()
+    {
 
         $this->products = Product::where('name', 'like', "%{$this->search}%")->take(5)->get();
         $stockProducts = StockProduct::with(['product'])->where('stock_id', $this->stock->id)->get();
@@ -51,6 +66,6 @@ class AddProductStock extends Component
             return !$stockProducts->contains('product_id', $product->id);
         });
 
-        return view('livewire.stock.add-product-stock', compact( 'stockProducts'));
+       // return view('livewire.stock.add-product-stock', compact('stockProducts'));
     }
 }
