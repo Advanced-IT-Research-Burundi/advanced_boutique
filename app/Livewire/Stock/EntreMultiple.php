@@ -7,22 +7,29 @@ use App\Models\StockProductMouvement;
 use Livewire\Component;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Stock;
 
 class EntreMultiple extends Component
 {
     public $stockID;
     public $quantities = [];
+    public $stock;
 
     public function mount($stock)
     {
         $this->stockID = $stock;
+        $this->stock = Stock::findOrFail($stock);
         // Initialiser le tableau des quantités
         $this->initializeQuantities();
     }
 
     public function initializeQuantities()
     {
-        $stockProducts = StockProduct::where('stock_id', $this->stockID)->get();
+        $stockProducts = StockProduct::
+        with(['product', 'product.category'])
+        ->where('stock_id', $this->stockID)
+        ->orderBy('product_name')
+        ->get();
         foreach ($stockProducts as $product) {
             $this->quantities[$product->id] = 0;
         }

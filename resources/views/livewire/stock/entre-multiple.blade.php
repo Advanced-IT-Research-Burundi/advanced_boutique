@@ -1,7 +1,7 @@
-<div class="container mt-4">
+<div class="mt-0">
     <div class="card">
-        <div class="text-white card-header bg-primary">
-            <h2>{{ }}</h2>
+        <div class="card-header d-flex justify-content-between">
+            <h2>{{ $stock->name }}</h2>
             <h2 class="mb-0 h5">Entrée Multiple de Produits</h2>
         </div>
 
@@ -38,9 +38,12 @@
                     <thead class="table-light">
                         <tr>
                             <th>Code du Produit</th>
+                            <th>Categorie</th>
                             <th>Produit</th>
                             <th>Quantité Actuelle</th>
                             <th>Quantité Entrée</th>
+                            <th>Unité</th>
+                            <th>Prix Unitaire</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -48,7 +51,8 @@
                         @forelse ($stockProducts as $product)
                             <tr>
                                 <td>{{ $product->product_id }}</td>
-                                <td>{{ $product->product_name }}</td>
+                                <td>{{ $product->product->category->name ?? 'N/A' }}</td>
+                                <td>{{ $product->product->name }}</td>
                                 <td>
                                     <span class="badge bg-primary">{{ $product->quantity }}</span>
                                 </td>
@@ -62,6 +66,10 @@
                                         placeholder="0"
                                     >
                                 </td>
+                                <td>{{ $product->product->unit }}</td>
+                                <td>
+                                <input type="number" wire:model="prices.{{ $product->id }}" class="form-control form-control-sm" min="0" step="1" placeholder="0" value="{{ $product->product->sale_price }}">
+                                </td>
                                 <td>
                                     <button
                                         wire:click="clearQuantity({{ $product->id }})"
@@ -74,7 +82,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="py-4 text-center">
+                                <td colspan="8" class="py-4 text-center">
                                     <div class="text-muted">Aucun produit trouvé dans ce stock.</div>
                                 </td>
                             </tr>
