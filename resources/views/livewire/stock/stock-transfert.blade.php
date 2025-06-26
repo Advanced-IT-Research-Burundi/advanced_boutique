@@ -49,7 +49,7 @@
                 </tr>
                 <tr>
 
-                    <td colspan="5" wire:loading>
+                    <td colspan="5" wire:loading wire:target="updateProductListe">
                         <div class="spinner-border text-primary" role="status">
                             <span class="visually-hidden">Loading...</span>
                         </div>
@@ -89,7 +89,7 @@
                 </div>
 
                 @if(count($selectedProducts) > 0)
-                    <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                    <div class="table-responsive" style="max-height: auto; overflow-y: auto;">
                     <div wire:loading>
     <div class="spinner">Chargement...</div>
 </div>
@@ -140,12 +140,18 @@
                             <div>
                                 <strong>Total:</strong> {{ count($selectedProducts) }} produit(s)
                             </div>
+
                             <button wire:click="transfer"
                                     class="btn btn-primary"
-                                    {{ !$destination_stock_id ? 'disabled' : '' }}>
+                                  >
                                 <i class="bi bi-arrow-left-right me-2"></i> Transférer
                             </button>
                         </div>
+                        @if(session()->has('error'))
+                            <div class="alert alert-danger">
+                                {{ session()->get('error') }}
+                            </div>
+                            @endif
                     </div>
                 @else
                     <div class="py-5 text-center card-body">

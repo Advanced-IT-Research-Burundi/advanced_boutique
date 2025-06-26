@@ -17,16 +17,7 @@ class StockTransfer extends Model
      *
      * @var array
      */
-    protected $fillable = [
-        'from_stock_id',
-        'to_stock_id',
-        'user_id',
-        'transfer_date',
-        'note',
-        'agency_id',
-        'created_by',
-        'stock_id',
-    ];
+    protected $guarded = [];
 
     /**
      * Get the attributes that should be cast.
@@ -45,21 +36,6 @@ class StockTransfer extends Model
             'created_by' => 'integer',
             'stock_id' => 'integer',
         ];
-    }
-
-    public function stock(): BelongsTo
-    {
-        return $this->belongsTo(Stock::class);
-    }
-
-    public function stock(): BelongsTo
-    {
-        return $this->belongsTo(Stock::class);
-    }
-
-    public function user(): BelongsTo
-    {
-        return $this->belongsTo(User::class);
     }
 
     public function agency(): BelongsTo

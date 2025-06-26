@@ -6,6 +6,9 @@ use App\Models\Category;
 use App\Models\Product;
 use App\Models\Stock;
 use App\Models\StockProduct;
+use App\Models\StockProductMouvement;
+use App\Models\StockTransfer;
+use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
 class StockTransfert extends Component
@@ -111,6 +114,62 @@ class StockTransfert extends Component
         // Implémentez la logique de transfert ici
         // Parcourir $this->selectedProducts et $this->quantities
 
+        $stockSource = Stock::find($this->stockSource);
+        $stockDestination = Stock::find($this->destination_stock_id);
+        //check if stock source and destination are the same
+        if ($stockSource->id == $stockDestination->id) {
+            session()->flash('error', 'Stock source et destination sont les mêmes');
+            return;
+        }
+
+        if (!$stockSource || !$stockDestination) {
+            session()->flash('error', 'Stock source ou destination non trouvé');
+            return;
+        }
+        try {
+            DB::beginTransaction();
+            $codeTransfert = time();
+            foreach ($this->selectedProductsItems as $product) {
+                $stockProduct = $product->stockProducts->where('stock_id', $this->stockSource)->first();
+                if ($stockProduct) {
+                    if ($stockProduct->quantity < $this->quantities[$product->id]) {
+                        session()->flash('error', 'Quantité insuffisante pour le produit '.$product->name);
+                        return;
+                    }
+                    $stockProduct->quantity -= $this->quantities[$product->id];
+                    $stockProduct->save();
+                    // Recherche de stock de destination
+                    $stockProductDestination = $product->stockProducts->where('stock_id', $this->destination_stock_id)->first();
+                    // Si non on le cree
+                    if (!$stockProductDestination) {
+                        $stockProductDestination = new StockProduct();
+                        $stockProductDestination->stock_id = $this->destination_stock_id;
+                        $stockProductDestination->product_id = $product->id;
+                        $stockProductDestination->product_name = $product->name;
+                        //$stockProductDestination->product_code = $product->code;
+                        $stockProductDestination->quantity = $this->quantities[$product->id];
+                        $stockProductDestination->save();
+                    }
+                    // Si oui on ajoute la quantité
+                    if ($stockProductDestination) {
+                        $stockProductDestination->quantity += $this->quantities[$product->id];
+                        $stockProductDestination->save();
+                    }
+                    // Enregistrement du transfert
+                    $this->updateTransferTable($product, $codeTransfert);
+                    // Enregistrement du Mouvment du produit de stock
+                    // stock_product_mouvements
+                    $this->updateStockProductMouvement($stockSource, $stockProductDestination, $product, $codeTransfert);
+                }
+            }
+
+            DB::commit();
+
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            session()->flash('error', 'Une erreur est survenue lors du transfert '.$th->getMessage());
+            return;
+        }
         // Réinitialiser après le transfert
         $this->selectedProducts = [];
         $this->quantities = [];
@@ -127,5 +186,69 @@ class StockTransfert extends Component
     public function updatedDestinationStockId()
     {
         // Logique spécifique lors du changement de stock de destination si nécessaire
+    }
+
+    public function updateTransferTable($product, $codeTransfert)
+    {
+        $transfer =  StockTransfer::create([
+            'from_stock_id' => $this->stockSource,
+            'to_stock_id' => $this->destination_stock_id,
+            'product_id' => $product->id,
+            'quantity' => $this->quantities[$product->id],
+            'price' => 0,
+            'user_id' => auth()->user()->id,
+            'transfer_date' => now(),
+            'note' =>   $codeTransfert,
+            'product_code' => $product->code,
+            'product_name' => $product->name,
+            'agency_id' => $product->agency_id,
+            'created_by' => auth()->user()->id,
+        ]);
+    }
+
+    public function updateStockProductMouvement($stockSource, $stockProductDestination, $product, $codeTransfert)
+    {
+        // stock source
+        StockProductMouvement::create([
+            'agency_id' => $product->agency_id,
+            'stock_id' => $stockSource->id,
+            'stock_product_id' => $product->stockProducts->where('stock_id', $stockSource->id)->first()->id,
+            'item_code' => $product->code,
+            'item_designation' => $product->name,
+            'item_quantity' => $this->quantities[$product->id],
+            'item_measurement_unit' => $product->measurement_unit,
+            'item_purchase_or_sale_price' => $product->purchase_or_sale_price,
+            'item_purchase_or_sale_currency' => $product->purchase_or_sale_currency,
+            'item_movement_type' => 'ST',
+            'item_movement_invoice_ref' => $codeTransfert,
+            'item_movement_description' => 'Transfert de stock',
+            'item_movement_date' => now(),
+            'item_product_detail_id' => $product->id,
+            'is_send_to_obr' => 'O',
+            'is_sent_at' => now(),
+            'user_id' => auth()->user()->id,
+            'item_movement_note' => 'Transfert de stock',
+        ]);
+        // stock destination
+        StockProductMouvement::create([
+            'agency_id' => $product->agency_id,
+            'stock_id' => $stockProductDestination->id,
+            'stock_product_id' => $product->stockProducts->where('stock_id', $stockProductDestination->id)->first()->id,
+            'item_code' => $product->code,
+            'item_designation' => $product->name,
+            'item_quantity' => $this->quantities[$product->id],
+            'item_measurement_unit' => $product->measurement_unit,
+            'item_purchase_or_sale_price' => $product->purchase_or_sale_price,
+            'item_purchase_or_sale_currency' => $product->purchase_or_sale_currency,
+            'item_movement_type' => 'ET',
+            'item_movement_invoice_ref' => $codeTransfert,
+            'item_movement_description' => 'Transfert de stock',
+            'item_movement_date' => now(),
+            'item_product_detail_id' => $product->id,
+            'is_send_to_obr' => 'O',
+            'is_sent_at' => now(),
+            'user_id' => auth()->user()->id,
+            'item_movement_note' => 'Transfert de distination ',
+        ]);
     }
 }
