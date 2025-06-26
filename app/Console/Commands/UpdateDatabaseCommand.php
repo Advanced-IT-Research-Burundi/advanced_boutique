@@ -52,7 +52,7 @@ class UpdateDatabaseCommand extends Command
                 'stock_id' => 1,
                 'product_name' => $product->name,
                 'product_id' => $product->id,
-                'quantity' => 10,
+                'quantity' => rand(10, 50),
                 'agency_id' => 1,
             ]);
             $this->output->progressAdvance();
