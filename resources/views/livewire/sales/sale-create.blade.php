@@ -7,16 +7,29 @@
             <!-- Colonne principale gauche -->
 
             <div class="col-md-6">
-            <select class="form-select mb-2"  wire:model="selectedStock" wire:change="currentSelectStock">
-                    <option value="">Selection stocks</option>
-                    @if($availablestocks)
-                    @foreach($availablestocks as $stock)
-                    <option value="{{ $stock->id }}">
-                        {{ $stock->name }}
-                    </option>
-                    @endforeach
-                    @endif
-            </select>
+            <div class="row">
+                <div class="col-md-6">
+                <select class="mb-2 form-select"  wire:model="selectedStock" wire:change="currentSelectStock">
+                        <option value="">Selection stocks</option>
+                        @if($availablestocks)
+                        @foreach($availablestocks as $stock)
+                        <option value="{{ $stock->id }}">
+                            {{ $stock->name }}
+                        </option>
+                        @endforeach
+                        @endif
+                </select>
+                </div>
+
+                <div>
+                <select class="mb-2 form-select"  wire:model="invoiceTye" wire:change="invoiceTye">
+                        <option value="FACTURE">FACTURE</option>
+                        <option value="PROFORMA">PROFORMA</option>
+                        <option value="BON">BON</option>
+                </select>
+            </div>
+
+            </div>
 
 
                 <!-- Section Client -->
