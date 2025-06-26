@@ -71,6 +71,9 @@ class StockTransfert extends Component
                   ->orWhere('description', 'like', '%' . $this->search . '%');
             });
         }
+        if ($this->selectedProducts) {
+            $query->whereNotIn('id', $this->selectedProducts);
+        }
 
         $this->products = $query->get();
     }
@@ -84,7 +87,7 @@ class StockTransfert extends Component
     {
         if (!in_array($productId, $this->selectedProducts)) {
             $this->selectedProducts[] = $productId;
-            $this->selectedProductsItems[] = $this->products->whereIn('id', $this->selectedProducts)->first();
+            $this->selectedProductsItems[] = $this->products->whereIn('id', $productId)->first();
             $this->quantities[$productId] = 1;
         }
     }

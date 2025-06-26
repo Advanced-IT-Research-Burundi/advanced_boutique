@@ -77,6 +77,9 @@
 
                 @if(count($selectedProducts) > 0)
                     <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                    <div wire:loading>
+    <div class="spinner">Chargement...</div>
+</div>
                         <table class="table mb-0 table-hover table-sm">
                             <thead class="table-light">
                                 <tr>
