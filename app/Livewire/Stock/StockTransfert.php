@@ -19,6 +19,12 @@ class StockTransfert extends Component
     public $selectedCategory;
     public $quantities = [];
     public $selectedProducts = [];
+    public $selectedProductsItems = [];
+
+    public $firstName = 'Jean';
+    public $lastName = 'Lionel';
+
+
 
     public function mount()
     {
@@ -78,8 +84,14 @@ class StockTransfert extends Component
     {
         if (!in_array($productId, $this->selectedProducts)) {
             $this->selectedProducts[] = $productId;
+            $this->selectedProductsItems[] = $this->products->whereIn('id', $this->selectedProducts)->first();
             $this->quantities[$productId] = 1;
         }
+    }
+
+    public function getSelectedProductsItemsProperty()
+    {
+        return $this->products->whereIn('id', $this->selectedProducts);
     }
 
     public function removeFromTransfer($productId)

@@ -1,7 +1,9 @@
 <div>
     {{-- The best athlete wants his opponent at his best. --}}
 
-    <h4>Transfert de stock</h4>
+    <h4>Transfert de stock </h4>
+
+
     <div class="row">
         <div class="col-md-6">
             <label for="stockSource">Stock source</label>
@@ -31,7 +33,7 @@
 
     <div class="row">
         <div class="col-md-6">
-        <table>
+        <table class="table table-hover table-sm">
             <thead>
                 <tr>
                     <th>Produit</th>
@@ -75,7 +77,7 @@
 
                 @if(count($selectedProducts) > 0)
                     <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
-                        <table class="table mb-0 table-hover">
+                        <table class="table mb-0 table-hover table-sm">
                             <thead class="table-light">
                                 <tr>
                                     <th>Produit</th>
@@ -84,7 +86,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach($products->whereIn('id', $selectedProducts) as $product)
+                                @foreach($selectedProductsItems as $product)
                                     @php
                                         $stockProduct = $product->stockProducts->where('stock_id', $stockSource)->first();
                                         $maxQty = $stockProduct ? $stockProduct->quantity : 0;
