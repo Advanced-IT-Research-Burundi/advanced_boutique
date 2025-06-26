@@ -33,14 +33,27 @@
 
     <div class="row">
         <div class="col-md-6">
+
         <table class="table table-hover table-sm">
             <thead>
+
                 <tr>
                     <th>Produit</th>
                     <th>CODE</th>
                     <th>CATÉGORIE</th>
                     <th>Quantité</th>
                     <th>Actions</th>
+                </tr>
+                <tr>
+                    <td colspan="5"><input type="text" wire:model="search" placeholder="Rechercher un produit" wire:keyup.debounce.300ms="updateProductListe" class="form-control"></td>
+                </tr>
+                <tr>
+
+                    <td colspan="5" wire:loading>
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </td>
                 </tr>
             </thead>
             <tbody>

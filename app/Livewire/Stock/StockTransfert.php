@@ -102,6 +102,7 @@ class StockTransfert extends Component
         if (($key = array_search($productId, $this->selectedProducts)) !== false) {
             unset($this->selectedProducts[$key]);
             unset($this->quantities[$productId]);
+            unset($this->selectedProductsItems[$key]);
         }
     }
 
