@@ -47,10 +47,14 @@ class EntreMultiple extends Component
         ->where('stock_id', $this->stockID)
         ->orderBy('product_name')
         ->get();
+
         foreach ($stockProducts as $product) {
             $this->quantities[$product->id] = 0;
             $this->prices[$product->id] = $product->product->sale_price;
         }
+      $this->products = [];
+      $this->resetForm();
+
     }
 
     public function clearQuantity($productId)

@@ -11,6 +11,7 @@ use App\Models\Category;
 use App\Models\StockProduct;
 use App\Models\CashRegister;
 use App\Models\CashTransaction;
+use App\Models\Proforma;
 use App\Models\StockProductMouvement;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
@@ -791,7 +792,26 @@ class SaleCreate extends Component
 
 
         public function createProforma($caisse){
-            dd($caisse);
+
+             Proforma::create([
+                'client_id' => $this->client_id,
+                'stock_id' => $this->current_stock->id ?? null,
+                'user_id' => Auth::id(),
+                'total_amount' => $this->total_amount,
+                'paid_amount' => $this->paid_amount,
+                'due_amount' => $this->due_amount,
+                'sale_date' => Carbon::parse($this->sale_date),
+                'note' => $this->note,
+                'invoice_type' => $this->invoiceTye,
+                'agency_id' => Auth::user()->agency_id,
+                'created_by' => Auth::id(),
+                'proforma_items' => json_encode($this->items),
+                'client' => json_encode(Client::find($this->client_id)),
+            ]);
+
+            $this->dispatch('success', [
+                'message' => 'Proforma enregistrée avec succès!'
+            ]);
         }
         /**
         * Définir le montant exact
