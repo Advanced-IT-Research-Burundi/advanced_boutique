@@ -20,7 +20,6 @@ class SaleController extends Controller
     {
         $query = Sale::with(['client', 'saleItems.product', 'user'])
                     ->orderBy('created_at', 'desc');
-
         // Apply filters
         if ($request->filled('search')) {
             $search = $request->search;

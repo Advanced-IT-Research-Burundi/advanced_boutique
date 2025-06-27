@@ -25,7 +25,7 @@ return new class extends Migration
             $table->timestamps();
             $table->softDeletes();
             $table->index(['stock_id', 'product_id']);
-            $table->unique(['stock_id', 'product_id', 'agency_id', 'category_id']);
+            $table->unique(['stock_id', 'product_id']);
         });
 
         Schema::enableForeignKeyConstraints();

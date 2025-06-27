@@ -317,10 +317,11 @@
                                                                 @endif
                                                                 <div class="flex-grow-1">
                                                                     <h6 class="mb-1 card-title fw-semibold">{{ $product['name'] }}</h6>
+
                                                                     <p class="mb-1 text-muted small">{{ number_format($product['sale_price_ttc'], 0, ',', ' ') }} Fbu</p>
                                                                     <div class="d-flex align-items-center justify-content-between">
-                                                                        <span class="badge {{ $product['available_stock'] <= ($product['alert_quantity'] ?? 5) ? 'bg-warning' : 'bg-success' }}">
-                                                                            Stock: {{ $product['available_stock'] }}
+                                                                        <span class="badge {{ $product['quantity_disponible'] <= 2 ? 'bg-warning' : 'bg-success' }}">
+                                                                        {{ $product['code'] }} qte: {{ $product['quantity_disponible'] }}
                                                                         </span>
                                                                         <i class="bi bi-plus-circle text-primary"></i>
                                                                     </div>

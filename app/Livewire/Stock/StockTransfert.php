@@ -220,7 +220,7 @@ class StockTransfert extends Component
     {
         // stock source
         StockProductMouvement::create([
-            'agency_id' => $product->agency_id,
+            'agency_id' => auth()->user()->agency_id,
             'stock_id' => $stockSource->id,
             'stock_product_id' => $stockProductSource->id,
             'item_code' => $product->code,
@@ -241,7 +241,7 @@ class StockTransfert extends Component
         ]);
         // stock destination
         StockProductMouvement::create([
-            'agency_id' => $product->agency_id,
+            'agency_id' => auth()->user()->agency_id,
             'stock_id' => $stockProductDestination->id,
             'stock_product_id' => $stockProductDestination->id,
             'item_code' => $product->code,
