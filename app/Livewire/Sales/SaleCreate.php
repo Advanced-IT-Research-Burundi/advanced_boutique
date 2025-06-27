@@ -47,6 +47,7 @@ class SaleCreate extends Component
     public $total_discount = 0;
     public $total_amount = 0;
     public $due_amount = 0;
+    public $invoiceTye = "FACTURE";
 
     // Collections (optimized)
     public $current_stock;
