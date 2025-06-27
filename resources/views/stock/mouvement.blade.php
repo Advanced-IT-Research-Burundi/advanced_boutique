@@ -42,7 +42,7 @@
                             <td>{{ $stockProductMouvement->item_purchase_or_sale_price }}</td>
                             <td>{{ $stockProductMouvement->item_purchase_or_sale_currency }}</td>
                             <td>{{ $stockProductMouvement->item_movement_type }}</td>
-                            <td>{{ $stockProductMouvement->invoice_ref }}</td>
+                            <td>{{ $stockProductMouvement->item_movement_invoice_ref }}</td>
                             <td>{{ $stockProductMouvement->item_movement_description }}</td>
 
                             <td>{{ $stockProductMouvement->user->first_name . ' ' . $stockProductMouvement->user->last_name }}</td>
