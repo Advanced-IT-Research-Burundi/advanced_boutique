@@ -52,6 +52,7 @@ class DatabaseSeeder extends Seeder
         $user->save();
         $user2->save();
 
+
         $agency = \App\Models\Agency::create([
             'company_id' => 1,
             'code' => 'AGC001',
@@ -66,7 +67,8 @@ class DatabaseSeeder extends Seeder
         $user->agency_id = $agency->id;
         $user2->agency_id = $agency->id;
 
-
+        $user->save();
+        $user2->save();
 
         $stock = \App\Models\Stock::create([
             'name' => 'Stock Principal',
@@ -77,7 +79,28 @@ class DatabaseSeeder extends Seeder
             'user_id' => $user->id,
         ]);
 
-        $user->save();
+        $userstocks = \App\Models\UserStock::create([
+                'user_id'=>$user->id,
+                'stock_id'=>$stock->id,
+                'agency_id'=>$agency->id,
+                'created_by'=>$user->id
+        ]);
+        $userstocks = \App\Models\UserStock::create([
+                'user_id'=>$user2->id,
+                'stock_id'=>$stock->id,
+                'agency_id'=>$agency->id,
+                'created_by'=>$user->id
+        ]);
+        $caisse = \App\Models\CashRegister::create([
+                'user_id' => $user->id,
+                'stock_id' => $stock->id,
+                'opening_balance' => 0,
+                'closing_balance' => 0,
+                'opened_at' => now(),
+                'created_by' => $user->id
+        ]);
+
+
 
         $sql = \File::get(public_path('product.sql'));
         \DB::unprepared($sql);

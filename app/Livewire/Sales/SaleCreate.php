@@ -110,7 +110,11 @@ class SaleCreate extends Component
     {
         $this->sale_date = now()->format('Y-m-d\TH:i');
         $this->cart_session = 'sale_create_' . Auth::id() . '_' . session()->getId();
-        $this->selectedStock = auth()->user()->stocks()->first()->id;
+        $stock = auth()->user()->stocks()->first();
+        if ($stock) {
+            # code...
+            $this->selectedStock = auth()->user()->stocks()->first()->id;
+        }
 
         if (!session()->has('cart_sessions')) {
             session()->put('cart_sessions', []);
