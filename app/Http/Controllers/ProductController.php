@@ -54,13 +54,16 @@ class ProductController extends Controller
     }
 
 
-    public function create()
+    public function create(Request $request)
     {
         $categories = Category::latest()->get();
         $stocks = Stock::where('agency_id', Auth::user()->agency_id)->latest()->get();
 
-        return view('product.create', compact('categories', 'stocks'));
+        $selectedCategoryId = $request->query('category_id');
+
+        return view('product.create', compact('categories', 'stocks', 'selectedCategoryId'));
     }
+
 
     /**
      * Store a newly created resource in storage.

@@ -6,6 +6,7 @@ use App\Models\Client;
 use App\Models\Product;
 use App\Models\StockProduct;
 use Illuminate\Console\Command;
+use Faker\Factory as Faker;
 
 class UpdateDatabaseCommand extends Command
 {
@@ -28,21 +29,31 @@ class UpdateDatabaseCommand extends Command
      */
     public function handle()
     {
-        //
+
+        $faker = Faker::create();
 
         // add progress indicator
-        $this->output->progressStart(100);
+         $products = Product::all();
+        $this->output->progressStart((count($products)+100));
         //Ajouter la liste des clients de test
         for($i=0; $i<100; $i++){
-            Client::create([
-                'name' => 'Client ' . $i,
-                'phone' => '0606060606',
-                'email' => 'client' . $i . '@gmail.com',
-                'address' => '123 Main St',
+           Client::create([
+                'name' => $faker->name,
+                'phone' => $faker->phoneNumber,
+                'email' => $faker->unique()->safeEmail,
+                'address' => $faker->address,
                 'agency_id' => 1,
                 'created_by' => 1,
-
-
+            ]);
+            $this->output->progressAdvance();
+        }
+        foreach ($products as $product) {
+            StockProduct::create([
+                'stock_id' => 1,
+                'product_name' => $product->name,
+                'product_id' => $product->id,
+                'quantity' => rand(10, 50),
+                'agency_id' => 1,
             ]);
             $this->output->progressAdvance();
         }

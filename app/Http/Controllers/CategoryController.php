@@ -79,11 +79,47 @@ class CategoryController extends Controller
 
     }
 
-    public function show(Request $request, Category $category): View
+    public function show(Category $category)
     {
-        return view('category.show', [
-            'category' => $category,
-        ]);
+
+        $allProducts = $category->products()
+            ->with(['stockProducts'])
+            ->get()
+            ->map(function ($product) {
+                $product->total_stock = $product->stockProducts->sum('quantity');
+                return $product;
+            });
+
+        // Statistiques
+        $totalProducts = $allProducts->count();
+        $productsInStock = $allProducts->filter(function($product) {
+            return $product->total_stock > 0;
+        })->count();
+
+        $productsLowStock = $allProducts->filter(function($product) {
+            return $product->total_stock > 0 && $product->total_stock <= $product->alert_quantity;
+        })->count();
+
+        $productsOutOfStock = $allProducts->filter(function($product) {
+            return $product->total_stock <= 0;
+        })->count();
+
+        $products = $category->products()
+            ->with(['agency', 'createdBy', 'stockProducts.stock', 'stockProducts.agency'])
+            ->paginate(15)
+            ->through(function ($product) {
+                $product->total_stock = $product->stockProducts->sum('quantity');
+                return $product;
+            });
+
+        return view('category.show', compact(
+            'category',
+            'products',
+            'totalProducts',
+            'productsInStock',
+            'productsLowStock',
+            'productsOutOfStock'
+        ));
     }
 
     public function edit(Request $request, Category $category): View
