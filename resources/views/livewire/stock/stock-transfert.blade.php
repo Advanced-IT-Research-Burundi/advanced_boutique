@@ -2,8 +2,9 @@
     {{-- The best athlete wants his opponent at his best. --}}
 
     <h4>Transfert de stock </h4>
-
-
+<div>
+    <a href="{{ route('stocks.index') }}" class="btn btn-primary">Retour</a>
+</div>
     <div class="row">
         <div class="col-md-6">
             <label for="stockSource">Stock source</label>

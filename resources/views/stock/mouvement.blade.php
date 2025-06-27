@@ -5,10 +5,11 @@
 @section('content')
 <div>
     <div>
-      @livewire('stock.stock-mouvement', ['stock' => $stock])
+        <a href="{{ route('stocks.index') }}" class="btn btn-primary">Retour</a>
+
     </div>
-    <div class="card-header">
-        <h3 class="card-title">Mouvements</h3>
+    <div>
+      @livewire('stock.stock-mouvement', ['stock' => $stock])
     </div>
     <div class="card-body">
         <div class="table-responsive">
@@ -39,7 +40,7 @@
                             <td>{{ $stockProductMouvement->item_measurement_unit }}</td>
                             <td>{{ $stockProductMouvement->item_purchase_or_sale_price }}</td>
                             <td>{{ $stockProductMouvement->item_purchase_or_sale_currency }}</td>
-                            <td>{{ $stockProductMouvement->type }}</td>
+                            <td>{{ $stockProductMouvement->item_movement_type }}</td>
                             <td>{{ $stockProductMouvement->invoice_ref }}</td>
                             <td>{{ $stockProductMouvement->description }}</td>
                             <td>{{ $stockProductMouvement->date }}</td>

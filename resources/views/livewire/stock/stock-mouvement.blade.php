@@ -1,6 +1,9 @@
 <div class="card">
-    <div class="card-header bg-primary text-white">
-        <h4 class="mb-0">Mouvement de Stock</h4>
+    <div class="text-white card-header bg-primary">
+        <h5 class="mb-0">Mouvement de Stock [{{ $stock->stock->name }}] :  {{ $stock->product_name }}
+
+        </h5>
+        <small class="text-white">Quantité : {{ $stock->quantity }}</small>
     </div>
     <div class="card-body">
         <form wire:submit.prevent="saveMovement">
