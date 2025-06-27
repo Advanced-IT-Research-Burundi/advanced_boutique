@@ -129,6 +129,9 @@
                     </select>
                 </div>
                 <div class="gap-2 col-md-3 d-flex align-items-end">
+                    <a href="{{ route('proformas.index') }}" class="btn btn-outline-primary" >
+                        <i class="bi bi-file-earmark-text me-1"></i>Proforma
+                    </a>
                     <button type="submit" class="btn btn-primary">
                         <i class="bi bi-funnel me-1"></i>Filtrer
                     </button>
