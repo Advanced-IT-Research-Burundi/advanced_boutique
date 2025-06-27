@@ -200,7 +200,7 @@ class StockTransfert extends Component
 
     public function updateTransferTable($product, $codeTransfert)
     {
-        $transfer =  StockTransfer::create([
+        $transfer = StockTransfer::create([
             'from_stock_id' => $this->stockSource,
             'to_stock_id' => $this->destination_stock_id,
             'product_id' => $product->id,
@@ -231,7 +231,7 @@ class StockTransfert extends Component
             'item_purchase_or_sale_currency' => $product->sale_price_currency ?? 'BIF',
             'item_movement_type' => 'ST',
             'item_movement_invoice_ref' => '',
-            'item_movement_description' => $codeTransfert,
+            'item_movement_description' => $codeTransfert . ' - Transfert de stock  vers ' . $stockProductDestination->stock->name . ' pour ' . $product->name,
             'item_movement_date' => now(),
             'item_product_detail_id' => $product->id,
             'is_send_to_obr' => null,
@@ -252,7 +252,7 @@ class StockTransfert extends Component
             'item_purchase_or_sale_currency' => $product->sale_price_currency ?? 'BIF',
             'item_movement_type' => 'ET',
             'item_movement_invoice_ref' => $codeTransfert,
-            'item_movement_description' => $codeTransfert,
+            'item_movement_description' => $codeTransfert . ' - Entre de stock  Provenant de ' . $stockProductSource->stock->name . ' pour ' . $product->name,
             'item_movement_date' => now(),
             'item_product_detail_id' => $product->id,
             'is_send_to_obr' => null,
