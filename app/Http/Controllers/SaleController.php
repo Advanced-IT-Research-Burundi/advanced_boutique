@@ -65,6 +65,11 @@ class SaleController extends Controller
 
     public function create()
     {
+        // $stock = auth()->user()->stocks()->first();
+
+        // if (!$stock) {
+        //     abort('403');
+        // }
 
         return view('sale.create');
     }
