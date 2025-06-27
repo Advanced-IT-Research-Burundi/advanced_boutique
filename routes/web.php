@@ -73,6 +73,9 @@ Route::middleware(['auth'])->group(function () {
             Route::delete('/detach', [\App\Http\Controllers\UserStockController::class, 'detachAjax'])->name('detach');
         });
     });
+
+
+    
 });
 
 

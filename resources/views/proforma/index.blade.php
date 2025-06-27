@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Gestion des Ventes')
+@section('title', 'Gestion des Proformas')
 
 @section('content')
 <div class="container-fluid">
@@ -10,18 +10,17 @@
             <div class="d-flex justify-content-between align-items-center">
                 <div>
                     <h2 class="mb-1 text-primary">
-                        <i class="bi bi-cart-check-fill me-2"></i>Gestion des Ventes
+                        <i class="bi bi-file-earmark-text-fill me-2"></i>Gestion des Proformas
                     </h2>
-                    <p class="mb-0 text-muted">{{ $sales->total() }} vente(s) au total</p>
+                    <p class="mb-0 text-muted">{{ $proformas->total() }} proforma(s) au total</p>
                 </div>
                 <div class="gap-2 d-flex">
                     <button class="btn btn-outline-primary" id="refreshBtn">
                         <i class="bi bi-arrow-clockwise me-1"></i>Actualiser
                     </button>
                     <a href="{{ route('sales.create') }}" class="btn btn-primary">
-                        <i class="bi bi-plus-circle me-1"></i>Nouvelle Vente
+                        <i class="bi bi-plus-circle me-1"></i>Nouveau Proforma
                     </a>
-
                 </div>
             </div>
         </div>
@@ -39,8 +38,8 @@
                             </div>
                         </div>
                         <div class="flex-grow-1 ms-3">
-                            <h6 class="mb-1 text-muted">Fbu Total</h6>
-                            <h4 class="mb-0">{{ number_format($totalRevenue ?? 0, 0, ',', ' ') }} F</h4>
+                            <h6 class="mb-1 text-muted">Montant Total</h6>
+                            <h4 class="mb-0">{{ number_format($totalRevenue ?? 0, 0, ',', ' ') }} Fbu</h4>
                         </div>
                     </div>
                 </div>
@@ -56,8 +55,8 @@
                             </div>
                         </div>
                         <div class="flex-grow-1 ms-3">
-                            <h6 class="mb-1 text-muted">Ventes Payées</h6>
-                            <h5 class="mb-0">{{ $paidSales ?? 0 }}</h5>
+                            <h6 class="mb-1 text-muted">Proformas Payés</h6>
+                            <h5 class="mb-0">{{ $paidProformas ?? 0 }}</h5>
                         </div>
                     </div>
                 </div>
@@ -91,7 +90,7 @@
                         </div>
                         <div class="flex-grow-1 ms-3">
                             <h6 class="mb-1 text-muted">Aujourd'hui</h6>
-                            <h6 class="mb-0">{{ $todaySales ?? 0 }}</h6>
+                            <h6 class="mb-0">{{ $todayProformas ?? 0 }}</h6>
                         </div>
                     </div>
                 </div>
@@ -107,7 +106,7 @@
                     <label class="form-label">Rechercher</label>
                     <div class="input-group">
                         <span class="input-group-text"><i class="bi bi-search"></i></span>
-                        <input type="text" class="form-control" name="search" placeholder="Rechercher une vente..."
+                        <input type="text" class="form-control" name="search" placeholder="Rechercher un proforma..."
                                value="{{ request('search') }}">
                     </div>
                 </div>
@@ -129,13 +128,10 @@
                     </select>
                 </div>
                 <div class="gap-2 col-md-3 d-flex align-items-end">
-                    <a href="{{ route('proformas.index') }}" class="btn btn-outline-primary" >
-                        <i class="bi bi-file-earmark-text me-1"></i>Proforma
-                    </a>
                     <button type="submit" class="btn btn-primary">
                         <i class="bi bi-funnel me-1"></i>Filtrer
                     </button>
-                    <a href="{{ route('sales.index') }}" class="btn btn-outline-secondary">
+                    <a href="{{ route('proformas.index') }}" class="btn btn-outline-secondary">
                         <i class="bi bi-x-circle me-1"></i>Reset
                     </a>
                 </div>
@@ -143,7 +139,7 @@
         </div>
     </div>
 
-    <!-- Sales Table -->
+    <!-- Proformas Table -->
     <div class="border-0 shadow-sm card">
         <div class="p-0 card-body">
             <div class="table-responsive">
@@ -153,91 +149,95 @@
                             <th class="px-4 py-3 border-0">
                                 <input type="checkbox" class="form-check-input" id="selectAll">
                             </th>
-                            <th class="px-4 py-3 border-0">Vente #</th>
+                            <th class="px-4 py-3 border-0">Proforma #</th>
                             <th class="px-4 py-3 border-0">Client</th>
                             <th class="px-4 py-3 border-0">Date</th>
                             <th class="px-4 py-3 border-0">Montant Total</th>
-                            <th class="px-4 py-3 border-0">Payé</th>
                             <th class="px-4 py-3 border-0">Reste</th>
                             <th class="px-4 py-3 border-0">Statut</th>
+                            <th class="px-4 py-3 border-0">Agence</th>
                             <th class="px-4 py-3 border-0">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse($sales as $sale)
-                        <tr class="sale-row" data-id="{{ $sale->id }}">
+                        @forelse($proformas as $proforma)
+                        @php
+                            $client = json_decode($proforma->client, true) ?? [];
+                        @endphp
+                        <tr class="proforma-row" data-id="{{ $proforma->id }}">
                             <td class="px-4">
-                                <input type="checkbox" class="form-check-input sale-checkbox" value="{{ $sale->id }}">
+                                <input type="checkbox" class="form-check-input proforma-checkbox" value="{{ $proforma->id }}">
                             </td>
                             <td class="px-4">
                                 <div class="d-flex align-items-center">
                                     <div class="p-2 bg-opacity-10 rounded bg-primary me-2">
-                                        <i class="bi bi-receipt text-primary"></i>
+                                        <i class="bi bi-file-earmark-text text-primary"></i>
                                     </div>
                                     <div>
-                                        <strong class="text-primary">#{{ str_pad($sale->id, 6, '0', STR_PAD_LEFT) }}</strong>
+                                        <strong class="text-primary">PRO-{{ str_pad($proforma->id, 6, '0', STR_PAD_LEFT) }}</strong>
                                         <br>
-                                        <small class="text-muted">{{ $sale->created_at->format('H:i') }}</small>
+                                        <small class="text-muted">{{ $proforma->created_at->format('H:i') }}</small>
                                     </div>
                                 </div>
                             </td>
                             <td class="px-4">
                                 <div>
-                                    <strong>{{ $sale->client->name ?? 'Client supprimé' }}</strong>
+                                    <strong>{{ $client['name'] ?? 'Client non spécifié' }}</strong>
                                     <br>
-                                    <small class="text-muted">{{ $sale->client->phone ?? '' }}</small>
+                                    <small class="text-muted">{{ $client['phone'] ?? '' }}</small>
                                 </div>
                             </td>
                             <td class="px-4">
                                 <div>
-                                    <strong>{{ \Carbon\Carbon::parse($sale->sale_date)->format('d/m/Y') }}</strong>
+                                    <strong>{{ \Carbon\Carbon::parse($proforma->sale_date)->format('d/m/Y') }}</strong>
                                     <br>
-                                    <small class="text-muted">{{ \Carbon\Carbon::parse($sale->sale_date)->diffForHumans() }}</small>
+                                    <small class="text-muted">{{ \Carbon\Carbon::parse($proforma->sale_date)->diffForHumans() }}</small>
                                 </div>
                             </td>
                             <td class="px-4">
-                                <strong class="text-dark">{{ number_format($sale->total_amount, 0, ',', ' ') }} F</strong>
+                                <strong class="text-dark">{{ number_format($proforma->total_amount, 0, ',', ' ') }} Fbu</strong>
                             </td>
                             <td class="px-4">
-                                <span class="text-success">{{ number_format($sale->paid_amount, 0, ',', ' ') }} Fbu</span>
-                            </td>
-                            <td class="px-4">
-                                @if($sale->due_amount > 0)
-                                    <span class="text-warning">{{ number_format($sale->due_amount, 0, ',', ' ') }} F</span>
+                                @if($proforma->due_amount > 0)
+                                    <span class="text-warning">{{ number_format($proforma->due_amount, 0, ',', ' ') }} Fbu</span>
                                 @else
-                                    <span class="text-success">0 F</span>
+                                    <span class="text-success">0 Fbu</span>
                                 @endif
                             </td>
                             <td class="px-4">
-                                @if($sale->due_amount == 0)
-                                    <span class="px-3 py-2 text-success">
+                                @if($proforma->due_amount == 0)
+                                    <span class="badge bg-success">
                                         <i class="bi bi-check-circle me-1"></i>Payé
                                     </span>
-                                @elseif($sale->paid_amount > 0)
-                                    <span class="px-3 py-2 text-warning">
+                                @elseif($proforma->due_amount < $proforma->total_amount)
+                                    <span class="badge bg-warning">
                                         <i class="bi bi-clock me-1"></i>Partiel
                                     </span>
                                 @else
-                                    <span class="px-3 py-2 text-danger">
+                                    <span class="badge bg-danger">
                                         <i class="bi bi-x-circle me-1"></i>Impayé
                                     </span>
                                 @endif
                             </td>
                             <td class="px-4">
+                                <small class="text-muted">{{ $proforma->agency->name ?? 'Non spécifiée' }}</small>
+                            </td>
+                            <td class="px-4">
                                 <div class="btn-group" role="group">
-                                    <a href="{{ route('sales.show', $sale) }}"
+                                    <a href="{{ route('proformas.show', $proforma) }}"
                                        class="btn btn-sm btn-outline-primary"
                                        data-bs-toggle="tooltip" title="Voir">
                                         <i class="bi bi-eye"></i>
                                     </a>
-                                    {{-- <a href="{{ route('sales.edit', $sale) }}"
-                                       class="btn btn-sm btn-outline-warning"
-                                       data-bs-toggle="tooltip" title="Modifier">
-                                        <i class="bi bi-pencil"></i>
-                                    </a> --}}
+                                    <button type="button"
+                                            class="btn btn-sm btn-outline-info print-btn"
+                                            data-id="{{ $proforma->id }}"
+                                            data-bs-toggle="tooltip" title="Imprimer">
+                                        <i class="bi bi-printer"></i>
+                                    </button>
                                     <button type="button"
                                             class="btn btn-sm btn-outline-danger delete-btn"
-                                            data-id="{{ $sale->id }}"
+                                            data-id="{{ $proforma->id }}"
                                             data-bs-toggle="tooltip" title="Supprimer">
                                         <i class="bi bi-trash"></i>
                                     </button>
@@ -249,8 +249,8 @@
                             <td colspan="9" class="py-5 text-center">
                                 <div class="text-muted">
                                     <i class="mb-3 bi bi-inbox display-4 d-block"></i>
-                                    <h5>Aucune vente trouvée</h5>
-                                    <p class="mb-0">Commencez par créer votre première vente</p>
+                                    <h5>Aucun proforma trouvé</h5>
+                                    <p class="mb-0">Commencez par créer votre premier proforma</p>
                                 </div>
                             </td>
                         </tr>
@@ -260,13 +260,13 @@
             </div>
         </div>
 
-        @if($sales->hasPages())
+        @if($proformas->hasPages())
         <div class="bg-transparent border-0 card-footer">
             <div class="d-flex justify-content-between align-items-center">
                 <div class="text-muted small">
-                    Affichage de {{ $sales->firstItem() }} à {{ $sales->lastItem() }} sur {{ $sales->total() }} résultats
+                    Affichage de {{ $proformas->firstItem() }} à {{ $proformas->lastItem() }} sur {{ $proformas->total() }} résultats
                 </div>
-                {{ $sales->links() }}
+                {{ $proformas->links() }}
             </div>
         </div>
         @endif
@@ -284,7 +284,7 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <p>Êtes-vous sûr de vouloir supprimer cette vente ? Cette action est irréversible.</p>
+                <p>Êtes-vous sûr de vouloir supprimer ce proforma ? Cette action est irréversible.</p>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
@@ -311,10 +311,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Select all checkbox functionality
     const selectAllCheckbox = document.getElementById('selectAll');
-    const saleCheckboxes = document.querySelectorAll('.sale-checkbox');
+    const proformaCheckboxes = document.querySelectorAll('.proforma-checkbox');
 
     selectAllCheckbox?.addEventListener('change', function() {
-        saleCheckboxes.forEach(checkbox => {
+        proformaCheckboxes.forEach(checkbox => {
             checkbox.checked = this.checked;
         });
     });
@@ -326,9 +326,18 @@ document.addEventListener('DOMContentLoaded', function() {
 
     deleteButtons.forEach(button => {
         button.addEventListener('click', function() {
-            const saleId = this.dataset.id;
-            deleteForm.action = `/sales/${saleId}`;
+            const proformaId = this.dataset.id;
+            deleteForm.action = `/proformas/${proformaId}`;
             deleteModal.show();
+        });
+    });
+
+    // Print functionality
+    const printButtons = document.querySelectorAll('.print-btn');
+    printButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const proformaId = this.dataset.id;
+            window.open(`/proformas/${proformaId}/print`, '_blank');
         });
     });
 
@@ -350,11 +359,11 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Row click to show details
-    document.querySelectorAll('.sale-row').forEach(row => {
+    document.querySelectorAll('.proforma-row').forEach(row => {
         row.addEventListener('click', function(e) {
             if (!e.target.closest('input, button, a')) {
-                const saleId = this.dataset.id;
-                window.location.href = `/sales/${saleId}`;
+                const proformaId = this.dataset.id;
+                window.location.href = `/proformas/${proformaId}`;
             }
         });
     });
@@ -366,7 +375,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!startTimestamp) startTimestamp = timestamp;
             const progress = Math.min((timestamp - startTimestamp) / duration, 1);
             const current = Math.floor(progress * (end - start) + start);
-            element.textContent = new Intl.NumberFormat('fr-FR').format(current) + ' F';
+            element.textContent = new Intl.NumberFormat('fr-FR').format(current) + ' Fbu';
             if (progress < 1) {
                 window.requestAnimationFrame(step);
             }
@@ -379,7 +388,7 @@ document.addEventListener('DOMContentLoaded', function() {
         document.querySelectorAll('.card h4').forEach(element => {
             const value = parseInt(element.textContent.replace(/\D/g, ''));
             if (value > 0) {
-                element.textContent = '0 F';
+                element.textContent = '0 Fbu';
                 animateValue(element, 0, value, 1000);
             }
         });

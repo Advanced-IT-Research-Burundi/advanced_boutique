@@ -195,18 +195,6 @@ class SaleCreate extends Component
         }
     }
 
-    /**
-    * Mise à jour de la recherche client avec debounce
-    */
-    public function updatedClientSearch()
-    {
-        if (strlen($this->client_search) >= 2) {
-            $this->searchClients();
-        } else {
-            $this->filtered_clients = [];
-            $this->show_client_search = false;
-        }
-    }
 
     /**
     * Sélection de catégorie optimisée

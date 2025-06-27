@@ -54,27 +54,25 @@
                                     </label>
                                     <input type="text"
                                         class="form-control @error('client_id') is-invalid @enderror"
-                                        wire:model.live.debounce.300ms="client_search"
+                                        wire:model="client_search"
                                         placeholder="Rechercher un client par nom ou téléphone..."
-                                        id="client_search"
+                                        {{-- id="client_search" --}}
                                         autocomplete="off">
                                     <!-- Loading indicator pour la recherche client -->
                                     <div class="position-absolute top-50 end-0 translate-middle-y me-3">
-                                        <div wire:loading wire:target="updatedClientSearch,searchClients" class="spinner-border spinner-border-sm text-primary" role="status">
+                                        <div wire:loading wire:target="searchClients" class="spinner-border spinner-border-sm text-primary" role="status">
                                             <span class="visually-hidden">Recherche...</span>
                                         </div>
-                                        <i wire:loading.remove wire:target="updatedClientSearch,searchClients" class="bi bi-search text-muted"></i>
+                                        <i wire:loading.remove wire:target="searchClients" class="bi bi-search text-muted"></i>
                                     </div>
 
                                     <!-- Bouton de recherche -->
-                                    @if(!$show_client_search && strlen($client_search) >= 2)
                                     <button type="button"
                                         class="btn btn-sm btn-outline-primary position-absolute top-50 end-0 translate-middle-y me-5"
                                         wire:click="searchClients"
                                         style="z-index: 10;">
                                         <i class="bi bi-search"></i>
                                     </button>
-                                    @endif
 
                                     <!-- Dropdown des clients -->
                                     @if($show_client_search && count($filtered_clients) > 0)

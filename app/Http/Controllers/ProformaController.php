@@ -11,13 +11,70 @@ use Illuminate\View\View;
 
 class ProformaController extends Controller
 {
-    public function index(Request $request): Response
+    public function index(Request $request)
     {
-        $proformas = Proforma::all();
+        $query = Proforma::with(['stock', 'user', 'agency', 'createdBy'])
+            ->orderBy('created_at', 'desc');
 
-        return view('proforma.index', [
-            'proformas' => $proformas,
-        ]);
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('id', 'like', "%{$search}%")
+                  ->orWhere('client', 'like', "%{$search}%")
+                  ->orWhere('note', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('date_from')) {
+            $query->whereDate('sale_date', '>=', $request->date_from);
+        }
+
+        if ($request->filled('date_to')) {
+            $query->whereDate('sale_date', '<=', $request->date_to);
+        }
+
+        if ($request->filled('status')) {
+            switch ($request->status) {
+                case 'paid':
+                    $query->where('due_amount', 0);
+                    break;
+                case 'partial':
+                    $query->where('due_amount', '>', 0)
+                          ->whereRaw('due_amount < total_amount');
+                    break;
+                case 'unpaid':
+                    $query->whereRaw('due_amount = total_amount');
+                    break;
+            }
+        }
+
+        $proformas = $query->paginate(15);
+
+        $totalRevenue = Proforma::sum('total_amount');
+        $paidProformas = Proforma::where('due_amount', 0)->count();
+        $totalDue = Proforma::sum('due_amount');
+        $todayProformas = Proforma::whereDate('created_at', today())->count();
+
+        return view('proforma.index', compact(
+            'proformas',
+            'totalRevenue',
+            'paidProformas',
+            'totalDue',
+            'todayProformas'
+        ));
+    }
+
+    public function show(Proforma $proforma)
+    {
+        $proforma->load(['stock', 'user', 'agency', 'createdBy']);
+
+        // Decode proforma items
+        $items = json_decode($proforma->proforma_items, true) ?? [];
+
+        // Decode client data
+        $client = json_decode($proforma->client, true) ?? [];
+
+        return view('proforma.show', compact('proforma', 'items', 'client'));
     }
 
     public function create(Request $request): Response
@@ -32,13 +89,6 @@ class ProformaController extends Controller
         $request->session()->flash('proforma.id', $proforma->id);
 
         return redirect()->route('proformas.index');
-    }
-
-    public function show(Request $request, Proforma $proforma): Response
-    {
-        return view('proforma.show', [
-            'proforma' => $proforma,
-        ]);
     }
 
     public function edit(Request $request, Proforma $proforma): Response
