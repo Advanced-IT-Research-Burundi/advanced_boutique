@@ -50,7 +50,7 @@ class StockProduct extends Model
 
     public function stockProductMouvements()
     {
-        return $this->hasMany(StockProductMouvement::class , 'stock_id', 'id');
+        return $this->hasMany(StockProductMouvement::class , 'stock_product_id', 'id');
     }
 
     public function product(): BelongsTo

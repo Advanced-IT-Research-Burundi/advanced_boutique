@@ -110,7 +110,7 @@ class SaleCreate extends Component
     {
         $this->sale_date = now()->format('Y-m-d\TH:i');
         $this->cart_session = 'sale_create_' . Auth::id() . '_' . session()->getId();
-        // $this->selectedStock = $stockId;
+        $this->selectedStock = auth()->user()->stocks()->first()->id;
 
         if (!session()->has('cart_sessions')) {
             session()->put('cart_sessions', []);
@@ -147,10 +147,12 @@ class SaleCreate extends Component
         $this->categories_loading = true;
 
         try {
+            $selectedStock = $this->selectedStock;
             $this->categories = Category::select('id', 'name')
-            ->withCount(['products' => function ($query) {
-                $query->whereHas('stockProducts', function ($q) {
-                    $q->where('quantity', '>', 0);
+            ->withCount(['products' => function ($query) use ($selectedStock) {
+                $query->whereHas('stockProducts', function ($q) use ($selectedStock) {
+                    $q->where('quantity', '>', 0)
+                    ->where('stock_id', $selectedStock);
                 });
             }])
             ->having('products_count', '>', 0)
@@ -340,6 +342,7 @@ class SaleCreate extends Component
 
                 // Charger les stocks en une seule requête
                 $stockProducts = StockProduct::whereIn('product_id', $productIds)
+                ->where('stock_id', $this->selectedStock)
                 ->select('product_id', 'quantity')
                 ->get()
                 ->keyBy('product_id');
@@ -504,19 +507,25 @@ class SaleCreate extends Component
         */
         public function updateItemQuantity($productId, $quantity)
         {
-            $quantity = floatval($quantity);
-
+            $quantity = doubleval($quantity);
             if ($quantity <= 0) {
                 $this->removeItem($productId);
                 return;
             }
 
+
             // Vérifier le stock disponible
-            $stockProduct = StockProduct::where('product_id', $productId)->first();
+            $stockProduct = StockProduct::where('product_id', $productId)
+            ->where('stock_id', $this->selectedStock)
+            ->first();
+
             if ($stockProduct && $quantity > $stockProduct->quantity) {
+              //  dd($quantity, $stockProduct);
                 $this->dispatch('error', ['message' => 'Quantité supérieure au stock disponible']);
                 return;
             }
+
+
 
             try {
                 Cart::session($this->cart_session)->update($productId, [
@@ -525,6 +534,8 @@ class SaleCreate extends Component
                 $this->loadCartItems();
             } catch (\Exception $e) {
                 // Gestion silencieuse
+                dd($e);
+                $this->dispatch('error', ['message' => 'Erreur lors de la mise à jour de la quantité: ' . $e->getMessage()]);
             }
         }
 
@@ -575,6 +586,8 @@ class SaleCreate extends Component
             $this->subtotal = 0;
             $this->total_discount = 0;
             $this->total_amount = 0;
+
+
 
             foreach ($this->items as $item) {
                 if (!empty($item['product_id']) && !empty($item['quantity']) && isset($item['sale_price'])) {
@@ -636,6 +649,7 @@ class SaleCreate extends Component
 
             // Charger tous les stocks en une seule requête
             $stockProducts = StockProduct::whereIn('product_id', $productIds)
+            ->where('stock_id', $this->selectedStock)
             ->select('product_id', 'quantity')
             ->get()
             ->keyBy('product_id');
@@ -772,18 +786,27 @@ class SaleCreate extends Component
                         'user_id' => Auth::id(),
                     ]);
 
-                    $stockProduct = StockProduct::where('product_id', $item['product_id'])->first();
+                    $stockProduct = StockProduct::where('product_id', $item['product_id'])
+                    ->where('stock_id', $this->selectedStock)
+                    ->first();
+                    if(!$stockProduct){
+                        $this->addError('stock_error', 'Stock insuffisant pour ' . $item['product_id']);
+                        $this->dispatch('error', [
+                            'message' => 'Stock insuffisant pour ' . $item['product_id']
+                        ]);
+                        return;
+                    }
                     if ($stockProduct) {
                         $stockProduct->update([
                             'quantity' => $stockProduct->quantity - $item['quantity']
                         ]);
 
                         // Update Product Stock Movement
-                        StockProductMouvement::create([
+                      $s =  StockProductMouvement::create([
                             'agency_id' => auth()->user()->agency_id,
                             'stock_id' => $stockProduct->stock_id,
                             'stock_product_id' => $stockProduct->id,
-                            'item_code' => $item['product_id'],
+                            'item_code' => $stockProduct->id,
                             'item_designation' => $stockProduct->product->name,
                             'item_quantity' => $item['quantity'],
                             'item_measurement_unit' => $stockProduct->product->unit ?? 'Piece',
@@ -799,6 +822,8 @@ class SaleCreate extends Component
                             'user_id' => auth()->user()->id,
                             'item_movement_note' => 'Vente Normal',
                         ]);
+
+                        //dd($s);
 
                     }
                 }
