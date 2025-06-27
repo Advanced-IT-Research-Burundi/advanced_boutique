@@ -505,10 +505,11 @@ class SaleCreate extends Component
         /**
         * Mettre à jour la quantité d'un item
         */
-        public function updateItemQuantity($productId, $quantity)
+        public function updateItemQuantity($productId, $quantityD)
         {
-            $quantity = doubleval($quantity);
-            if ($quantity <= 0) {
+            $quantity = doubleval($quantityD);
+            if ($quantity <= 0 && $quantityD != "" ) {
+
                 $this->removeItem($productId);
                 return;
             }
@@ -707,6 +708,8 @@ class SaleCreate extends Component
         */
         public function save()
         {
+
+
             $this->loadCartItems();
 
             if (empty($this->items)) {
@@ -759,85 +762,15 @@ class SaleCreate extends Component
 
             try {
                 DB::beginTransaction();
-
-                $sale = Sale::create([
-                    'client_id' => $this->client_id,
-                    'stock_id' => $this->current_stock->id ?? null,
-                    'user_id' => Auth::id(),
-                    'total_amount' => $this->total_amount,
-                    'paid_amount' => $this->paid_amount,
-                    'due_amount' => $this->due_amount,
-                    'sale_date' => Carbon::parse($this->sale_date),
-                    'note' => $this->note,
-                    'agency_id' => Auth::user()->agency_id,
-                    'created_by' => Auth::id(),
-                ]);
-
-                foreach ($this->items as $item) {
-                    SaleItem::create([
-                        'sale_id' => $sale->id,
-                        'product_id' => $item['product_id'],
-                        'quantity' => $item['quantity'],
-                        'sale_price' => $item['sale_price'] ?? 0,
-                        'discount' => $item['discount'] ?? 0,
-                        'subtotal' => $item['subtotal'],
-                        'agency_id' => Auth::user()->agency_id,
-                        'created_by' => Auth::id(),
-                        'user_id' => Auth::id(),
-                    ]);
-
-                    $stockProduct = StockProduct::where('product_id', $item['product_id'])
-                    ->where('stock_id', $this->selectedStock)
-                    ->first();
-                    if(!$stockProduct){
-                        $this->addError('stock_error', 'Stock insuffisant pour ' . $item['product_id']);
-                        $this->dispatch('error', [
-                            'message' => 'Stock insuffisant pour ' . $item['product_id']
-                        ]);
-                        return;
-                    }
-                    if ($stockProduct) {
-                        $stockProduct->update([
-                            'quantity' => $stockProduct->quantity - $item['quantity']
-                        ]);
-
-                        // Update Product Stock Movement
-                      $s =  StockProductMouvement::create([
-                            'agency_id' => auth()->user()->agency_id,
-                            'stock_id' => $stockProduct->stock_id,
-                            'stock_product_id' => $stockProduct->id,
-                            'item_code' => $stockProduct->id,
-                            'item_designation' => $stockProduct->product->name,
-                            'item_quantity' => $item['quantity'],
-                            'item_measurement_unit' => $stockProduct->product->unit ?? 'Piece',
-                            'item_purchase_or_sale_price' => $item['sale_price'],
-                            'item_purchase_or_sale_currency' => $stockProduct->product->sale_price_currency ?? 'BIF',
-                            'item_movement_type' => 'SN',
-                            'item_movement_invoice_ref' => $sale->id,
-                            'item_movement_description' => 'Vente',
-                            'item_movement_date' => now(),
-                            'item_product_detail_id' => $stockProduct->product->id,
-                            'is_send_to_obr' => null,
-                            'is_sent_at' => null,
-                            'user_id' => auth()->user()->id,
-                            'item_movement_note' => 'Vente Normal',
-                        ]);
-
-                        //dd($s);
-
-                    }
+                //   dd($this->invoiceTye);
+                if($this->invoiceTye == "PROFORMA"){
+                    // create Proforma
+                    $this->createProforma(  $caisse );
+                }else{
+                    // create Sale
+                    $this->createSale(  $caisse );
                 }
 
-                CashTransaction::create([
-                    'cash_register_id' => $caisse->id,
-                    'type' => 'in',
-                    'reference_id' => 'Ref ' . $sale->id,
-                    'amount' => $this->total_amount,
-                    'description' => $this->note,
-                    'agency_id' => $caisse->agency_id,
-                    'created_by' => auth()->user()->id,
-                    'user_id' => auth()->user()->id,
-                ]);
 
                 DB::commit();
 
@@ -852,6 +785,10 @@ class SaleCreate extends Component
             }
         }
 
+
+        public function createProforma($caisse){
+            dd($caisse);
+        }
         /**
         * Définir le montant exact
         */
@@ -859,6 +796,89 @@ class SaleCreate extends Component
         {
             $this->paid_amount = $this->total_amount;
             $this->calculateTotals();
+        }
+
+        public function createSale($caisse){
+
+            $sale = Sale::create([
+                'client_id' => $this->client_id,
+                'stock_id' => $this->current_stock->id ?? null,
+                'user_id' => Auth::id(),
+                'total_amount' => $this->total_amount,
+                'paid_amount' => $this->paid_amount,
+                'due_amount' => $this->due_amount,
+                'sale_date' => Carbon::parse($this->sale_date),
+                'note' => $this->note,
+                'agency_id' => Auth::user()->agency_id,
+                'created_by' => Auth::id(),
+            ]);
+
+            foreach ($this->items as $item) {
+                SaleItem::create([
+                    'sale_id' => $sale->id,
+                    'product_id' => $item['product_id'],
+                    'quantity' => $item['quantity'],
+                    'sale_price' => $item['sale_price'] ?? 0,
+                    'discount' => $item['discount'] ?? 0,
+                    'subtotal' => $item['subtotal'],
+                    'agency_id' => Auth::user()->agency_id,
+                    'created_by' => Auth::id(),
+                    'user_id' => Auth::id(),
+                ]);
+
+                $stockProduct = StockProduct::where('product_id', $item['product_id'])
+                ->where('stock_id', $this->selectedStock)
+                ->first();
+                if(!$stockProduct){
+                    $this->addError('stock_error', 'Stock insuffisant pour ' . $item['product_id']);
+                    $this->dispatch('error', [
+                        'message' => 'Stock insuffisant pour ' . $item['product_id']
+                    ]);
+                    return;
+                }
+                if ($stockProduct) {
+                    $stockProduct->update([
+                        'quantity' => $stockProduct->quantity - $item['quantity']
+                    ]);
+
+                    // Update Product Stock Movement
+                  $s =  StockProductMouvement::create([
+                        'agency_id' => auth()->user()->agency_id,
+                        'stock_id' => $stockProduct->stock_id,
+                        'stock_product_id' => $stockProduct->id,
+                        'item_code' => $stockProduct->id,
+                        'item_designation' => $stockProduct->product->name,
+                        'item_quantity' => $item['quantity'],
+                        'item_measurement_unit' => $stockProduct->product->unit ?? 'Piece',
+                        'item_purchase_or_sale_price' => $item['sale_price'],
+                        'item_purchase_or_sale_currency' => $stockProduct->product->sale_price_currency ?? 'BIF',
+                        'item_movement_type' => 'SN',
+                        'item_movement_invoice_ref' => $sale->id,
+                        'item_movement_description' => 'Vente',
+                        'item_movement_date' => now(),
+                        'item_product_detail_id' => $stockProduct->product->id,
+                        'is_send_to_obr' => null,
+                        'is_sent_at' => null,
+                        'user_id' => auth()->user()->id,
+                        'item_movement_note' => 'Vente Normal',
+                    ]);
+
+                    //dd($s);
+
+                }
+            }
+
+            CashTransaction::create([
+                'cash_register_id' => $caisse->id,
+                'type' => 'in',
+                'reference_id' => 'Ref ' . $sale->id,
+                'amount' => $this->total_amount,
+                'description' => $this->note,
+                'agency_id' => $caisse->agency_id,
+                'created_by' => auth()->user()->id,
+                'user_id' => auth()->user()->id,
+            ]);
+
         }
 
         /**

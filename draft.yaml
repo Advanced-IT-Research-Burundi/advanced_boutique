@@ -1,21 +1,21 @@
 models:
-  Vehicule:
-    name: string
-    model: string nullable
-    brand: string nullable
-    year: integer nullable
-    color: string nullable
-    price: decimal nullable
-    status: enum[available,rented,unavailable] default:available
-    description: text nullable
-    agency_id: id foreign:agencies nullable
+  Proforma:
+    stock_id: id foreign:stocks
+    user_id: id foreign:users
+    total_amount: double
+    due_amount: double
+    sale_date: date
+    note: text nullable
+    invoice_type: string nullable
+    agency_id: id foreign:agencies
     created_by: id foreign:users
+    proforma_items: text nullable
+    client: text nullable
     timestamps: true
     softDeletes: true
     relationships:
-      belongsTo: Agency, User
-      hasMany: Vehicule
+      belongsTo: Stock, User, Agency
 
 controllers:
-  Vehicule:
+  Proforma:
     resource: web
