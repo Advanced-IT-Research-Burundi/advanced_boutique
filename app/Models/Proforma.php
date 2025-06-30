@@ -39,7 +39,7 @@ class Proforma extends Model
         'sale_date'
     ];
 
-    // Relationships
+
     public function stock()
     {
         return $this->belongsTo(Stock::class);
