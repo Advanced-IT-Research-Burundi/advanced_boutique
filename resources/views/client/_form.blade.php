@@ -1,13 +1,12 @@
 <div class="row">
-    <!-- Type de patient -->
+
     <div class="col-md-6 mb-3">
         <label for="patient_type" class="form-label required">Type de client</label>
         <select class="form-select @error('patient_type') is-invalid @enderror"
                 id="patient_type"
                 name="patient_type"
                 required>
-            <option value="">Sélectionner le type</option>
-            <option value="physique" {{ old('patient_type', $client->patient_type ?? '') == 'physique' ? 'selected' : '' }}>
+            <option value="physique" {{ old('patient_type', $client->patient_type ?? 'physique') == 'physique' ? 'selected' : '' }}>
                 Personne physique
             </option>
             <option value="morale" {{ old('patient_type', $client->patient_type ?? '') == 'morale' ? 'selected' : '' }}>
@@ -19,9 +18,11 @@
         @enderror
     </div>
 
-    <!-- Nom -->
+
     <div class="col-md-6 mb-3">
-        <label for="name" class="form-label required">Nom</label>
+        <label for="name" class="form-label required" id="name_label">
+            {{ old('patient_type', $client->patient_type ?? 'physique') == 'morale' ? 'Nom' : 'Nom' }}
+        </label>
         <input type="text"
                class="form-control @error('name') is-invalid @enderror"
                id="name"
@@ -34,8 +35,10 @@
     </div>
 </div>
 
-<div class="row">
-    <!-- Prénom -->
+
+<div class="row" id="personne-physique-fields"
+     style="display: {{ old('patient_type', $client->patient_type ?? 'physique') == 'physique' ? 'flex' : 'none' }};">
+
     <div class="col-md-6 mb-3">
         <label for="first_name" class="form-label">Prénom</label>
         <input type="text"
@@ -48,7 +51,7 @@
         @enderror
     </div>
 
-    <!-- Nom de famille -->
+
     <div class="col-md-6 mb-3">
         <label for="last_name" class="form-label">Nom de famille</label>
         <input type="text"
@@ -62,8 +65,10 @@
     </div>
 </div>
 
-<div class="row" id="entreprise-fields" style="display: none;">
-    <!-- Société -->
+
+<div class="row" id="personne-morale-fields"
+     style="display: {{ old('patient_type', $client->patient_type ?? '') == 'morale' ? 'flex' : 'none' }};">
+
     <div class="col-md-6 mb-3">
         <label for="societe" class="form-label">Société</label>
         <input type="text"
@@ -76,7 +81,6 @@
         @enderror
     </div>
 
-    <!-- NIF -->
     <div class="col-md-6 mb-3">
         <label for="nif" class="form-label">NIF</label>
         <input type="text"
@@ -91,7 +95,7 @@
 </div>
 
 <div class="row">
-    <!-- Email -->
+
     <div class="col-md-6 mb-3">
         <label for="email" class="form-label">Email</label>
         <input type="email"
@@ -104,7 +108,7 @@
         @enderror
     </div>
 
-    <!-- Téléphone -->
+
     <div class="col-md-6 mb-3">
         <label for="phone" class="form-label">Téléphone</label>
         <input type="tel"
@@ -119,8 +123,7 @@
 </div>
 
 <div class="row">
-    <!-- Adresse -->
-    <div class="col-md-8 mb-3">
+    <div class="col-md-12 mb-3">
         <label for="address" class="form-label">Adresse</label>
         <textarea class="form-control @error('address') is-invalid @enderror"
                   id="address"
@@ -131,8 +134,7 @@
         @enderror
     </div>
 
-    <!-- Solde -->
-    <div class="col-md-4 mb-3">
+    {{-- <div class="col-md-4 mb-3">
         <label for="balance" class="form-label">Solde initial (F)</label>
         <input type="number"
                class="form-control @error('balance') is-invalid @enderror"
@@ -144,48 +146,38 @@
         @error('balance')
             <div class="invalid-feedback">{{ $message }}</div>
         @enderror
-    </div>
-</div>
-
-<div class="row">
-    <!-- Agence -->
-    {{-- <div class="col-md-6 mb-3">
-        <label for="agency_id" class="form-label">Agence</label>
-        <select class="form-select @error('agency_id') is-invalid @enderror"
-                id="agency_id"
-                name="agency_id">
-            <option value="">Sélectionner une agence</option>
-            @foreach($agencies as $agency)
-                <option value="{{ $agency->id }}"
-                        {{ old('agency_id', $client->agency_id ?? '') == $agency->id ? 'selected' : '' }}>
-                    {{ $agency->name }}
-                </option>
-            @endforeach
-        </select>
-        @error('agency_id')
-            <div class="invalid-feedback">{{ $message }}</div>
-        @enderror
     </div> --}}
 </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const patientTypeSelect = document.getElementById('patient_type');
-    const entrepriseFields = document.getElementById('entreprise-fields');
+    const personnePhysiqueFields = document.getElementById('personne-physique-fields');
+    const personneMoraleFields = document.getElementById('personne-morale-fields');
+    const nameLabel = document.getElementById('name_label');
 
-    function toggleEntrepriseFields() {
+    function toggleFields() {
         if (patientTypeSelect.value === 'morale') {
-            entrepriseFields.style.display = 'block';
+            personnePhysiqueFields.style.display = 'none';
+            personneMoraleFields.style.display = 'flex';
+            nameLabel.textContent = 'Nom';
+
+            document.getElementById('first_name').value = '';
+            document.getElementById('last_name').value = '';
         } else {
-            entrepriseFields.style.display = 'none';
+
+            personnePhysiqueFields.style.display = 'flex';
+            personneMoraleFields.style.display = 'none';
+            nameLabel.textContent = 'Nom';
+
+            document.getElementById('societe').value = '';
+            document.getElementById('nif').value = '';
         }
     }
 
-    // Initialiser l'affichage
-    toggleEntrepriseFields();
+    toggleFields();
 
-    // Écouter les changements
-    patientTypeSelect.addEventListener('change', toggleEntrepriseFields);
+    patientTypeSelect.addEventListener('change', toggleFields);
 });
 </script>
 
@@ -193,5 +185,9 @@ document.addEventListener('DOMContentLoaded', function() {
     .required::after {
         content: " *";
         color: red;
+    }
+
+    .fade-transition {
+        transition: opacity 0.3s ease-in-out;
     }
 </style>
