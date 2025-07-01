@@ -19,9 +19,11 @@ return new class extends Migration
             $table->foreignId('product_id')->constrained();
             $table->text("product_name");
             $table->float('quantity');
+            $table->double('price')->default(0);
             $table->foreignId('agency_id')->nullable()->constrained();
             $table->foreignId('category_id')->nullable()->constrained();
             $table->foreignId('user_id')->nullable()->constrained();
+            $table->text('description')->nullable();
             $table->timestamps();
             $table->softDeletes();
             $table->index(['stock_id', 'product_id']);
