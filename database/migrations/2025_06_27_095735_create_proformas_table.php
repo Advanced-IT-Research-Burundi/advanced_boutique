@@ -23,7 +23,7 @@ return new class extends Migration
             $table->text('note')->nullable();
             $table->string('invoice_type')->nullable();
             $table->foreignId('agency_id')->constrained();
-            $table->foreignId('created_by')->constrained('users', 'by');
+            $table->foreignId('created_by')->nullable()->constrained('users');
             $table->text('proforma_items')->nullable();
             $table->text('client')->nullable();
             $table->timestamps();
