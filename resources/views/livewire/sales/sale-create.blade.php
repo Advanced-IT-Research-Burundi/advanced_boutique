@@ -54,9 +54,9 @@
                                     </label>
                                     <input type="text" class="form-control @error('client_id') is-invalid @enderror"
                                         wire:model="client_search"
-                                        placeholder="Rechercher un client par nom ou téléphone..." {{-- id="client_search" --}}
+                                        wire:keydown.enter="searchClients"
+                                        placeholder="Rechercher un client par nom ou téléphone..."
                                         autocomplete="off">
-                                    <!-- Loading indicator pour la recherche client -->
                                     <div class="position-absolute top-50 end-0 translate-middle-y me-3">
                                         <div wire:loading wire:target="searchClients"
                                             class="spinner-border spinner-border-sm text-primary" role="status">
