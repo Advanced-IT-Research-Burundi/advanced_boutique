@@ -269,22 +269,25 @@
                         @if ($stock->proformas->count() > 0)
                             <div class="list-group list-group-flush">
                                 @foreach ($stock->proformas->take(5) as $proforma)
+                                    @php
+                                        $proforma->client = json_decode($proforma->client);
+                                    @endphp
                                     <div class="list-group-item px-0 py-2 border-0 border-bottom">
                                         <div class="d-flex justify-content-between align-items-start">
                                             <div class="flex-grow-1">
-                                                <h6 class="mb-1">
+                                                <div class="d-flex gap-4">
+                                                    <h6 class="mb-1">
                                                     <i class="bi bi-file-earmark-text text-primary me-1"></i>
-                                                    #{{ $proforma->id }}
+                                                    #{{ $proforma->getFormattedNumber() }}
                                                 </h6>
                                                 <p class="mb-1 text-muted small">
                                                     <i class="bi bi-person me-1"></i>
-                                                    {{ $proforma->client->name  ?? 'Client non spécifié' }}
+
+                                                    {{ $proforma->client['name'] ?? 'Client non spécifié' }}
                                                 </p>
-                                                <p class="mb-1 text-muted small">
-                                                    <i class="bi bi-calendar-event me-1"></i>
-                                                    {{ $proforma->sale_date ? \Carbon\Carbon::parse($proforma->sale_date)->format('d/m/Y') : 'Date non définie' }}
-                                                </p>
-                                                <div class="d-flex align-items-center">
+                                                </div>
+                                                <div class="d-flex gap-4">
+                                                      <div class="d-flex align-items-center">
                                                     <span class="badge bg-success me-2">
                                                         {{ number_format($proforma->total_amount, 0, ',', ' ') }} FCFA
                                                     </span>
@@ -294,9 +297,15 @@
                                                         </span>
                                                     @endif
                                                 </div>
+                                                     <p class="mb-1 text-muted small">
+                                                    <i class="bi bi-calendar-event me-1"></i>
+                                                    {{ $proforma->sale_date ? \Carbon\Carbon::parse($proforma->sale_date)->format('d/m/Y') : 'Date non définie' }}
+                                                </p>
+                                                </div>
+
                                             </div>
                                             <div class="dropdown">
-                                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle"
+                                                <button class="btn btn-sm btn-outline-secondary"
                                                     type="button" data-bs-toggle="dropdown">
                                                     <i class="bi bi-three-dots-vertical"></i>
                                                 </button>
