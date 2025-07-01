@@ -72,7 +72,7 @@ class AddProductStock extends Component
 
         public function exportToPdf()
         {
-            $stockProducts = $this->searchStockProducts();
+            $stockProducts = StockProduct::with(['product'])->where('stock_id', $this->stock->id)->get();
             $pdf = PDF::loadView('exports.stock-product-pdf', compact('stockProducts'))
             ->setPaper('a4', 'landscape');
             $filename = 'stock_' . preg_replace('/[^A-Za-z0-9\-_]/', '_', $this->stock->name) . '.pdf';
