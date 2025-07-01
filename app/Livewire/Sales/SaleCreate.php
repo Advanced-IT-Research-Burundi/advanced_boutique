@@ -240,7 +240,7 @@ class SaleCreate extends Component
                         }
                     })
                     ->whereHas('stockProducts', function ($query) use ($selectedStock) {
-                        $query->where('quantity', '>=', 10)
+                        $query->where('quantity', '>=', 0)
                         ->where('stock_id', $selectedStock);
                     })
                     ->whereNotIn('id', $this->selected_products)
@@ -785,7 +785,7 @@ class SaleCreate extends Component
 
              Proforma::create([
                 'client_id' => $this->client_id,
-                'stock_id' => $this->current_stock->id ?? null,
+                'stock_id' => $this->selectedStock ?? null,
                 'user_id' => Auth::id(),
                 'total_amount' => $this->total_amount,
                 'paid_amount' => $this->paid_amount,
@@ -816,7 +816,7 @@ class SaleCreate extends Component
 
             $sale = Sale::create([
                 'client_id' => $this->client_id,
-                'stock_id' => $this->current_stock->id ?? null,
+                'stock_id' => $this->selectedStock ?? null,
                 'user_id' => Auth::id(),
                 'total_amount' => $this->total_amount,
                 'paid_amount' => $this->paid_amount,

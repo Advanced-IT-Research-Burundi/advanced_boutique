@@ -73,8 +73,7 @@ Route::middleware(['auth'])->group(function () {
             Route::delete('/detach', [\App\Http\Controllers\UserStockController::class, 'detachAjax'])->name('detach');
         });
     });
-
-
+    Route::resource('proformas', App\Http\Controllers\ProformaController::class);
 
 });
 
@@ -83,5 +82,4 @@ require __DIR__.'/auth.php';
 
 
 
-
-Route::resource('proformas', App\Http\Controllers\ProformaController::class);
+Route::get('/export/excel/{token}', [App\Http\Controllers\ExportController::class, 'exportExcel'])->name('export.excel');

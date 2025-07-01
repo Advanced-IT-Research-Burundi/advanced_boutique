@@ -4,9 +4,9 @@
 
 @section('content')
 
-<div class="container-fluid px-4">
+<div class="px-4 container-fluid">
 
-    <nav aria-label="breadcrumb" class="mb-4 d-flex justify-between">
+    <nav aria-label="breadcrumb" class="justify-between mb-4 d-flex">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Dashboard</a></li>
             <li class="breadcrumb-item"><a href="{{ route('stocks.index') }}">Stocks</a></li>

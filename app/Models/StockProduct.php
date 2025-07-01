@@ -58,6 +58,11 @@ class StockProduct extends Model
         return $this->belongsTo(Product::class, 'product_id');
     }
 
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(Category::class, 'category_id');
+    }
+
     public function agency(): BelongsTo
     {
         return $this->belongsTo(Agency::class);

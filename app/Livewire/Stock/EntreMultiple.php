@@ -89,8 +89,11 @@ class EntreMultiple extends Component
                     // Mettre à jour la quantité
                     $stockProduct->quantity += $quantity;
                     $stockProduct->user_id = Auth::id(); // Enregistrer qui a fait l'entrée
+                    $stockProduct->agency_id = Auth::user()->agency_id;
+                    $stockProduct->purchase_price = $this->prices[$productId];
+                    $stockProduct->sale_price_ht = $this->prices[$productId];
+                    $stockProduct->sale_price_ttc = $this->prices[$productId];
                     $stockProduct->save();
-
                     $entriesCount++;
 
                     // Optionnel : Créer un historique des mouvements de stock
@@ -120,7 +123,6 @@ class EntreMultiple extends Component
     private function createStockMovement($stockProduct, $quantity, $type, $price)
     {
         // Si vous avez une table stock_movements pour l'historique
-
 
         $movement = StockProductMouvement::create([
             'agency_id' => auth()->user()->agency_id ?? 1,
