@@ -35,23 +35,10 @@ class UpdateDatabaseCommand extends Command
 
         // add progress indicator
         $products = Product::all();
-        $this->output->progressStart((count($products)+100));
-        //Ajouter la liste des clients de test
-        for($i=0; $i<100; $i++){
-            Client::create([
-                'name' => $faker->name,
-                'phone' => $faker->phoneNumber,
-                'email' => $faker->unique()->safeEmail,
-                'address' => $faker->address,
-                'agency_id' => 1,
-                'created_by' => 1,
-            ]);
-            $this->output->progressAdvance();
-        }
-
+        $stocks = Stock::all();
+        $this->output->progressStart(count($products) * count($stocks));
         //stock
 
-        $stocks = Stock::all();
         foreach ($stocks as $stock) {
             foreach ($products as $product) {
                 $stockProduct = StockProduct::where('stock_id', $stock->id)->where('product_id', $product->id)->first();
