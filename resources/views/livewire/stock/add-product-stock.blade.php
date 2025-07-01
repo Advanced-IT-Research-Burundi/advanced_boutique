@@ -68,9 +68,9 @@
                         @foreach($stockProducts as $product)
                         <tr>
                             <td>{{ $product->id }}</td>
-                            <td>{{ $product->product->code }}</td>
-                            <td>{{ $product->category->name }}</td>
-                            <td>{{ $product->product->name }}</td>
+                            <td>{{ $product->product?->code ?? '' }}</td>
+                            <td>{{ $product->category?->name ?? '' }}</td>
+                            <td>{{ $product->product?->name ?? '' }}</td>
                             <td>{{ $product->quantity }}</td>
                             <td>{{ $product->sale_price_ttc}}</td>
                             <td>{{ $product->quantity * $product->sale_price_ttc }}</td>
