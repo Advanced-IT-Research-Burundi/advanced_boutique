@@ -113,8 +113,10 @@ class SaleCreate extends Component
         $this->cart_session = 'sale_create_' . Auth::id() . '_' . session()->getId();
         $stock = auth()->user()->stocks()->first();
         if ($stock) {
-            # code...
             $this->selectedStock = auth()->user()->stocks()->first()->id;
+
+            // select current Category
+            $this->currentSelectStock();
         }
 
         if (!session()->has('cart_sessions')) {
@@ -238,7 +240,7 @@ class SaleCreate extends Component
                         }
                     })
                     ->whereHas('stockProducts', function ($query) use ($selectedStock) {
-                        $query->where('quantity', '>=', 0)
+                        $query->where('quantity', '>=', 10)
                         ->where('stock_id', $selectedStock);
                     })
                     ->whereNotIn('id', $this->selected_products)

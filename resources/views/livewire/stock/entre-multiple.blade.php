@@ -71,7 +71,7 @@
                     </thead>
                     <tbody>
                         @forelse($products as $product)
-                            <tr>
+                            <tr wire:key="{{ $product->id }}">
                                 <td>{{ $product->product_id }}</td>
                                 <td>{{ $product->product->name }}</td>
                                 <td>{{ $product->product->category->name ?? 'N/A' }}</td>
@@ -110,7 +110,7 @@
                                 </td>
                             </tr>
                         @empty
-                            <tr>
+                            <tr wire:key="empty">
                                 <td colspan="8" class="py-4 text-center">
                                     <div class="text-muted">Aucun produit trouvé.</div>
                                 </td>
