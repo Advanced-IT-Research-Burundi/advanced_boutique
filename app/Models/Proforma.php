@@ -146,7 +146,7 @@ class Proforma extends Model
 
     public function getClientData()
     {
-        return $this->client ?? [];
+        return json_decode($this->client, true) ?? [];
     }
 
     public function getTotalQuantity()

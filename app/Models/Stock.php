@@ -81,6 +81,11 @@ class Stock extends Model
         return $this->hasMany(Sale::class);
     }
 
+    public function proformas(): HasMany
+    {
+        return $this->hasMany(Proforma::class);
+    }
+
     public function stockTransfers(): HasMany
     {
         return $this->hasMany(StockTransfer::class);
