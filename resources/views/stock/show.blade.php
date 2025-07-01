@@ -307,12 +307,7 @@
                                                             <i class="bi bi-eye me-2"></i>Voir détails
                                                         </a>
                                                     </li>
-                                                    <li>
-                                                        <a class="dropdown-item"
-                                                            href="{{ route('proformas.edit', $proforma) }}">
-                                                            <i class="bi bi-pencil me-2"></i>Modifier
-                                                        </a>
-                                                    </li>
+
                                                     <li>
                                                         <hr class="dropdown-divider">
                                                     </li>
