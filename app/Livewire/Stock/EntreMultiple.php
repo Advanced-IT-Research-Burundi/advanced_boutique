@@ -53,7 +53,7 @@ class EntreMultiple extends Component
             $this->prices[$product->id] = $product->product->sale_price;
         }
       $this->products = [];
-      $this->resetForm();
+      //$this->resetForm();
 
     }
 
