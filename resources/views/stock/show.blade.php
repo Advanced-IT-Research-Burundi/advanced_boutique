@@ -358,7 +358,7 @@
                             <div class="text-center py-4">
                                 <i class="bi bi-receipt-cutoff text-muted" style="font-size: 2rem;"></i>
                                 <p class="text-muted mt-2 mb-0">Aucune proforma associée</p>
-                                <a href="{{ route('proformas.create', ['stock_id' => $stock->id]) }}"
+                                <a href="{{ route('sales.create', ['stock_id' => $stock->id]) }}"
                                     class="btn btn-sm btn-primary mt-2">
                                     <i class="bi bi-plus-circle me-1"></i>
                                     Créer une proforma
