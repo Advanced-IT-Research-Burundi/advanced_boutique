@@ -205,7 +205,7 @@
                     <td class="product-name">{{ $product->product->name ?? 'N/A' }}</td>
                     <td class="text-center">{{ number_format($product->quantity, 0, ',', ' ') }}</td>
                     <td class="text-right amount">{{ number_format($product->sale_price_ttc, 0, ',', ' ') }} €</td>
-                    <td class="text-right amount">{{ number_format($stockValue, 0, ',', ' ') }} €</td>
+                    <td class="text-right amount">{{ number_format($stockValue, 0, ',', ' ') }} BIF</td>
                     <td class="text-center date-cell">{{ \Carbon\Carbon::parse($product->created_at)->format('d/m/Y H:i') }}</td>
                 </tr>
                 @endforeach
@@ -215,7 +215,7 @@
                     <td colspan="4" class="text-right"><strong>TOTAUX:</strong></td>
                     <td class="text-center"><strong>{{ number_format($totalQuantity, 0, ',', ' ') }}</strong></td>
                     <td class="text-center">-</td>
-                    <td class="text-right"><strong>{{ number_format($totalValue, 0, ',', ' ') }} €</strong></td>
+                    <td class="text-right"><strong>{{ number_format($totalValue, 0, ',', ' ') }} BIF</strong></td>
                     <td class="text-center">-</td>
                 </tr>
             </tfoot>
@@ -223,7 +223,7 @@
     </div>
 
     <div class="footer">
-        <p>Nombre total d'articles: {{ count($stockProducts) }} | Valeur totale du stock: {{ number_format($totalValue, 2, ',', ' ') }} €</p>
+        <p>Nombre total d'articles: {{ count($stockProducts) }} | Valeur totale du stock: {{ number_format($totalValue, 2, ',', ' ') }} BIF</p>
         <p>Rapport généré automatiquement - {{ date('d/m/Y à H:i:s') }}</p>
     </div>
 </body>
