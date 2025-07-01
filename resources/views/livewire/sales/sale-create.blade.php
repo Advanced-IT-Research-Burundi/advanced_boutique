@@ -74,9 +74,10 @@
                                     </button>
 
                                     <!-- Dropdown des clients -->
-                                    @if ($show_client_search && count($filtered_clients) > 0)
-                                        <div class="mt-1 border-0 shadow-lg dropdown-menu show w-100"
-                                            style="z-index: 1000; max-height: 300px; overflow-y: auto;">
+
+                                        @if ($show_client_search && count($filtered_clients) > 0)
+                                        <div  class="mt-4 border-0 shadow-lg dropdown-menu show w-100"
+                                            style="margin-top: 50px !important; z-index: 1000; max-height: 300px; overflow-y: auto;">
                                             @foreach ($filtered_clients as $client)
                                                 <a href="#"
                                                     class="px-3 py-2 dropdown-item d-flex align-items-center"
