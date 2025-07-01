@@ -123,7 +123,7 @@
                                 <th>Type</th>
                                 <th>Contact</th>
                                 <th>Société/NIF</th>
-                                <th>Solde</th>
+                                {{-- <th>Solde</th> --}}
                                 <th>Agence</th>
                                 <th>Créé par</th>
                                 <th>Créé le</th>
@@ -194,11 +194,11 @@
                                             <span class="text-muted">-</span>
                                         @endif
                                     </td>
-                                    <td>
+                                    {{-- <td>
                                         <span class="fw-bold {{ $client->balance >= 0 ? 'text-success' : 'text-danger' }}">
                                             {{ number_format($client->balance, 0, ',', ' ') }} F
                                         </span>
-                                    </td>
+                                    </td> --}}
                                     <td>
                                         @if($client->agency)
                                             <div class="d-flex align-items-center">
