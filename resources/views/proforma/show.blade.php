@@ -33,7 +33,7 @@
         </div>
     </div>
 
-    {{$proforma}}
+    {{-- {{$proforma}} --}}
 
     <!-- Invoice Content -->
     <div class="border-0 shadow-sm card" id="invoice-content">
