@@ -24,7 +24,7 @@ return new class extends Migration
             $table->string('invoice_type')->nullable();
             $table->foreignId('agency_id')->constrained();
             $table->foreignId('created_by')->nullable()->constrained('users');
-            $table->text('pproforma_items')->nullable();
+            $table->text('proforma_items')->nullable();
             $table->text('client')->nullable();
             $table->timestamps();
             $table->softDeletes();

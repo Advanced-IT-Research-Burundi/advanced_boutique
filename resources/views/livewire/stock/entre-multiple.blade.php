@@ -3,8 +3,8 @@
         <div class="card-header d-flex justify-content-between">
             <h2>{{ $stock->name }}</h2>
             <h2 class="mb-0 h5">Entrée Multiple de Produits</h2>
+            <a href="{{ route('stocks.list', $stock->id) }}" class="btn btn-primary btn-sm">Retour</a>
         </div>
-
         <div class="card-body">
             @if (session()->has('message'))
                 <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -44,7 +44,7 @@
                 <div>
                     <button
                         wire:click="entreMultiple"
-                        class="btn btn-primary"
+                        class="btn btn-primary btn-sm"
                         wire:loading.attr="disabled"
                         wire:loading.class="disabled"
                     >
@@ -59,6 +59,7 @@
                 <table class="table table-hover table-striped">
                     <thead class="table-light">
                         <tr>
+                            <th>ID</th>
                             <th>Code</th>
                             <th>Produit</th>
                             <th>Catégorie</th>
@@ -72,7 +73,8 @@
                     <tbody>
                         @forelse($products as $product)
                             <tr wire:key="{{ $product->id }}">
-                                <td>{{ $product->product_id }}</td>
+                                <td>{{ $product->id }}</td>
+                                <td>{{ $product->product->code }}</td>
                                 <td>{{ $product->product->name }}</td>
                                 <td>{{ $product->product->category->name ?? 'N/A' }}</td>
                                 <td>
