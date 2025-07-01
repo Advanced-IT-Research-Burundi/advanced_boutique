@@ -179,7 +179,7 @@ class SaleCreate extends Component
         $this->client_search_loading = true;
 
         try {
-            if (strlen($this->client_search) >= 2) {
+            if (strlen($this->client_search) >= 1) {
                 $this->filtered_clients = Client::select('id', 'name', 'phone', 'email')
                 ->where(function ($query) {
                     $query->where('name', 'like', '%' . $this->client_search . '%')
@@ -295,7 +295,7 @@ class SaleCreate extends Component
     {
         $this->product_search_loading = true;
         try {
-            if (strlen($this->product_search) >= 2) {
+            if (strlen($this->product_search) >= 1) {
               $this->loadProductList(null, false, $this->product_search);
             }
         } finally {
@@ -308,7 +308,7 @@ class SaleCreate extends Component
     */
     public function updatedProductSearch()
     {
-        if (strlen($this->product_search) >= 2) {
+        if (strlen($this->product_search) >= 1) {
             $this->selected_category_id = null;
             $this->searchProducts();
         } else {
