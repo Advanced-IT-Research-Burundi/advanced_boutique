@@ -13,11 +13,7 @@
         </div>
     </div>
     <div class="mt-0">
-        <div class="mb-3 input-group">
-            <label for="search">Ajouter un Produit</label>
-        <input type="text" wire:model="search" wire:keyup="searchProduct" placeholder="Rechercher un produit">
 
-        </div>
         <ul>
             @foreach ($products as $product)
             <li class="gap-1 mt-1 d-flex justify-content-between align-items-center">
@@ -34,8 +30,15 @@
 
         <div class="card">
             <div class="card-body">
-                <h5 class="card-title">Les produits du stock {{ $stock->name }}</h5>
-                <div class="mb-3 input-group">
+               <div class="d-flex justify-content-between">
+               <h5 class="card-title">Les produits du stock {{ $stock->name }}</h5>
+               <div>
+                <button class="btn btn-success btn-sm" wire:click="exportToExcel"> <i class="bi bi-file-earmark-excel"></i> Exporter vers Excel</button>
+                <button class="btn btn-danger btn-sm" wire:click="exportToPdf"> <i class="bi bi-file-earmark-pdf"></i> Exporter vers PDF</button>
+               </div>
+                </div>
+               <div>
+               <div class="mb-3 input-group">
     <input
         type="text"
         wire:model.live="stockProductSearch"
@@ -86,3 +89,5 @@
         </div>
     </div>
 </div>
+
+
