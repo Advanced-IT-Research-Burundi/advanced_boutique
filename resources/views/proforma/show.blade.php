@@ -18,6 +18,10 @@
                     <a href="{{ route('proformas.index') }}" class="btn btn-outline-secondary">
                         <i class="bi bi-arrow-left me-1"></i>Retour
                     </a>
+
+                    <a class="btn btn-outline-success" href="{{ route('proformas.validate', $proforma->id) }}" onclick="return confirm('Êtes-vous sûr de vouloir valider cette facture proforma ?')">
+                        <i class="bi bi-printer me-1"></i>Valider
+                    </a>
                     <button class="btn btn-outline-primary" onclick="window.print()">
                         <i class="bi bi-printer me-1"></i>Imprimer
                     </button>
@@ -28,6 +32,8 @@
             </div>
         </div>
     </div>
+
+    {{$proforma}}
 
     <!-- Invoice Content -->
     <div class="border-0 shadow-sm card" id="invoice-content">

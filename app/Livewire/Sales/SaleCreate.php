@@ -821,6 +821,7 @@ class SaleCreate extends Component
                 'total_amount' => $this->total_amount,
                 'paid_amount' => $this->paid_amount,
                 'due_amount' => $this->due_amount,
+                'type_facture' =>'F. NORMALE',
                 'sale_date' => Carbon::parse($this->sale_date),
                 'note' => $this->note,
                 'agency_id' => Auth::user()->agency_id,

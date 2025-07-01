@@ -74,6 +74,7 @@ Route::middleware(['auth'])->group(function () {
         });
     });
     Route::resource('proformas', App\Http\Controllers\ProformaController::class);
+    Route::get('proformas/{proforma}/validate', [App\Http\Controllers\ProformaController::class, 'validateProforma'])->name('proformas.validate');
 
 });
 

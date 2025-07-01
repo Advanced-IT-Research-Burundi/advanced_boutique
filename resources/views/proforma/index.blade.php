@@ -156,6 +156,7 @@
                             <th class="px-4 py-3 border-0">Reste</th>
                             <th class="px-4 py-3 border-0">Statut</th>
                             <th class="px-4 py-3 border-0">Agence</th>
+                            <th class="px-4 py-3 border-0">Facture</th>
                             <th class="px-4 py-3 border-0">Actions</th>
                         </tr>
                     </thead>
@@ -221,6 +222,9 @@
                             </td>
                             <td class="px-4">
                                 <small class="text-muted">{{ $proforma->agency->name ?? 'Non spécifiée' }}</small>
+                            </td>
+                            <td class="px-4">
+                                <strong>{{ $proforma->invoice_type ?? 'Non Valide' }}</strong>
                             </td>
                             <td class="px-4">
                                 <div class="btn-group" role="group">

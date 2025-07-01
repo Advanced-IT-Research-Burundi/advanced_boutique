@@ -160,6 +160,7 @@
                             <th class="px-4 py-3 border-0">Payé</th>
                             <th class="px-4 py-3 border-0">Reste</th>
                             <th class="px-4 py-3 border-0">Statut</th>
+                            <th class="px-4 py-3 border-0">Facture</th>
                             <th class="px-4 py-3 border-0">Actions</th>
                         </tr>
                     </thead>
@@ -222,6 +223,9 @@
                                         <i class="bi bi-x-circle me-1"></i>Impayé
                                     </span>
                                 @endif
+                            </td>
+                            <td class="px-4">
+                                <strong>{{ $sale->type_facture }}</strong>
                             </td>
                             <td class="px-4">
                                 <div class="btn-group" role="group">

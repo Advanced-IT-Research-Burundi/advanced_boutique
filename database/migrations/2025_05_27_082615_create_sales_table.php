@@ -22,6 +22,7 @@ return new class extends Migration
             $table->double('paid_amount');
             $table->double('due_amount');
             $table->dateTime('sale_date');
+            $table->string('type_facture')->nullable();
             $table->foreignId('agency_id')->nullable()->constrained();
             $table->foreignId('created_by')->constrained('users');
             $table->timestamps();
