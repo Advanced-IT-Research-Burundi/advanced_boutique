@@ -48,6 +48,7 @@ class UpdateDatabaseCommand extends Command
                         'product_name' => $product->name,
                         'product_id' => $product->id,
                         'quantity' => 0,
+                        'category_id' => $product->category_id,
                         'agency_id' =>1,//$stock->agency_id,
                     ]);
                 }
