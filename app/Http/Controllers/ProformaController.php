@@ -157,7 +157,7 @@ class ProformaController extends Controller
             }
 
             $proforma->update([
-                'invoice_type' => 'VALIDATED',
+                'invoice_type' => 'F. PROFORMA VALIDÉE',
                 'updated_at' => now()
             ]);
 
