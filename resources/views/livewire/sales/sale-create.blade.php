@@ -182,10 +182,10 @@
                             </h5>
 
                             @if ($show_product_search)
-                                <div class="flex-fill mx-3" style="max-width: 400px;">
+                                <div class="mx-3 flex-fill" style="max-width: 400px;">
                                     <div class="position-relative">
                                         <input type="text"
-                                            class="form-control form-control-sm bg-white border-0 shadow-sm"
+                                            class="bg-white border-0 shadow-sm form-control form-control-sm"
                                             wire:model.live.debounce.300ms="product_search"
                                             placeholder="Rechercher un produit par nom..." autocomplete="off"
                                             style="padding-right: 40px;">
@@ -220,7 +220,7 @@
                     </div>
                     <div class="p-4 card-body">
                         @if ($show_product_search)
-                            <div class=" border-0 card bg-light">
+                            <div class="border-0 card bg-light">
                                 <div class="card-body">
                                     <!-- Loading pour les catégories -->
                                     <div wire:loading wire:target="loadCategories" class="py-3 text-center">
