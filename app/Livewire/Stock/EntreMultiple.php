@@ -143,7 +143,7 @@ class EntreMultiple extends Component
 
     public function render()
     {
-        $query = StockProduct::with(['product', 'product.category'])
+        $products = StockProduct::with(['product', 'product.category'])
             ->where('stock_id', $this->stockID)
             ->when($this->search, function($query) {
                 $query->whereHas('product', function($q) {
@@ -156,9 +156,11 @@ class EntreMultiple extends Component
                     $q->where('category_id', $this->selectedCategory);
                 });
             })
-            ->orderBy('product_name');
-
-        $products = $query->get();
+            ->join('products', 'stock_products.product_id', '=', 'products.id')
+            ->orderBy('products.code')
+            ->select('stock_products.*')
+            ->take(200)
+            ->get();
 
         return view('livewire.stock.entre-multiple', [
             'products' => $products,
