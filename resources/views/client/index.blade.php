@@ -148,6 +148,7 @@
                                         </div>
                                     </td>
                                     <td>
+                                        {{-- @dump($client->patient_type) --}}
                                         @if($client->patient_type == 'physique')
                                             <span class="badge bg-success">
                                                 <i class="bi bi-person me-1"></i>

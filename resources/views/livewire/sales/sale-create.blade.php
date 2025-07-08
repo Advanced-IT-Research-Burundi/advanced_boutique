@@ -457,7 +457,7 @@
                                             <th>Nom</th>
                                             <th class="text-center" style="width: 100px;">Quantité</th>
                                             <th class="text-center" style="width: 100px;">Prix</th>
-                                            <th class="text-center" style="width: 70px;">Remise</th>
+                                            <th class="text-sm-center" style="width: 70px;">Remise(%)</th>
                                             <th class="text-center" style="width: 120px;">Total</th>
                                             <th class="text-center" style="width: 40px;"></th>
                                         </tr>
@@ -636,8 +636,11 @@
                             </label>
                             <div class="input-group">
                                 <input type="number" id="paid_amount" min="0" step="0.01"
-                                    placeholder="0" class="form-control @error('paid_amount') is-invalid @enderror"
-                                    wire:model.live="paid_amount">
+                                    placeholder="0"
+                                    class="form-control {{ $this->paymentStatus['type'] == 'success' ? 'disabled' : '' }} @error('paid_amount') is-invalid @enderror"
+                                    wire:model.live="paid_amount"
+                                    {{ $this->paymentStatus['type'] == 'success' ? 'disabled' : '' }}>
+
                                 <span class="input-group-text">Fbu</span>
                             </div>
                             @error('paid_amount')
