@@ -59,7 +59,7 @@ class SaleCreate extends Component
     // Category and pagination
     public $categories = [];
     public $selected_category_id = null;
-    public $products_per_page = 12;
+    public $products_per_page = 200;
     public $categories_loading = false;
     public $products_loading = false;
     public $selectedStock = null;
@@ -798,7 +798,6 @@ class SaleCreate extends Component
                 'proforma_items' => json_encode($this->items),
                 'client' => json_encode(Client::find($this->client_id)),
             ]);
-
             $this->dispatch('success', [
                 'message' => 'Proforma enregistrée avec succès!'
             ]);
