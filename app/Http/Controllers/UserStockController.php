@@ -38,17 +38,42 @@ class UserStockController extends Controller
         $stocks = Stock::select('id', 'name', 'code')->get();
         $agencies = Agency::select('id', 'name')->get();
 
+        // return json if api request
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'userStocks' => $userStocks->toArray(),
+                    'users' => $users->toArray(),
+                    'stocks' => $stocks->toArray(),
+                    'agencies' => $agencies->toArray()
+                ]
+            ]);
+        }
+
         return view('userStock.index', compact('userStocks', 'users', 'stocks', 'agencies'));
     }
 
     /**
      * Afficher le formulaire de création d'association
      */
-    public function create()
+    public function create(Request $request)
     {
         $users = User::select('id', 'first_name', 'last_name', 'email')->get();
         $stocks = Stock::select('id', 'name', 'code', 'description')->get();
         $agencies = Agency::select('id', 'name')->get();
+
+        // return json if api request
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'users' => $users->toArray(),
+                    'stocks' => $stocks->toArray(),
+                    'agencies' => $agencies->toArray()
+                ]
+            ]);
+        }
 
         return view('userStocks.create', compact('users', 'stocks', 'agencies'));
     }
@@ -80,6 +105,14 @@ class UserStockController extends Controller
             'created_by' => Auth::id(),
         ]);
 
+        // return json if api request
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Association créée avec succès.'
+            ]);
+        }
+
         return redirect()->route('user-stocks.index')
             ->with('success', 'Association créée avec succès.');
     }
@@ -91,7 +124,15 @@ class UserStockController extends Controller
     {
         $userStock->load(['user', 'stock', 'agency', 'createdBy']);
 
-        return view('user-stocks.show', compact('userStock'));
+        // return json if api request
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'data' => $userStock
+            ]);
+        }
+
+        return view('userStock.show', compact('userStock'));
     }
 
     /**
@@ -143,6 +184,14 @@ class UserStockController extends Controller
             $message .= " (Existantes ignorées: $existing)";
         }
 
+        // return json if api request
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => $message
+            ]);
+        }
+
         return back()->with('success', $message);
     }
 
@@ -158,7 +207,15 @@ class UserStockController extends Controller
         $count = UserStock::where('user_id', $request->user_id)->count();
         UserStock::where('user_id', $request->user_id)->delete();
 
-        return back()->with('success', "$count associations supprimées.");
+        // return json if api request
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => "$count associations supprimées."
+            ]);
+        }
+
+        return  back()->with('success', "$count associations supprimées.");
     }
 
 
@@ -168,12 +225,17 @@ class UserStockController extends Controller
      */
     public function getStockUsers($stockId)
     {
-        $stockUsers = UserStock::with('user')
+            $stockUsers = UserStock::with('user')
             ->where('stock_id', $stockId)
             ->get()
             ->pluck('user');
 
-        return response()->json($stockUsers);
+        // return json if api request
+        if ($request->wantsJson()) {
+            return response()->json($stockUsers);
+        }
+
+        return view('userStock.index', compact('stockUsers'));
     }
 
      /**
