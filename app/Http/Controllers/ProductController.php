@@ -44,12 +44,29 @@ class ProductController extends Controller
         $categories = Category::orderBy('name')->get();
         $agencies = Agency::orderBy('name')->get();
 
+        // return json if api request
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'data' => $products
+            ]);
+        }
+
         return view('product.index', compact('products', 'categories', 'agencies'));
     }
 
     public function show(Product $product)
     {
         $product->load(['category', 'agency', 'createdBy', 'user']);
+
+        // return json if api request
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'data' => $product
+            ]);
+        }
+
         return view('product.show', compact('product'));
     }
 
@@ -60,6 +77,14 @@ class ProductController extends Controller
         $stocks = Stock::where('agency_id', Auth::user()->agency_id)->latest()->get();
 
         $selectedCategoryId = $request->query('category_id');
+
+        // return json if api request
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'data' => $product
+            ]);
+        }
 
         return view('product.create', compact('categories', 'stocks', 'selectedCategoryId'));
     }
@@ -150,6 +175,14 @@ class ProductController extends Controller
         $selectedStockId = $stockProduct ? $stockProduct->id : null;
         $currentQuantity = $stockProduct ? $stockProduct->pivot->quantity : 0;
 
+        // return json if api request
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'data' => $product
+            ]);
+        }
+
         return view('product.edit', compact(
             'product',
             'categories',
@@ -237,6 +270,14 @@ class ProductController extends Controller
         }
 
         $product->delete();
+
+        // return json if api request
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'data' => $product
+            ]);
+        }
 
         return redirect()->route('products.index')
                         ->with('success', 'Produit supprimé avec succès.');
