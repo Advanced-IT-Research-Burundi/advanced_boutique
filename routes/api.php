@@ -30,6 +30,8 @@ use App\Http\Controllers\VehiculeController;
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 // Routes protégées
+Route::apiResource('products', ProductController::class);
+    Route::apiResource('categories',CategoryController::class);
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::post('/logout-all', [AuthController::class, 'logoutAll']);
@@ -39,7 +41,7 @@ Route::middleware('auth:sanctum')->group(function () {
         return $request->user();
     });
 
-    Route::apiResource('products', ProductController::class);
+
 
     Route::prefix('users/{user}/stocks')->name('users.stocks.')->group(function () {
         Route::get('/manage', [UserStockController::class, 'manage']);
@@ -68,8 +70,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::resource('agencies', AgencyController::class);
     Route::resource('users', UserController::class);
     Route::resource('stocks', StockController::class);
-    Route::resource('categories', CategoryController::class);
-    Route::resource('products', ProductController::class);
+    // Route::resource('categories', CategoryController::class);
+    // Route::resource('products', ProductController::class);
     Route::resource('clients', ClientController::class);
     Route::resource('suppliers', SupplierController::class);
     Route::resource('purchases', PurchaseController::class);

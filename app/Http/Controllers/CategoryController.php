@@ -13,7 +13,7 @@ use Illuminate\View\View;
 
 class CategoryController extends Controller
 {
-    public function index(Request $request): View
+    public function index(Request $request)
     {
 
         $query = Category::with(['agency', 'createdBy', 'user']);
@@ -42,12 +42,19 @@ class CategoryController extends Controller
         // Tri par défaut
         $query->orderBy('created_at', 'desc');
 
-        $categories = $query->paginate(15)->withQueryString();
+        $categories = $query->get();
 
         // Données pour les filtres
         $agencies = Agency::latest()->get();
         $creators = User::latest()->get();
 
+        // return json if api request
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'data' => $categories
+            ]);
+        }
 
         return view('category.index', compact('categories', 'agencies', 'creators'));
         // $categories = Category::all();

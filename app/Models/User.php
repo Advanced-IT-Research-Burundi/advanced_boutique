@@ -78,6 +78,10 @@ class User extends Authenticatable
         ];
     }
 
+    protected $appends = [
+        'name',
+        'full_name',
+    ];
 
     public function getNameAttribute(): string
     {

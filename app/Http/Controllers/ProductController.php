@@ -38,7 +38,7 @@ class ProductController extends Controller
         }
 
 
-        $products = $query->orderBy('created_at', 'desc')->paginate(15);
+        $products = $query->orderBy('created_at', 'desc')->get();
 
         // Données pour les filtres
         $categories = Category::orderBy('name')->get();
@@ -55,7 +55,7 @@ class ProductController extends Controller
         return view('product.index', compact('products', 'categories', 'agencies'));
     }
 
-    public function show(Product $product)
+    public function show(Product $product, Request $request)
     {
         $product->load(['category', 'agency', 'createdBy', 'user']);
 
@@ -162,7 +162,7 @@ class ProductController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Product $product)
+    public function edit(Product $product, Request $request)
     {
         $categories = Category::latest()->get();
         $stocks = Stock::where('agency_id', Auth::user()->agency_id)->latest()->get();
@@ -262,7 +262,7 @@ class ProductController extends Controller
                         ->withInput();
         }
     }
-    public function destroy(Product $product)
+    public function destroy(Product $product, Request $request)
     {
         // Supprimer l'image si elle existe
         if ($product->image) {
