@@ -13,7 +13,7 @@ use Illuminate\View\View;
 
 class CategoryController extends Controller
 {
-    public function index(Request $request): View
+    public function index(Request $request)
     {
 
         $query = Category::with(['agency', 'createdBy', 'user']);
@@ -48,6 +48,15 @@ class CategoryController extends Controller
         $agencies = Agency::latest()->get();
         $creators = User::latest()->get();
 
+        // If request is json
+        if ($request->wantsJson()) {
+            return response()->json([
+                'categories' => $categories,
+                'agencies' => $agencies,
+                'creators' => $creators,
+            ]);
+        }
+
 
         return view('category.index', compact('categories', 'agencies', 'creators'));
         // $categories = Category::all();
@@ -57,9 +66,15 @@ class CategoryController extends Controller
         // ]);
     }
 
-    public function create(Request $request): View
+    public function create(Request $request)
     {
         $agencies = Agency::latest()->get();
+        // if request is json
+        if ($request->wantsJson()) {
+            return response()->json([
+                'agencies' => $agencies,
+            ]);
+        }
         return view('category.create',compact('agencies'));
     }
 
@@ -75,6 +90,12 @@ class CategoryController extends Controller
         $category = Category::create($data);
 
         // Redirect with message success message en francais
+        if ($request->wantsJson()) {
+            return response()->json([
+                'message' => 'Categorie cree avec success',
+                'category' => $category,
+            ]);
+        }
         return redirect()->route('categories.index')->with('success', 'Categorie cree avec success');
 
     }
@@ -122,9 +143,16 @@ class CategoryController extends Controller
         ));
     }
 
-    public function edit(Request $request, Category $category): View
+    public function edit(Request $request, Category $category)
     {
         $agencies = Agency::latest()->get();
+        // if request is json
+        if ($request->wantsJson()) {
+            return response()->json([
+                'agencies' => $agencies,
+                'category' => $category,
+            ]);
+        }
         return view('category.edit', [
             'category' => $category,
             'agencies' => $agencies
@@ -145,14 +173,26 @@ class CategoryController extends Controller
 
         $category->update($data);
 
+        if ($request->wantsJson()) {
+            return response()->json([
+                'message' => 'Categorie mis a jour avec success',
+                'category' => $category,
+            ]);
+        }
         return redirect()->route('categories.index')->with('success', 'Categorie mis a jour avec success');
 
     }
 
-    public function destroy(Request $request, Category $category): RedirectResponse
+    public function destroy(Request $request, Category $category)
     {
         $category->delete();
 
+        if ($request->wantsJson()) {
+            return response()->json([
+                'message' => 'Categorie supprimee avec success',
+                'category' => $category,
+            ]);
+        }
         return redirect()->route('categories.index');
     }
 }
