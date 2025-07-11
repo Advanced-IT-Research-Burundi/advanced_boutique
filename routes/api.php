@@ -1,30 +1,31 @@
 <?php
 
-use App\Http\Controllers\AgencyController;
+use App\Http\Controllers\Api\AgencyController;
+use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\CashRegisterController;
+use App\Http\Controllers\Api\CashTransactionController;
+use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\ClientController;
+use App\Http\Controllers\Api\CompanyController;
+use App\Http\Controllers\Api\ExpenseController;
+use App\Http\Controllers\Api\ExpenseTypeController;
+use App\Http\Controllers\Api\ParametrageController;
+use App\Http\Controllers\Api\PaymentController;
+use App\Http\Controllers\Api\ProductController;
+use App\Http\Controllers\Api\ProfileController;
+use App\Http\Controllers\Api\ProformaController;
+use App\Http\Controllers\Api\PurchaseController;
+use App\Http\Controllers\Api\SaleController;
+use App\Http\Controllers\Api\StockController;
+use App\Http\Controllers\Api\StockTransferController;
+use App\Http\Controllers\Api\SupplierController;
+use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Api\UserStockController;
+use App\Http\Controllers\Api\VehiculeController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-use App\Http\Controllers\Api\AuthController;
-use App\Http\Controllers\CashRegisterController;
-use App\Http\Controllers\CashTransactionController;
-use App\Http\Controllers\CategoryController;
-use App\Http\Controllers\ClientController;
-use App\Http\Controllers\CompanyController;
-use App\Http\Controllers\ExpenseController;
-use App\Http\Controllers\ExpenseTypeController;
-use App\Http\Controllers\ParametrageController;
-use App\Http\Controllers\PaymentController;
-use App\Http\Controllers\ProductController;
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\ProformaController;
-use App\Http\Controllers\PurchaseController;
-use App\Http\Controllers\SaleController;
-use App\Http\Controllers\StockController;
-use App\Http\Controllers\StockTransferController;
-use App\Http\Controllers\SupplierController;
-use App\Http\Controllers\UserController;
-use App\Http\Controllers\UserStockController;
-use App\Http\Controllers\VehiculeController;
+
 
 // Routes publiques
 Route::post('/register', [AuthController::class, 'register']);
