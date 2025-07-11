@@ -36,6 +36,10 @@
                 <i class="bi bi-arrow-left me-2"></i>
                 Retour
             </a>
+            <a href="{{ route('users.stocks.manage', $user) }}" class="btn btn-info">
+                <i class="bi bi-boxes me-2"></i>
+                Gestion des Stocks
+            </a>
             <a href="{{ route('users.edit', $user) }}" class="btn btn-warning">
                 <i class="bi bi-pencil me-2"></i>
                 Modifier
@@ -147,6 +151,43 @@
                         @else
                             <i class="bi bi-check-circle-fill text-success"></i>
                         @endif
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stocks Assignment Card -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-info text-white">
+                    <h6 class="card-title mb-0">
+                        <i class="bi bi-boxes me-2"></i>
+                        Stocks Assignés
+                    </h6>
+                </div>
+                <div class="card-body">
+                    @if($user->stocks && $user->stocks->count() > 0)
+                        <div class="mb-3">
+                            <strong>{{ $user->stocks->count() }}</strong> stock(s) assigné(s)
+                        </div>
+                        @foreach($user->stocks->take(3) as $stock)
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="bi bi-box text-info me-2"></i>
+                                <span>{{ $stock->name }}</span>
+                            </div>
+                        @endforeach
+                        @if($user->stocks->count() > 3)
+                            <small class="text-muted">
+                                et {{ $user->stocks->count() - 3 }} autre(s)...
+                            </small>
+                        @endif
+                    @else
+                        <p class="text-muted mb-0">Aucun stock assigné</p>
+                    @endif
+
+                    <div class="mt-3">
+                        <a href="{{ route('users.stocks.manage', $user) }}" class="btn btn-sm btn-outline-info w-100">
+                            <i class="bi bi-gear me-1"></i>
+                            Gérer les stocks
+                        </a>
                     </div>
                 </div>
             </div>

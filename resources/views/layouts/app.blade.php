@@ -13,6 +13,8 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.css">
     <!-- Font Awesome (optionnel) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.3.2/css/dataTables.dataTables.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.3.2/css/dataTables.bootstrap5.min.css">
 
     <!-- Custom CSS -->
     @vite(['resources/css/app.css'])
@@ -154,7 +156,6 @@
                 <button class="btn btn-outline-secondary sidebar-toggle me-3" id="sidebarToggle" type="button">
                     <i class="bi bi-list"></i>
                 </button>
-
                 <h5 class="mb-0 d-none d-md-block text-primary">@yield('page-title', 'Dashboard')</h5>
             </div>
 
@@ -223,7 +224,7 @@
         <main class="main-content">
             <!-- Breadcrumb (optionnel) -->
             @if(isset($breadcrumbs) || View::hasSection('breadcrumb'))
-                <nav aria-label="breadcrumb" class="mb-4">
+                <nav aria-label="breadcrumb">
                     <ol class="breadcrumb">
                         <li class="breadcrumb-item">
                             <a href="{{ route('dashboard') }}">
@@ -242,7 +243,8 @@
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
+    <script src="https://cdn.datatables.net/2.3.2/js/dataTables.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/2.3.2/js/dataTables.bootstrap5.min.js"></script>
     <!-- Custom JS -->
     @vite(['resources/js/app.js'])
 
@@ -532,9 +534,66 @@
         if (localStorage.getItem('theme') === 'dark') {
             document.body.classList.add('dark-theme');
         }
+
+        // Fonction pour basculer la barre latérale
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebar = document.getElementById('sidebar');
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            const mainWrapper = document.querySelector('.main-wrapper');
+
+            // Vérifier si l'état est sauvegardé dans localStorage
+            const isSidebarCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+
+            // Appliquer l'état initial
+            if (isSidebarCollapsed) {
+                sidebar.style.transform = 'translateX(-100%)';
+                mainWrapper.style.marginLeft = '0';
+                document.body.classList.add('sidebar-collapsed');
+            }
+
+            // Gérer le clic sur le bouton de bascule
+            sidebarToggle.addEventListener('click', function() {
+                const isCollapsed = sidebar.style.transform === 'translateX(-100%)' ||
+                                 getComputedStyle(sidebar).transform === 'matrix(1, 0, 0, 1, -280, 0)';
+
+                if (isCollapsed) {
+                    // Afficher la barre latérale
+                    sidebar.style.transform = 'translateX(0)';
+                    mainWrapper.style.marginLeft = 'var(--sidebar-width)';
+                    document.body.classList.remove('sidebar-collapsed');
+                    localStorage.setItem('sidebarCollapsed', 'false');
+                } else {
+                    // Cacher la barre latérale
+                    sidebar.style.transform = 'translateX(-100%)';
+                    mainWrapper.style.marginLeft = '0';
+                    document.body.classList.add('sidebar-collapsed');
+                    localStorage.setItem('sidebarCollapsed', 'true');
+                }
+            });
+
+            // Gérer le redimensionnement de la fenêtre
+            function handleResize() {
+                if (window.innerWidth < 992) {
+                    // Sur mobile, cacher la barre latérale par défaut
+                    sidebar.style.transform = 'translateX(-100%)';
+                    mainWrapper.style.marginLeft = '0';
+                    document.body.classList.add('sidebar-collapsed');
+                } else {
+                    // Sur desktop, afficher la barre latérale si elle n'était pas masquée manuellement
+                    if (localStorage.getItem('sidebarCollapsed') !== 'true') {
+                        sidebar.style.transform = 'translateX(0)';
+                        mainWrapper.style.marginLeft = 'var(--sidebar-width)';
+                        document.body.classList.remove('sidebar-collapsed');
+                    }
+                }
+            }
+
+            window.addEventListener('resize', handleResize);
+        });
     </script>
 
-    @stack('scripts')
+
     @livewireScripts
+    @stack('scripts')
 </body>
 </html>

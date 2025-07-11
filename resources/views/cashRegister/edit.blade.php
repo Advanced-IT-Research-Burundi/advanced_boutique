@@ -124,34 +124,7 @@
                         </div>
                     </form>
                 </div>
-            </div>
-
-            <!-- Actions rapides -->
-            @if($cashRegister->status === 'open')
-                <div class="card shadow mt-4">
-                    <div class="card-header bg-light">
-                        <h6 class="card-title mb-0">
-                            <i class="bi bi-lightning me-2"></i>
-                            Actions rapides
-                        </h6>
-                    </div>
-                    <div class="card-body">
-                        <div class="d-flex gap-2">
-                            <form action="{{ route('cash-registers.close', $cashRegister) }}"
-                                  method="POST"
-                                  class="d-inline"
-                                  onsubmit="return confirm('Êtes-vous sûr de vouloir fermer cette caisse ?')">
-                                @csrf
-                                @method('POST')
-                                <button type="submit" class="btn btn-outline-danger">
-                                    <i class="bi bi-lock me-2"></i>
-                                    Fermer la caisse
-                                </button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            @endif
+           </div>
         </div>
     </div>
 </div>

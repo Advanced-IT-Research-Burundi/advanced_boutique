@@ -17,12 +17,18 @@ return new class extends Migration
             $table->id();
             $table->foreignId('from_stock_id')->constrained('stocks');
             $table->foreignId('to_stock_id')->constrained('stocks');
+            //$table->foreignId('stock_product_id')->constrained('stock_products');
+            // procuct id
+            $table->foreignId('product_id')->constrained('products');
+            $table->text('product_name')->nullable();
+            $table->double('quantity')->default(0);
+            $table->double('price')->default(0);
             $table->foreignId('user_id')->constrained();
             $table->dateTime('transfer_date');
-            $table->text('note');
+            $table->text('note')->nullable();
+            $table->text('product_code')->nullable();
             $table->foreignId('agency_id')->nullable()->constrained();
             $table->foreignId('created_by')->constrained('users');
-            $table->foreignId('stock_id');
             $table->timestamps();
             $table->softDeletes();
         });

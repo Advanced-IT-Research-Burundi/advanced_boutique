@@ -84,7 +84,6 @@ class StockMouvement extends Component
     {
         // Determine if this is an entry or exit movement
         $isEntry = in_array($movement->item_movement_type, ['EN', 'ER', 'EI', 'EAJ', 'ET', 'EAU']);
-
         if ($isEntry) {
             $this->stock->quantity += $movement->item_quantity;
             $this->stock->save();

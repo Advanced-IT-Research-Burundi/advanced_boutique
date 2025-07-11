@@ -38,29 +38,67 @@ class UserStock extends Model
             'created_by' => 'integer',
         ];
     }
-
-    public function user(): BelongsTo
+/**
+     * Relation avec l'utilisateur assigné
+     */
+    public function user()
     {
         return $this->belongsTo(User::class);
     }
 
-    public function stock(): BelongsTo
+    /**
+     * Relation avec le stock
+     */
+    public function stock()
     {
         return $this->belongsTo(Stock::class);
     }
 
-    public function agency(): BelongsTo
+    /**
+     * Relation avec l'agence (optionnelle)
+     */
+    public function agency()
     {
         return $this->belongsTo(Agency::class);
     }
 
-    public function user(): BelongsTo
+    /**
+     * Relation avec l'utilisateur qui a créé l'assignation
+     */
+    public function createdBy()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'created_by');
     }
 
-    public function createdBy(): BelongsTo
+    /**
+     * Scope pour filtrer par utilisateur
+     */
+    public function scopeForUser($query, $userId)
     {
-        return $this->belongsTo(User::class);
+        return $query->where('user_id', $userId);
+    }
+
+    /**
+     * Scope pour filtrer par stock
+     */
+    public function scopeForStock($query, $stockId)
+    {
+        return $query->where('stock_id', $stockId);
+    }
+
+    /**
+     * Scope pour filtrer par agence
+     */
+    public function scopeForAgency($query, $agencyId)
+    {
+        return $query->where('agency_id', $agencyId);
+    }
+
+    /**
+     * Scope pour les assignations actives (non supprimées)
+     */
+    public function scopeActive($query)
+    {
+        return $query->whereNull('deleted_at');
     }
 }

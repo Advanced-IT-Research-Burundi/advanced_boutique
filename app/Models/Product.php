@@ -112,8 +112,6 @@ class Product extends Model
 
 
 
-
-
     /**
      * Obtenir la quantité pour une agence spécifique
      */

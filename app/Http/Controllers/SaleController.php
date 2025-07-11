@@ -20,7 +20,6 @@ class SaleController extends Controller
     {
         $query = Sale::with(['client', 'saleItems.product', 'user'])
                     ->orderBy('created_at', 'desc');
-
         // Apply filters
         if ($request->filled('search')) {
             $search = $request->search;
@@ -66,13 +65,13 @@ class SaleController extends Controller
 
     public function create()
     {
-        $clients = Client::orderBy('name')->get();
-        $products = Product::with('stocks')
-                          ->where('alert_quantity', '>', 0)
-                          ->orderBy('name')
-                          ->get();
+        // $stock = auth()->user()->stocks()->first();
 
-        return view('sale.create', compact('clients', 'products'));
+        // if (!$stock) {
+        //     abort('403');
+        // }
+
+        return view('sale.create');
     }
 
     public function store(Request $request)

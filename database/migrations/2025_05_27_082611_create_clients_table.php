@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
+    /**Physique
      * Run the migrations.
      */
     public function up(): void
@@ -15,7 +15,6 @@ return new class extends Migration
 
         Schema::create('clients', function (Blueprint $table) {
             $table->id();
-            // 'physique' ou 'morale'
             $table->string('patient_type')->default('physique');
             $table->string('nif')->nullable();
             $table->string('societe')->nullable();

@@ -15,9 +15,21 @@ class StockController extends Controller
      * Display a listing of the resource.
      */
 
+     public function transfer()
+     {
+        return view('stock.transfer');
+     }
+
+     public function entreMultiple($stock){
+
+        return view('stock.entre_multiple', compact('stock'));
+     }
+
     public function mouvement($stock)
     {
         $stock = StockProduct::with(['stock', 'product', 'agency', 'stockProductMouvements'])->findOrFail($stock);
+
+      //  dd($stock->stockProductMouvements);
 
         return view('stock.mouvement', compact('stock'));
     }

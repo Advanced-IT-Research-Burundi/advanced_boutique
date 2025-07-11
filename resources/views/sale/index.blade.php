@@ -5,91 +5,92 @@
 @section('content')
 <div class="container-fluid">
     <!-- Header Section -->
-    <div class="row mb-4">
+    <div class="mb-4 row">
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center">
                 <div>
-                    <h2 class="text-primary mb-1">
+                    <h2 class="mb-1 text-primary">
                         <i class="bi bi-cart-check-fill me-2"></i>Gestion des Ventes
                     </h2>
-                    <p class="text-muted mb-0">{{ $sales->total() }} vente(s) au total</p>
+                    <p class="mb-0 text-muted">{{ $sales->total() }} vente(s) au total</p>
                 </div>
-                <div class="d-flex gap-2">
+                <div class="gap-2 d-flex">
                     <button class="btn btn-outline-primary" id="refreshBtn">
                         <i class="bi bi-arrow-clockwise me-1"></i>Actualiser
                     </button>
                     <a href="{{ route('sales.create') }}" class="btn btn-primary">
                         <i class="bi bi-plus-circle me-1"></i>Nouvelle Vente
                     </a>
+
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Stats Cards -->
-    <div class="row mb-4">
-        <div class="col-xl-3 col-md-6 mb-3">
-            <div class="card border-0 shadow-sm h-100">
+    <div class="mb-4 row">
+        <div class="mb-3 col-xl-3 col-md-6">
+            <div class="border-0 shadow-sm card h-100">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
                         <div class="flex-shrink-0">
-                            <div class="bg-primary bg-opacity-10 p-3 rounded-circle">
+                            <div class="p-3 bg-opacity-10 bg-primary rounded-circle">
                                 <i class="bi bi-currency-dollar text-primary fs-4"></i>
                             </div>
                         </div>
                         <div class="flex-grow-1 ms-3">
-                            <h6 class="text-muted mb-1">Fbu Total</h6>
+                            <h6 class="mb-1 text-muted">Fbu Total</h6>
                             <h4 class="mb-0">{{ number_format($totalRevenue ?? 0, 0, ',', ' ') }} F</h4>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-xl-3 col-md-6 mb-3">
-            <div class="card border-0 shadow-sm h-100">
+        <div class="mb-3 col-xl-3 col-md-6">
+            <div class="border-0 shadow-sm card h-100">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
                         <div class="flex-shrink-0">
-                            <div class="bg-success bg-opacity-10 p-3 rounded-circle">
+                            <div class="p-3 bg-opacity-10 bg-success rounded-circle">
                                 <i class="bi bi-check-circle text-success fs-4"></i>
                             </div>
                         </div>
                         <div class="flex-grow-1 ms-3">
-                            <h6 class="text-muted mb-1">Ventes Payées</h6>
+                            <h6 class="mb-1 text-muted">Ventes Payées</h6>
                             <h5 class="mb-0">{{ $paidSales ?? 0 }}</h5>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-xl-3 col-md-6 mb-3">
-            <div class="card border-0 shadow-sm h-100">
+        <div class="mb-3 col-xl-3 col-md-6">
+            <div class="border-0 shadow-sm card h-100">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
                         <div class="flex-shrink-0">
-                            <div class="bg-warning bg-opacity-10 p-3 rounded-circle">
+                            <div class="p-3 bg-opacity-10 bg-warning rounded-circle">
                                 <i class="bi bi-clock text-warning fs-4"></i>
                             </div>
                         </div>
                         <div class="flex-grow-1 ms-3">
-                            <h6 class="text-muted mb-1">Créances</h6>
+                            <h6 class="mb-1 text-muted">Créances</h6>
                             <h4 class="mb-0">{{ number_format($totalDue ?? 0, 0, ',', ' ') }} Fbu</h4>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-xl-3 col-md-6 mb-3">
-            <div class="card border-0 shadow-sm h-100">
+        <div class="mb-3 col-xl-3 col-md-6">
+            <div class="border-0 shadow-sm card h-100">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
                         <div class="flex-shrink-0">
-                            <div class="bg-info bg-opacity-10 p-3 rounded-circle">
+                            <div class="p-3 bg-opacity-10 bg-info rounded-circle">
                                 <i class="bi bi-calendar-day text-info fs-4"></i>
                             </div>
                         </div>
                         <div class="flex-grow-1 ms-3">
-                            <h6 class="text-muted mb-1">Aujourd'hui</h6>
+                            <h6 class="mb-1 text-muted">Aujourd'hui</h6>
                             <h6 class="mb-0">{{ $todaySales ?? 0 }}</h6>
                         </div>
                     </div>
@@ -99,7 +100,7 @@
     </div>
 
     <!-- Filters Section -->
-    <div class="card border-0 shadow-sm mb-4">
+    <div class="mb-4 border-0 shadow-sm card">
         <div class="card-body">
             <form id="filterForm" class="row g-3">
                 <div class="col-md-3">
@@ -127,7 +128,10 @@
                         <option value="unpaid" {{ request('status') == 'unpaid' ? 'selected' : '' }}>Impayé</option>
                     </select>
                 </div>
-                <div class="col-md-3 d-flex align-items-end gap-2">
+                <div class="gap-2 col-md-3 d-flex align-items-end">
+                    <a href="{{ route('proformas.index') }}" class="btn btn-outline-primary" >
+                        <i class="bi bi-file-earmark-text me-1"></i>Proforma
+                    </a>
                     <button type="submit" class="btn btn-primary">
                         <i class="bi bi-funnel me-1"></i>Filtrer
                     </button>
@@ -140,10 +144,10 @@
     </div>
 
     <!-- Sales Table -->
-    <div class="card border-0 shadow-sm">
-        <div class="card-body p-0">
+    <div class="border-0 shadow-sm card">
+        <div class="p-0 card-body">
             <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
+                <table class="table mb-0 align-middle table-hover">
                     <thead class="bg-light">
                         <tr>
                             <th class="px-4 py-3 border-0">
@@ -156,6 +160,7 @@
                             <th class="px-4 py-3 border-0">Payé</th>
                             <th class="px-4 py-3 border-0">Reste</th>
                             <th class="px-4 py-3 border-0">Statut</th>
+                            <th class="px-4 py-3 border-0">Facture</th>
                             <th class="px-4 py-3 border-0">Actions</th>
                         </tr>
                     </thead>
@@ -167,7 +172,7 @@
                             </td>
                             <td class="px-4">
                                 <div class="d-flex align-items-center">
-                                    <div class="bg-primary bg-opacity-10 p-2 rounded me-2">
+                                    <div class="p-2 bg-opacity-10 rounded bg-primary me-2">
                                         <i class="bi bi-receipt text-primary"></i>
                                     </div>
                                     <div>
@@ -206,18 +211,21 @@
                             </td>
                             <td class="px-4">
                                 @if($sale->due_amount == 0)
-                                    <span class="text-success px-3 py-2">
+                                    <span class="px-3 py-2 text-success">
                                         <i class="bi bi-check-circle me-1"></i>Payé
                                     </span>
                                 @elseif($sale->paid_amount > 0)
-                                    <span class="text-warning px-3 py-2">
+                                    <span class="px-3 py-2 text-warning">
                                         <i class="bi bi-clock me-1"></i>Partiel
                                     </span>
                                 @else
-                                    <span class=" text-danger px-3 py-2">
+                                    <span class="px-3 py-2 text-danger">
                                         <i class="bi bi-x-circle me-1"></i>Impayé
                                     </span>
                                 @endif
+                            </td>
+                            <td class="px-4">
+                                <strong>{{ $sale->type_facture }}</strong>
                             </td>
                             <td class="px-4">
                                 <div class="btn-group" role="group">
@@ -242,9 +250,9 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="9" class="text-center py-5">
+                            <td colspan="9" class="py-5 text-center">
                                 <div class="text-muted">
-                                    <i class="bi bi-inbox display-4 d-block mb-3"></i>
+                                    <i class="mb-3 bi bi-inbox display-4 d-block"></i>
                                     <h5>Aucune vente trouvée</h5>
                                     <p class="mb-0">Commencez par créer votre première vente</p>
                                 </div>
@@ -257,7 +265,7 @@
         </div>
 
         @if($sales->hasPages())
-        <div class="card-footer bg-transparent border-0">
+        <div class="bg-transparent border-0 card-footer">
             <div class="d-flex justify-content-between align-items-center">
                 <div class="text-muted small">
                     Affichage de {{ $sales->firstItem() }} à {{ $sales->lastItem() }} sur {{ $sales->total() }} résultats
@@ -273,7 +281,7 @@
 <div class="modal fade" id="deleteModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header bg-danger text-white">
+            <div class="text-white modal-header bg-danger">
                 <h5 class="modal-title">
                     <i class="bi bi-exclamation-triangle me-2"></i>Confirmer la suppression
                 </h5>

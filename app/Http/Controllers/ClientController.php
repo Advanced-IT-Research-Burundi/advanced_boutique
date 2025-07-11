@@ -43,7 +43,7 @@ class ClientController extends Controller
             $query->where('created_by', $request->created_by);
         }
 
-        $clients = $query->orderBy('created_at', 'desc')->paginate(15);
+        $clients = $query->latest()->paginate(15);
         $agencies = Agency::all();
         $creators = User::all();
 

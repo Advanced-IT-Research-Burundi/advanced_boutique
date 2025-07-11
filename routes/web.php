@@ -29,8 +29,7 @@ Route::middleware('auth')->group(function () {
     Route::put('/parametrage/company/update', [App\Http\Controllers\ParametrageController::class, 'updateCompany'])->name('parametrage.company.update');
     Route::get('stocks/{stock}/show', [App\Http\Controllers\StockController::class, 'list'])->name('stocks.list');
     Route::get('stocks/{stock}/mouvement', [App\Http\Controllers\StockController::class, 'mouvement'])->name('stocks.mouvement');
-
-
+    Route::get('stocks/transfer', [App\Http\Controllers\StockController::class, 'transfer'])->name('stocks.transfer');
     Route::resource('companies', App\Http\Controllers\CompanyController::class);
     Route::resource('agencies', App\Http\Controllers\AgencyController::class);
     Route::resource('users', App\Http\Controllers\UserController::class);
@@ -56,8 +55,32 @@ Route::middleware('auth')->group(function () {
     Route::resource('user-stocks', App\Http\Controllers\UserStockController::class);
     Route::resource('vehicules', App\Http\Controllers\VehiculeController::class);
 
+    Route::get("entre_multiple/{stock}", [App\Http\Controllers\StockController::class, "entreMultiple"])->name("entre_multiple");
+
+
 });
+Route::middleware(['auth'])->group(function () {
+    // Gestion des stocks pour les utilisateurs
+    Route::prefix('users/{user}/stocks')->name('users.stocks.')->group(function () {
+        Route::get('/manage', [\App\Http\Controllers\UserStockController::class, 'manage'])->name('manage');
+        Route::post('/attach', [\App\Http\Controllers\UserStockController::class, 'attach'])->name('attach');
+        Route::delete('/{stock}/detach', [\App\Http\Controllers\UserStockController::class, 'detach'])->name('detach');
+        Route::delete('/detach-all', [\App\Http\Controllers\UserStockController::class, 'detachAll'])->name('detach-all');
+        Route::get('/history', [\App\Http\Controllers\UserStockController::class, 'history'])->name('history');
+        Route::prefix('api')->name('api.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\UserStockController::class, 'getUserStocks'])->name('get');
+            Route::post('/attach', [\App\Http\Controllers\UserStockController::class, 'attachAjax'])->name('attach');
+            Route::delete('/detach', [\App\Http\Controllers\UserStockController::class, 'detachAjax'])->name('detach');
+        });
+    });
+    Route::resource('proformas', App\Http\Controllers\ProformaController::class);
+    Route::get('proformas/{proforma}/validate', [App\Http\Controllers\ProformaController::class, 'validateProforma'])->name('proformas.validate');
+
+});
+
 
 require __DIR__.'/auth.php';
 
 
+
+Route::get('/export/excel/{token}', [App\Http\Controllers\ExportController::class, 'exportExcel'])->name('export.excel');

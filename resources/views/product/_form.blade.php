@@ -41,17 +41,18 @@
             Catégorie <span class="text-danger">*</span>
         </label>
         <select class="form-select @error('category_id') is-invalid @enderror"
-                id="category_id"
-                name="category_id"
-                required>
+        id="category_id"
+        name="category_id"
+        required>
             <option value="">Sélectionner une catégorie</option>
             @foreach($categories as $category)
                 <option value="{{ $category->id }}"
-                        {{ old('category_id', $product->category_id ?? '') == $category->id ? 'selected' : '' }}>
+                    {{ old('category_id', $product->category_id ?? $selectedCategoryId ?? '') == $category->id ? 'selected' : '' }}>
                     {{ $category->name }}
                 </option>
             @endforeach
         </select>
+
         @error('category_id')
             <div class="invalid-feedback">{{ $message }}</div>
         @enderror

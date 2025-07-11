@@ -5,10 +5,11 @@
 @section('content')
 <div>
     <div>
-      @livewire('stock.stock-mouvement', ['stock' => $stock])
+        <a href="{{ route('stocks.index') }}" class="btn btn-primary">Retour</a>
+
     </div>
-    <div class="card-header">
-        <h3 class="card-title">Mouvements</h3>
+    <div>
+      @livewire('stock.stock-mouvement', ['stock' => $stock])
     </div>
     <div class="card-body">
         <div class="table-responsive">
@@ -25,8 +26,9 @@
                         <th>Invoice Ref</th>
                         <th>Description</th>
                         <th>User</th>
-                        <th>Agene</th>
                         <th>Date</th>
+                        <th>Agency</th>
+
 
                     </tr>
                 </thead>
@@ -39,17 +41,13 @@
                             <td>{{ $stockProductMouvement->item_measurement_unit }}</td>
                             <td>{{ $stockProductMouvement->item_purchase_or_sale_price }}</td>
                             <td>{{ $stockProductMouvement->item_purchase_or_sale_currency }}</td>
-                            <td>{{ $stockProductMouvement->type }}</td>
-                            <td>{{ $stockProductMouvement->invoice_ref }}</td>
-                            <td>{{ $stockProductMouvement->description }}</td>
-                            <td>{{ $stockProductMouvement->date }}</td>
-                            <td>{{ $stockProductMouvement->time }}</td>
-                            <td>{{ $stockProductMouvement->user }}</td>
-                            <td>{{ $stockProductMouvement->item_movement_agency }}</td>
-                            <td>{{ $stockProductMouvement->item_movement_stock }}</td>
-                            <td>{{ $stockProductMouvement->item_movement_stock_product }}</td>
-                            <td>{{ $stockProductMouvement->item_movement_system_or_device_id }}</td>
-                            <td>{{ $stockProductMouvement->created_at }}</td>
+                            <td>{{ $stockProductMouvement->item_movement_type }}</td>
+                            <td>{{ $stockProductMouvement->item_movement_invoice_ref }}</td>
+                            <td>{{ $stockProductMouvement->item_movement_description }}</td>
+
+                            <td>{{ $stockProductMouvement->user->first_name . ' ' . $stockProductMouvement->user->last_name }}</td>
+                            <td>{{ $stockProductMouvement->item_movement_date }}</td>
+                            <td>-</td>
 
                         </tr>
                     @endforeach

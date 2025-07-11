@@ -18,12 +18,19 @@ return new class extends Migration
             $table->foreignId('stock_id')->constrained();
             $table->foreignId('product_id')->constrained();
             $table->text("product_name");
-            $table->float('quantity');
+            $table->float('quantity',64,2)->default(0);
+            $table->double('price',64,2)->default(0);
             $table->foreignId('agency_id')->nullable()->constrained();
+            $table->foreignId('category_id')->nullable()->constrained();
+            $table->foreignId('user_id')->nullable()->constrained();
+            $table->double('purchase_price',64,2)->default(0);
+            $table->double('sale_price_ht',64,2)->default(0);
+            $table->double('sale_price_ttc',64,2)->default(0);
+            $table->text('description')->nullable();
             $table->timestamps();
             $table->softDeletes();
             $table->index(['stock_id', 'product_id']);
-            $table->unique(['stock_id', 'product_id', 'agency_id']);
+            $table->unique(['stock_id', 'product_id']);
         });
 
         Schema::enableForeignKeyConstraints();

@@ -1,15 +1,15 @@
 created:
-    - app/Http/Controllers/VehiculeController.php
-    - database/factories/VehiculeFactory.php
-    - database/migrations/2025_06_09_032251_create_vehicules_table.php
-    - app/Models/Vehicule.php
-    - tests/Feature/Http/Controllers/VehiculeControllerTest.php
-    - app/Http/Requests/VehiculeStoreRequest.php
-    - app/Http/Requests/VehiculeUpdateRequest.php
-    - resources/views/vehicule/index.blade.php
-    - resources/views/vehicule/create.blade.php
-    - resources/views/vehicule/show.blade.php
-    - resources/views/vehicule/edit.blade.php
+    - app/Http/Controllers/ProformaController.php
+    - database/factories/ProformaFactory.php
+    - database/migrations/2025_06_27_095735_create_proformas_table.php
+    - app/Models/Proforma.php
+    - tests/Feature/Http/Controllers/ProformaControllerTest.php
+    - app/Http/Requests/ProformaStoreRequest.php
+    - app/Http/Requests/ProformaUpdateRequest.php
+    - resources/views/proforma/index.blade.php
+    - resources/views/proforma/create.blade.php
+    - resources/views/proforma/show.blade.php
+    - resources/views/proforma/edit.blade.php
 updated:
     - routes/web.php
 models:
@@ -35,3 +35,4 @@ models:
     ExpenseType: { name: 'string unique', description: text, agency_id: 'id foreign:agencies nullable', created_by: 'id foreign:users', timestamps: timestamps, softdeletes: softDeletes, relationships: { belongsTo: 'Agency, User', hasMany: Expense } }
     Agency: { company_id: 'id foreign:companies', code: 'string unique', name: string, adresse: string, manager_id: 'id foreign:users nullable', parent_agency_id: 'id foreign:agencies nullable', is_main_office: 'boolean default:false', created_by: 'id foreign:users', timestamps: timestamps, softdeletes: softDeletes, relationships: { belongsTo: 'Company, User, Agency, User', hasMany: 'Agency, Stock, Category, Product, Client, Supplier, Purchase, Sale, CashRegister, Expense, ExpenseType, UserStock, StockTransfer, CashTransaction' } }
     Vehicule: { name: string, model: 'string nullable', brand: 'string nullable', year: 'integer nullable', color: 'string nullable', price: 'decimal nullable', status: 'enum[available,rented,unavailable] default:available', description: 'text nullable', agency_id: 'id foreign:agencies nullable', created_by: 'id foreign:users', timestamps: timestamps, softdeletes: softDeletes, relationships: { belongsTo: 'Agency, User', hasMany: Vehicule } }
+    Proforma: { stock_id: 'id foreign:stocks', user_id: 'id foreign:users', total_amount: double, due_amount: double, sale_date: date, note: 'text nullable', invoice_type: 'string nullable', agency_id: 'id foreign:agencies', created_by: 'id foreign:users', proforma_items: 'text nullable', client: 'text nullable', timestamps: timestamps, softdeletes: softDeletes, relationships: { belongsTo: 'Stock, User, Agency' } }

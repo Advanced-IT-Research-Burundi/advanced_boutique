@@ -19,9 +19,11 @@ class StockProduct extends Model
     protected $fillable = [
         'stock_id',
         'product_id',
+        'category_id',
         'quantity',
         'agency_id',
         'product_name',
+        'user_id'
     ];
 
     /**
@@ -37,27 +39,36 @@ class StockProduct extends Model
             'product_id' => 'integer',
             'quantity' => 'float',
             'agency_id' => 'integer',
+            'user_id' => 'integer',
         ];
     }
 
     public function stock(): BelongsTo
     {
-        return $this->belongsTo(Stock::class);
+        return $this->belongsTo(Stock::class, 'stock_id');
     }
 
     public function stockProductMouvements()
     {
-        return $this->hasMany(StockProductMouvement::class , 'item_code', 'id');
+        return $this->hasMany(StockProductMouvement::class , 'stock_product_id', 'id');
     }
 
     public function product(): BelongsTo
     {
-        return $this->belongsTo(Product::class);
+        return $this->belongsTo(Product::class, 'product_id');
+    }
+
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(Category::class, 'category_id');
     }
 
     public function agency(): BelongsTo
     {
         return $this->belongsTo(Agency::class);
     }
+
+
+
 
 }
