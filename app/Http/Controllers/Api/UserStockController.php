@@ -39,7 +39,7 @@ class UserStockController extends Controller
         $agencies = Agency::select('id', 'name')->get();
 
         // return json if api request
-        if ($request->wantsJson()) {
+        
             return response()->json([
                 'success' => true,
                 'data' => [
@@ -49,9 +49,9 @@ class UserStockController extends Controller
                     'agencies' => $agencies->toArray()
                 ]
             ]);
-        }
+        
 
-        return view('userStock.index', compact('userStocks', 'users', 'stocks', 'agencies'));
+        
     }
 
     /**
@@ -64,7 +64,7 @@ class UserStockController extends Controller
         $agencies = Agency::select('id', 'name')->get();
 
         // return json if api request
-        if ($request->wantsJson()) {
+        
             return response()->json([
                 'success' => true,
                 'data' => [
@@ -73,9 +73,9 @@ class UserStockController extends Controller
                     'agencies' => $agencies->toArray()
                 ]
             ]);
-        }
+        
 
-        return view('userStocks.create', compact('users', 'stocks', 'agencies'));
+        
     }
 
     /**
@@ -106,12 +106,12 @@ class UserStockController extends Controller
         ]);
 
         // return json if api request
-        if ($request->wantsJson()) {
+        
             return response()->json([
                 'success' => true,
                 'message' => 'Association créée avec succès.'
             ]);
-        }
+        
 
         return redirect()->route('user-stocks.index')
             ->with('success', 'Association créée avec succès.');
@@ -125,12 +125,12 @@ class UserStockController extends Controller
         $userStock->load(['user', 'stock', 'agency', 'createdBy']);
 
         // return json if api request
-        if ($request->wantsJson()) {
+        
             return response()->json([
                 'success' => true,
                 'data' => $userStock
             ]);
-        }
+        
 
         return view('userStock.show', compact('userStock'));
     }
@@ -185,12 +185,12 @@ class UserStockController extends Controller
         }
 
         // return json if api request
-        if ($request->wantsJson()) {
+        
             return response()->json([
                 'success' => true,
                 'message' => $message
             ]);
-        }
+        
 
         return back()->with('success', $message);
     }
@@ -208,12 +208,12 @@ class UserStockController extends Controller
         UserStock::where('user_id', $request->user_id)->delete();
 
         // return json if api request
-        if ($request->wantsJson()) {
+        
             return response()->json([
                 'success' => true,
                 'message' => "$count associations supprimées."
             ]);
-        }
+        
 
         return  back()->with('success', "$count associations supprimées.");
     }
@@ -231,11 +231,11 @@ class UserStockController extends Controller
             ->pluck('user');
 
         // return json if api request
-        if ($request->wantsJson()) {
-            return response()->json($stockUsers);
-        }
 
-        return view('userStock.index', compact('stockUsers'));
+            return response()->json($stockUsers);
+        
+
+        //return view('userStock.index', compact('stockUsers'));
     }
 
      /**
@@ -253,8 +253,16 @@ class UserStockController extends Controller
         $assignedStockIds = $assignedStocks->pluck('id')->toArray();
         $availableStocks = Stock::whereNotIn('id', $assignedStockIds)
             ->get();
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'user' => $user,
+                    'assignedStocks' => $assignedStocks,
+                    'availableStocks' => $availableStocks
+                ]
+            ]);
 
-        return view('userStock.manage', compact('user', 'assignedStocks', 'availableStocks'));
+        
     }
 
     /**
@@ -311,14 +319,20 @@ class UserStockController extends Controller
             if (!empty($alreadyAssigned)) {
                 $message .= " Attention: " . implode(', ', $alreadyAssigned) . " étai(en)t déjà assigné(s).";
             }
+            
+            return response()->json([
+                'success' => true,
+                'message' => $message
+            ]); 
 
-            return redirect()->route('users.stocks.manage', $user)
-                ->with('success', $message);
+            
 
         } catch (\Exception $e) {
             \DB::rollBack();
-            return redirect()->back()
-                ->with('error', 'Erreur lors de l\'assignation des stocks: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur lors de l\'assignation des stocks: ' . $e->getMessage()
+            ]);
         }
     }
 
@@ -333,18 +347,24 @@ class UserStockController extends Controller
                 ->first();
 
             if (!$userStock) {
-                return redirect()->back()
-                    ->with('error', 'Ce stock n\'est pas assigné à cet utilisateur.');
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Ce stock n\'est pas assigné à cet utilisateur.'
+                ]);
             }
 
             $userStock->delete();
 
-            return redirect()->route('users.stocks.manage', $user)
-                ->with('success', "Le stock \"{$stock->name}\" a été désassigné avec succès.");
+            return response()->json([
+                'success' => true,
+                'message' => "Le stock \"{$stock->name}\" a été désassigné avec succès."
+            ]);
 
         } catch (\Exception $e) {
-            return redirect()->back()
-                ->with('error', 'Erreur lors de la désassignation du stock: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur lors de la désassignation du stock: ' . $e->getMessage()
+            ]);
         }
     }
 
@@ -356,12 +376,16 @@ class UserStockController extends Controller
         try {
             $deletedCount = UserStock::where('user_id', $user->id)->delete();
 
-            return redirect()->route('users.stocks.manage', $user)
-                ->with('success', "{$deletedCount} stock(s) désassigné(s) avec succès.");
+            return response()->json([
+                'success' => true,
+                'message' => "{$deletedCount} stock(s) désassigné(s) avec succès."
+            ]);
 
         } catch (\Exception $e) {
-            return redirect()->back()
-                ->with('error', 'Erreur lors de la désassignation des stocks: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur lors de la désassignation des stocks: ' . $e->getMessage()
+            ]);
         }
     }
 
@@ -376,7 +400,10 @@ class UserStockController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(15);
 
-        return view('userStock.history', compact('user', 'stockHistory'));
+        return response()->json([
+            'success' => true,
+            'data' => $stockHistory
+        ]);
     }
 
     /**

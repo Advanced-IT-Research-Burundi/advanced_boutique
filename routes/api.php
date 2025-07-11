@@ -89,5 +89,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::resource('payments', PaymentController::class);
     Route::resource('user-stocks', UserStockController::class);
     Route::resource('vehicules', VehiculeController::class);
-
+    Route::delete('products/mul_destroy', [ProductController::class, 'multDestroy']);
 });

@@ -264,4 +264,30 @@ class ProductController extends Controller
             'data' => $product
         ]);
     }
+
+    public function multDestroy(Request $request)
+    {
+        $productIds = $request->input('product_ids', []);
+        
+        if (empty($productIds)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Aucun produit sélectionné.'
+            ]);
+        }
+        
+        try {
+            Product::whereIn('id', $productIds)->delete();
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Produits supprimés avec succès.'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Une erreur est survenue lors de la suppression des produits.'
+            ]);
+        }
+    }
 }
