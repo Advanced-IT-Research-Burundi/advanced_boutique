@@ -59,12 +59,12 @@ class CashRegisterController extends Controller
         $users = User::all();
         $stocks = Stock::all();
 
-        return view('cashRegister.index', compact(
-            'cashRegisters',
-            'agencies',
-            'users',
-            'stocks'
-        ));
+        return sendResponse([
+            'cashRegisters' => $cashRegisters,
+            'agencies' => $agencies,
+            'users' => $users,
+            'stocks' => $stocks
+        ], 'Cash registers retrieved successfully', 200);
     }
 
     public function create()
@@ -73,7 +73,11 @@ class CashRegisterController extends Controller
         $stocks = Stock::all();
         $agencies = Agency::all();
 
-        return view('cashRegister.create', compact('users', 'stocks', 'agencies'));
+        return sendResponse([
+            'users' => $users,
+            'stocks' => $stocks,
+            'agencies' => $agencies
+        ], 'Cash register created successfully', 200);
     }
 
     public function store(Request $request)
@@ -90,10 +94,11 @@ class CashRegisterController extends Controller
         $data['created_by'] = Auth::id();
         $data['closing_balance'] = $data['opening_balance']; // Initialement égal au solde d'ouverture
 
-        CashRegister::create($data);
+        $cashRegister = CashRegister::create($data);
 
-        return redirect()->route('cash-registers.index')
-                        ->with('success', 'Caisse enregistreuse créée avec succès.');
+        return sendResponse([
+            'cashRegister' => $cashRegister,
+        ], 'Cash register created successfully', 200);
     }
 
     public function show(CashRegister $cashRegister)
@@ -117,12 +122,12 @@ class CashRegisterController extends Controller
 
         $currentBalance = $cashRegister->opening_balance + $totalIn - $totalOut;
 
-        return view('cashRegister.show', compact(
-            'cashRegister',
-            'transactions',
-            'totalIn',
-            'totalOut',
-            'currentBalance'
+        return sendResponse([
+            'cashRegister' => $cashRegister,
+            'transactions' => $transactions,
+            'totalIn' => $totalIn,
+            'totalOut' => $totalOut,
+            'currentBalance' => $currentBalance
         ));
     }
 
@@ -149,28 +154,33 @@ class CashRegisterController extends Controller
 
         $cashRegister->update($request->all());
 
-        return redirect()->route('cash-registers.index')
-                        ->with('success', 'Caisse enregistreuse modifiée avec succès.');
+        return sendResponse([
+            'cashRegister' => $cashRegister,
+        ], 'Cash register updated successfully', 200);
     }
 
     public function destroy(CashRegister $cashRegister)
     {
         // Vérifier s'il y a des transactions liées
         if ($cashRegister->transactions()->count() > 0) {
-            return redirect()->route('cash-registers.index')
-                           ->with('error', 'Impossible de supprimer cette caisse car elle contient des transactions.');
+            return sendResponse([
+                'cashRegister' => $cashRegister,
+            ], 'Cash register deleted successfully', 200);
         }
 
         $cashRegister->delete();
 
-        return redirect()->route('cash-registers.index')
-                        ->with('success', 'Caisse enregistreuse supprimée avec succès.');
+        return sendResponse([
+            'cashRegister' => $cashRegister,
+        ], 'Cash register deleted successfully', 200);
     }
 
     public function close(CashRegister $cashRegister)
     {
         if ($cashRegister->status === 'closed') {
-            return redirect()->back()->with('error', 'Cette caisse est déjà fermée.');
+            return sendResponse([
+                'cashRegister' => $cashRegister,
+            ], 'Cash register closed successfully', 200);
         }
 
         // Calculer le solde de fermeture
@@ -190,7 +200,9 @@ class CashRegisterController extends Controller
             'closing_balance' => $closingBalance
         ]);
 
-        return redirect()->back()->with('success', 'Caisse fermée avec succès.');
+        return sendResponse([
+            'cashRegister' => $cashRegister,
+        ], 'Cash register closed successfully', 200);
     }
 
     public function addTransaction(Request $request, CashRegister $cashRegister)
@@ -213,6 +225,8 @@ class CashRegisterController extends Controller
             'user_id' => Auth::id(),
         ]);
 
-        return redirect()->back()->with('success', 'Transaction ajoutée avec succès.');
+        return sendResponse([
+            'cashRegister' => $cashRegister,
+        ], 'Cash register closed successfully', 200);
     }
 }

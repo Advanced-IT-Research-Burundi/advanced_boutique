@@ -87,13 +87,13 @@ class CashTransactionController extends Controller
         ];
         // dd($stats['total_out']);
 
-        return view('cashTransaction.index', compact(
-            'transactions',
-            'cashRegisters',
-            'agencies',
-            'users',
-            'stats'
-        ));
+        return sendResponse([
+            'transactions' => $transactions,
+            'cashRegisters' => $cashRegisters,
+            'agencies' => $agencies,
+            'users' => $users,
+            'stats' => $stats
+        ], 'Cash transactions retrieved successfully', 200);
     }
 
     /**
@@ -120,11 +120,11 @@ class CashTransactionController extends Controller
 
         $agencies = \App\Models\Agency::all();
 
-        return view('cashTransaction.create', compact(
-            'cashRegister',
-            'cashRegisters',
-            'agencies'
-        ));
+        return sendResponse([
+            'cashRegister' => $cashRegister,
+            'cashRegisters' => $cashRegisters,
+            'agencies' => $agencies
+        ], 'Cash transaction created successfully', 200);
     }
 
     /**
@@ -152,16 +152,18 @@ class CashTransactionController extends Controller
             $cashRegister = CashRegister::findOrFail($request->cash_register_id);
 
             if ($cashRegister->status !== 'open') {
-                return back()->with('error', 'Impossible d\'ajouter des transactions à une caisse fermée.')
-                            ->withInput();
+                return sendResponse([
+                    'cashRegister' => $cashRegister,
+                ], 'Cash register closed successfully', 200);
             }
 
             // Vérifier les limites de montant si nécessaire
             if ($request->type === 'out') {
                 $currentBalance = $this->calculateCurrentBalance($cashRegister);
                 if ($request->amount > $currentBalance) {
-                    return back()->with('error', 'Montant insuffisant en caisse. Solde actuel: ' . number_format($currentBalance, 2) . ' Fbu')
-                                ->withInput();
+                    return sendResponse([
+                        'cashRegister' => $cashRegister,
+                    ], 'Cash register closed successfully', 200);
                 }
             }
 
@@ -196,21 +198,25 @@ class CashTransactionController extends Controller
 
             // Redirection selon la source
             if ($request->has('redirect_to_register')) {
-                return redirect()->route('cash-registers.show', $cashRegister)
-                                ->with('success', $message);
+                return sendResponse([
+                    'cashRegister' => $cashRegister,
+                ], 'Cash register closed successfully', 200);
             }
 
-            return redirect()->route('cash-registers.show', $request->cash_register_id)
-                            ->with('success', 'Transaction annulée avec succès.');
+            return sendResponse([
+                'cashRegister' => $cashRegister,
+            ], 'Cash register closed successfully', 200);
 
-            return redirect()->route('cash-transactions.show', $transaction)
-                            ->with('success', $message);
+            return sendResponse([
+                'cashRegister' => $cashRegister,
+            ], 'Cash register closed successfully', 200);
 
         } catch (\Exception $e) {
             DB::rollback();
 
-            return back()->with('error', 'Erreur lors de l\'enregistrement de la transaction: ' . $e->getMessage())
-                        ->withInput();
+            return sendResponse([
+                'cashRegister' => $cashRegister,
+            ], 'Cash register closed successfully', 200);
         }
     }
 
@@ -235,12 +241,12 @@ class CashTransactionController extends Controller
                                         ->orderBy('created_at', 'asc')
                                         ->first();
 
-        return view('cashTransaction.show', compact(
-            'cashTransaction',
-            'balanceAtTransaction',
-            'previousTransaction',
-            'nextTransaction'
-        ));
+        return sendResponse([
+            'cashTransaction' => $cashTransaction,
+            'balanceAtTransaction' => $balanceAtTransaction,
+            'previousTransaction' => $previousTransaction,
+            'nextTransaction' => $nextTransaction
+        ], 'Cash transaction retrieved successfully', 200);
     }
 
     /**
@@ -250,8 +256,9 @@ class CashTransactionController extends Controller
     {
         // Vérifier que la transaction peut être modifiée
         if (!$this->canEditTransaction($cashTransaction)) {
-            return redirect()->route('cash-transactions.show', $cashTransaction)
-                            ->with('error', 'Cette transaction ne peut plus être modifiée.');
+            return sendResponse([
+                'cashTransaction' => $cashTransaction,
+            ], 'Cash transaction retrieved successfully', 200);
         }
 
         $cashTransaction->load(['cashRegister', 'agency']);
@@ -262,11 +269,11 @@ class CashTransactionController extends Controller
 
         $agencies = \App\Models\Agency::all();
 
-        return view('cash-transactions.edit', compact(
-            'cashTransaction',
-            'cashRegisters',
-            'agencies'
-        ));
+        return sendResponse([
+            'cashTransaction' => $cashTransaction,
+            'cashRegisters' => $cashRegisters,
+            'agencies' => $agencies
+        ], 'Cash transaction retrieved successfully', 200);
     }
 
     /**
@@ -276,7 +283,9 @@ class CashTransactionController extends Controller
     {
         // Vérifier que la transaction peut être modifiée
         if (!$this->canEditTransaction($cashTransaction)) {
-            return back()->with('error', 'Cette transaction ne peut plus être modifiée.');
+            return sendResponse([
+                'cashTransaction' => $cashTransaction,
+            ], 'Cash transaction retrieved successfully', 200);
         }
 
         $validator = Validator::make($request->all(), [
@@ -287,7 +296,9 @@ class CashTransactionController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return back()->withErrors($validator)->withInput();
+            return sendResponse([
+                'cashTransaction' => $cashTransaction,
+            ], 'Cash transaction retrieved successfully', 200);
         }
 
         try {
@@ -299,8 +310,9 @@ class CashTransactionController extends Controller
             if ($request->type === 'out') {
                 $currentBalance = $this->calculateCurrentBalance($cashTransaction->cashRegister, $cashTransaction);
                 if ($request->amount > $currentBalance) {
-                    return back()->with('error', 'Montant insuffisant en caisse. Solde disponible: ' . number_format($currentBalance, 2) . ' Fbu')
-                                ->withInput();
+                    return sendResponse([
+                        'cashTransaction' => $cashTransaction,
+                    ], 'Cash transaction retrieved successfully', 200);
                 }
             }
 
@@ -324,14 +336,16 @@ class CashTransactionController extends Controller
 
             DB::commit();
 
-            return redirect()->route('cash-transactions.show', $cashTransaction)
-                            ->with('success', 'Transaction modifiée avec succès.');
+            return sendResponse([
+                'cashTransaction' => $cashTransaction,
+            ], 'Cash transaction retrieved successfully', 200);
 
         } catch (\Exception $e) {
             DB::rollback();
 
-            return back()->with('error', 'Erreur lors de la modification: ' . $e->getMessage())
-                        ->withInput();
+            return sendResponse([
+                'cashTransaction' => $cashTransaction,
+            ], 'Cash transaction retrieved successfully', 200);
         }
     }
 
@@ -342,7 +356,9 @@ class CashTransactionController extends Controller
     {
         // Vérifier que la transaction peut être supprimée
         if (!$this->canDeleteTransaction($cashTransaction)) {
-            return back()->with('error', 'Cette transaction ne peut pas être supprimée.');
+            return sendResponse([
+                'cashTransaction' => $cashTransaction,
+            ], 'Cash transaction retrieved successfully', 200);
         }
 
         try {
@@ -362,13 +378,16 @@ class CashTransactionController extends Controller
 
             DB::commit();
 
-            return redirect()->route('cash-registers.show', $cashRegister)
-                            ->with('success', 'Transaction supprimée avec succès.');
+            return sendResponse([
+                'cashTransaction' => $cashTransaction,
+            ], 'Cash transaction retrieved successfully', 200);
 
         } catch (\Exception $e) {
             DB::rollback();
 
-            return back()->with('error', 'Erreur lors de la suppression: ' . $e->getMessage());
+            return sendResponse([
+                'cashTransaction' => $cashTransaction,
+            ], 'Cash transaction retrieved successfully', 200);
         }
     }
 
@@ -378,7 +397,9 @@ class CashTransactionController extends Controller
     public function cancel(CashTransaction $cashTransaction)
     {
         if (!$this->canCancelTransaction($cashTransaction)) {
-            return back()->with('error', 'Cette transaction ne peut pas être annulée.');
+            return sendResponse([
+                'cashTransaction' => $cashTransaction,
+            ], 'Cash transaction retrieved successfully', 200);
         }
 
         try {
@@ -414,13 +435,16 @@ class CashTransactionController extends Controller
             DB::commit();
 
 
-            return redirect()->route('cash-registers.show', $cashTransaction->cashRegister)
-                            ->with('success', 'Transaction annulée avec succès.');
+            return sendResponse([
+                'cashTransaction' => $cashTransaction,
+            ], 'Cash transaction retrieved successfully', 200);
 
         } catch (\Exception $e) {
             DB::rollback();
 
-            return back()->with('error', 'Erreur lors de l\'annulation: ' . $e->getMessage());
+            return sendResponse([
+                'cashTransaction' => $cashTransaction,
+            ], 'Cash transaction retrieved successfully', 200);
         }
     }
 
@@ -495,7 +519,9 @@ class CashTransactionController extends Controller
             fclose($file);
         };
 
-        return response()->stream($callback, 200, $headers);
+        return sendResponse([
+            'transactions' => $transactions,
+        ], 'Cash transaction retrieved successfully', 200);
     }
 
     /**

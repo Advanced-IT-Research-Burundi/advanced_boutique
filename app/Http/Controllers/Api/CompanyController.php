@@ -5,62 +5,64 @@ namespace App\Http\Controllers\Api;
 use App\Http\Requests\CompanyStoreRequest;
 use App\Http\Requests\CompanyUpdateRequest;
 use App\Models\Company;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\View\View;
 
 class CompanyController extends Controller
 {
-    public function index(Request $request): View
+    public function index(Request $request)
     {
         $companies = Company::all();
 
-        return view('company.index', [
+        return sendResponse([
             'companies' => $companies,
-        ]);
+        ], 'Companies retrieved successfully', 200);
     }
 
-    public function create(Request $request): View
+    public function create(Request $request)
     {
-        return view('company.create');
+        return sendResponse([
+            'companies' => Company::all(),
+        ], 'Company created successfully', 200);
     }
 
-    public function store(CompanyStoreRequest $request): RedirectResponse
+    public function store(CompanyStoreRequest $request)
     {
         $company = Company::create($request->validated());
 
-        $request->session()->flash('company.id', $company->id);
-
-        return redirect()->route('companies.index');
-    }
-
-    public function show(Request $request, Company $company): View
-    {
-        return view('company.show', [
+        return sendResponse([
             'company' => $company,
-        ]);
+        ], 'Company created successfully', 200);
     }
 
-    public function edit(Request $request, Company $company): View
+    public function show(Request $request, Company $company)
     {
-        return view('company.edit', [
+        return sendResponse([
             'company' => $company,
-        ]);
+        ], 'Company retrieved successfully', 200);
     }
 
-    public function update(CompanyUpdateRequest $request, Company $company): RedirectResponse
+    public function edit(Request $request, Company $company)
+    {
+        return sendResponse([
+            'company' => $company,
+        ], 'Company retrieved successfully', 200);
+    }
+
+    public function update(CompanyUpdateRequest $request, Company $company)
     {
         $company->update($request->validated());
 
-        $request->session()->flash('company.id', $company->id);
-
-        return redirect()->route('companies.index');
+        return sendResponse([
+            'company' => $company,
+        ], 'Company updated successfully', 200);
     }
 
-    public function destroy(Request $request, Company $company): RedirectResponse
+    public function destroy(Request $request, Company $company)
     {
         $company->delete();
 
-        return redirect()->route('companies.index');
+        return sendResponse([
+            'company' => $company,
+        ], 'Company deleted successfully', 200);
     }
 }
