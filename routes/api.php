@@ -42,6 +42,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::apiResource('products', ProductController::class);
 
+    Route::post('categories/bulk-delete', [CategoryController::class, 'bulkDelete'])->name('categories.bulk-delete');
+    Route::post('categories/{id}/restore', [CategoryController::class, 'restore'])->name('categories.restore');
+
     Route::prefix('users/{user}/stocks')->name('users.stocks.')->group(function () {
         Route::get('/manage', [UserStockController::class, 'manage']);
         Route::post('/attach', [UserStockController::class, 'attach']);
