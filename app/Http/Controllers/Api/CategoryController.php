@@ -33,21 +33,11 @@ class CategoryController extends Controller
             $perPage = $request->get('perPage', 10);
             $categories = $query->paginate($perPage);
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Catégories récupérées avec succès',
-                'data' => $categories,
-                'error' => null,
-            ]);
+            return sendResponse($categories, 'Catégories récupérées avec succès');
 
         } catch (Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Erreur lors de la récupération des catégories',
-                'data' => null,
-                'error' => $e->getMessage(),
-            ], 500);
-        }
+            return sendError('Erreur lors de la récupération des catégories', 500, $e->getMessage());
+    }
     }
 
     public function store(Request $request): JsonResponse
@@ -59,30 +49,15 @@ class CategoryController extends Controller
             ]);
 
             if ($validator->fails()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Données invalides',
-                    'data' => null,
-                    'error' => $validator->errors(),
-                ], 422);
+                return sendError('Données invalides', 422, $validator->errors());
             }
 
             $category = Category::create($request->validated());
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Catégorie créée avec succès',
-                'data' => $category,
-                'error' => null,
-            ], 201);
+            return sendResponse($category, 'Catégorie créée avec succès', 201);
 
         } catch (Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Erreur lors de la création de la catégorie',
-                'data' => null,
-                'error' => $e->getMessage(),
-            ], 500);
+            return sendError('Erreur lors de la création de la catégorie', 500, $e->getMessage());
         }
     }
 
@@ -91,22 +66,14 @@ class CategoryController extends Controller
         try {
             $category = Category::findOrFail($id);
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Catégorie récupérée avec succès',
-                'data' => $category,
-                'error' => null,
-            ]);
+            return sendResponse($category, 'Catégorie récupérée avec succès');
 
         } catch (Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Catégorie introuvable',
-                'data' => null,
-                'error' => $e->getMessage(),
-            ], 404);
+            return sendError('Catégorie introuvable', 404, $e->getMessage());
         }
     }
+
+
 
     public function update(Request $request, $id): JsonResponse
     {
@@ -119,32 +86,18 @@ class CategoryController extends Controller
             ]);
 
             if ($validator->fails()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Données invalides',
-                    'data' => null,
-                    'error' => $validator->errors(),
-                ], 422);
+                return sendError('Données invalides', 422, $validator->errors());
             }
 
             $category->update($request->validated());
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Catégorie mise à jour avec succès',
-                'data' => $category,
-                'error' => null,
-            ]);
+            return sendResponse($category, 'Catégorie mise à jour avec succès');
 
         } catch (Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Erreur lors de la mise à jour de la catégorie',
-                'data' => null,
-                'error' => $e->getMessage(),
-            ], 500);
+            return sendError('Erreur lors de la mise à jour de la catégorie', 500, $e->getMessage());
         }
     }
+
 
     public function destroy($id): JsonResponse
     {
@@ -152,20 +105,10 @@ class CategoryController extends Controller
             $category = Category::findOrFail($id);
             $category->delete();
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Catégorie supprimée avec succès',
-                'data' => null,
-                'error' => null,
-            ]);
+            return sendResponse(null, 'Catégorie supprimée avec succès');
 
         } catch (Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Erreur lors de la suppression de la catégorie',
-                'data' => null,
-                'error' => $e->getMessage(),
-            ], 500);
+            return sendError('Erreur lors de la suppression de la catégorie', 500, $e->getMessage());
         }
     }
 
@@ -178,30 +121,15 @@ class CategoryController extends Controller
             ]);
 
             if ($validator->fails()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Données invalides',
-                    'data' => null,
-                    'error' => $validator->errors(),
-                ], 422);
+                return sendError('Données invalides', 422, $validator->errors());
             }
 
             $deletedCount = Category::whereIn('id', $request->ids)->delete();
 
-            return response()->json([
-                'success' => true,
-                'message' => "{$deletedCount} catégories supprimées avec succès",
-                'data' => ['deleted_count' => $deletedCount],
-                'error' => null,
-            ]);
+            return sendResponse(null, "{$deletedCount} catégories supprimées avec succès");
 
         } catch (Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Erreur lors de la suppression multiple',
-                'data' => null,
-                'error' => $e->getMessage(),
-            ], 500);
+            return sendError('Erreur lors de la suppression multiple', 500, $e->getMessage());
         }
     }
 
@@ -211,20 +139,31 @@ class CategoryController extends Controller
             $category = Category::onlyTrashed()->findOrFail($id);
             $category->restore();
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Catégorie restaurée avec succès',
-                'data' => $category,
-                'error' => null,
-            ]);
+            return sendResponse(    $category, 'Catégorie restaurée avec succès');
 
         } catch (Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Erreur lors de la restauration',
-                'data' => null,
-                'error' => $e->getMessage(),
-            ], 500);
+            return sendError('Erreur lors de la restauration', 500, $e->getMessage());
+        }
+    }
+
+    public function bulkRestore(Request $request): JsonResponse
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'ids' => 'required|array',
+                'ids.*' => 'exists:categories,id'
+            ]);
+
+            if ($validator->fails()) {
+                return sendError('Données invalides', 422, $validator->errors());
+            }
+
+            $restoredCount = Category::onlyTrashed()->whereIn('id', $request->ids)->restore();
+
+            return sendResponse(null, "{$restoredCount} catégories restaurées avec succès");
+
+        } catch (Exception $e) {
+            return sendError('Erreur lors de la restauration', 500, $e->getMessage());
         }
     }
 }

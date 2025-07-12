@@ -78,7 +78,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::resource('sales', SaleController::class);
     Route::get('/sales/{sale}/pdf', [SaleController::class, 'downloadPDF'])->name('sales.pdf');
     Route::resource('cash-registers', CashRegisterController::class);
-    ;
     Route::post('cash-register/{cashRegister}/close', [CashRegisterController::class, 'close'])->name('cash-register.close');
     Route::resource('cash-transactions', CashTransactionController::class);
     Route::get('cash-transactions/{cashRegister}/export', [CashTransactionController::class, 'export'])->name('cash-transactions.export');
