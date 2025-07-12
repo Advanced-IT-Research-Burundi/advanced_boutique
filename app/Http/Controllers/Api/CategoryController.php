@@ -1,198 +1,231 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers;
 
-use App\Http\Requests\CategoryStoreRequest;
-use App\Http\Requests\CategoryUpdateRequest;
 use App\Models\Category;
-use App\Models\Agency;
-use App\Models\User;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\View\View;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\DB;
+use Exception;
 
 class CategoryController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request): JsonResponse
     {
+        try {
+            $query = Category::query();
 
-        $query = Category::with(['agency', 'createdBy', 'user']);
+            // Recherche
+            if ($request->has('search') && !empty($request->search)) {
+                $search = $request->search;
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                      ->orWhere('description', 'like', "%{$search}%");
+                });
+            }
 
-        // Filtres de recherche
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('description', 'like', "%{$search}%");
-            });
-        }
+            // Tri
+            $sortBy = $request->get('sortBy', 'name');
+            $sortOrder = $request->get('sortOrder', 'asc');
+            $query->orderBy($sortBy, $sortOrder);
 
-        if ($request->filled('agency_id')) {
-            $query->where('agency_id', $request->agency_id);
-        }
+            // Pagination
+            $perPage = $request->get('perPage', 10);
+            $categories = $query->paginate($perPage);
 
-        if ($request->filled('created_by')) {
-            $query->where('created_by', $request->created_by);
-        }
-
-        if ($request->filled('user_id')) {
-            $query->where('user_id', $request->user_id);
-        }
-
-        // Tri par défaut
-        $query->orderBy('created_at', 'desc');
-
-        $categories = $query->paginate(15)->withQueryString();
-
-        // Données pour les filtres
-        $agencies = Agency::latest()->get();
-        $creators = User::latest()->get();
-
-        // If request is json
-        if ($request->wantsJson()) {
             return response()->json([
-                'categories' => $categories,
-                'agencies' => $agencies,
-                'creators' => $creators,
+                'success' => true,
+                'message' => 'Catégories récupérées avec succès',
+                'data' => $categories,
+                'error' => null,
             ]);
+
+        } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur lors de la récupération des catégories',
+                'data' => null,
+                'error' => $e->getMessage(),
+            ], 500);
         }
-
-
-        return view('category.index', compact('categories', 'agencies', 'creators'));
-        // $categories = Category::all();
-
-        // return view('category.index', [
-        //     'categories' => $categories,
-        // ]);
     }
 
-    public function create(Request $request)
+    public function store(Request $request): JsonResponse
     {
-        $agencies = Agency::latest()->get();
-        // if request is json
-        if ($request->wantsJson()) {
-            return response()->json([
-                'agencies' => $agencies,
+        try {
+            $validator = Validator::make($request->all(), [
+                'name' => 'required|string|max:255|unique:categories,name',
+                'description' => 'nullable|string|max:1000',
             ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Données invalides',
+                    'data' => null,
+                    'error' => $validator->errors(),
+                ], 422);
+            }
+
+            $category = Category::create($request->validated());
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Catégorie créée avec succès',
+                'data' => $category,
+                'error' => null,
+            ], 201);
+
+        } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur lors de la création de la catégorie',
+                'data' => null,
+                'error' => $e->getMessage(),
+            ], 500);
         }
-        return view('category.create',compact('agencies'));
     }
 
-    public function store(Request $request)
+    public function show($id): JsonResponse
     {
-        $request->validate([
-            'name' => 'required',
-        ]);
-        $data = $request->all();
-        $data['created_by'] = auth()->user()->id;
-        $data['user_id'] = auth()->user()->id;
+        try {
+            $category = Category::findOrFail($id);
 
-        $category = Category::create($data);
-
-        // Redirect with message success message en francais
-        if ($request->wantsJson()) {
             return response()->json([
-                'message' => 'Categorie cree avec success',
-                'category' => $category,
+                'success' => true,
+                'message' => 'Catégorie récupérée avec succès',
+                'data' => $category,
+                'error' => null,
             ]);
-        }
-        return redirect()->route('categories.index')->with('success', 'Categorie cree avec success');
 
+        } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Catégorie introuvable',
+                'data' => null,
+                'error' => $e->getMessage(),
+            ], 404);
+        }
     }
 
-    public function show(Category $category)
+    public function update(Request $request, $id): JsonResponse
     {
+        try {
+            $category = Category::findOrFail($id);
 
-        $allProducts = $category->products()
-            ->with(['stockProducts'])
-            ->get()
-            ->map(function ($product) {
-                $product->total_stock = $product->stockProducts->sum('quantity');
-                return $product;
-            });
+            $validator = Validator::make($request->all(), [
+                'name' => 'required|string|max:255|unique:categories,name,' . $id,
+                'description' => 'nullable|string|max:1000',
+            ]);
 
-        // Statistiques
-        $totalProducts = $allProducts->count();
-        $productsInStock = $allProducts->filter(function($product) {
-            return $product->total_stock > 0;
-        })->count();
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Données invalides',
+                    'data' => null,
+                    'error' => $validator->errors(),
+                ], 422);
+            }
 
-        $productsLowStock = $allProducts->filter(function($product) {
-            return $product->total_stock > 0 && $product->total_stock <= $product->alert_quantity;
-        })->count();
+            $category->update($request->validated());
 
-        $productsOutOfStock = $allProducts->filter(function($product) {
-            return $product->total_stock <= 0;
-        })->count();
+            return response()->json([
+                'success' => true,
+                'message' => 'Catégorie mise à jour avec succès',
+                'data' => $category,
+                'error' => null,
+            ]);
 
-        $products = $category->products()
-            ->with(['agency', 'createdBy', 'stockProducts.stock', 'stockProducts.agency'])
-            ->paginate(15)
-            ->through(function ($product) {
-                $product->total_stock = $product->stockProducts->sum('quantity');
-                return $product;
-            });
-
-        return view('category.show', compact(
-            'category',
-            'products',
-            'totalProducts',
-            'productsInStock',
-            'productsLowStock',
-            'productsOutOfStock'
-        ));
+        } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur lors de la mise à jour de la catégorie',
+                'data' => null,
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 
-    public function edit(Request $request, Category $category)
+    public function destroy($id): JsonResponse
     {
-        $agencies = Agency::latest()->get();
-        // if request is json
-        if ($request->wantsJson()) {
+        try {
+            $category = Category::findOrFail($id);
+            $category->delete();
+
             return response()->json([
-                'agencies' => $agencies,
-                'category' => $category,
+                'success' => true,
+                'message' => 'Catégorie supprimée avec succès',
+                'data' => null,
+                'error' => null,
             ]);
+
+        } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur lors de la suppression de la catégorie',
+                'data' => null,
+                'error' => $e->getMessage(),
+            ], 500);
         }
-        return view('category.edit', [
-            'category' => $category,
-            'agencies' => $agencies
-        ]);
     }
 
-    public function update(Request $request, Category $category)
+    public function bulkDelete(Request $request): JsonResponse
     {
-
-        $request->validate([
-            'name' => 'required',
-        ]);
-
-
-        $data = $request->all();
-        $data['created_by'] = auth()->user()->id;
-        $data['user_id'] = auth()->user()->id;
-
-        $category->update($data);
-
-        if ($request->wantsJson()) {
-            return response()->json([
-                'message' => 'Categorie mis a jour avec success',
-                'category' => $category,
+        try {
+            $validator = Validator::make($request->all(), [
+                'ids' => 'required|array',
+                'ids.*' => 'exists:categories,id'
             ]);
-        }
-        return redirect()->route('categories.index')->with('success', 'Categorie mis a jour avec success');
 
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Données invalides',
+                    'data' => null,
+                    'error' => $validator->errors(),
+                ], 422);
+            }
+
+            $deletedCount = Category::whereIn('id', $request->ids)->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => "{$deletedCount} catégories supprimées avec succès",
+                'data' => ['deleted_count' => $deletedCount],
+                'error' => null,
+            ]);
+
+        } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur lors de la suppression multiple',
+                'data' => null,
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 
-    public function destroy(Request $request, Category $category)
+    public function restore($id): JsonResponse
     {
-        $category->delete();
+        try {
+            $category = Category::onlyTrashed()->findOrFail($id);
+            $category->restore();
 
-        if ($request->wantsJson()) {
             return response()->json([
-                'message' => 'Categorie supprimee avec success',
-                'category' => $category,
+                'success' => true,
+                'message' => 'Catégorie restaurée avec succès',
+                'data' => $category,
+                'error' => null,
             ]);
+
+        } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur lors de la restauration',
+                'data' => null,
+                'error' => $e->getMessage(),
+            ], 500);
         }
-        return redirect()->route('categories.index');
     }
 }
