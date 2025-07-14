@@ -15,17 +15,17 @@ class ProfileController extends Controller
     /**
      * Display the user's profile form.
      */
-    public function edit(Request $request): View
+    public function edit(Request $request)
     {
-        return view('profile.edit', [
+        return sendResponse([
             'user' => $request->user(),
-        ]);
+        ], 'User retrieved successfully', 200);
     }
 
     /**
      * Update the user's profile information.
      */
-    public function update(ProfileUpdateRequest $request): RedirectResponse
+    public function update(ProfileUpdateRequest $request)
     {
         $request->user()->fill($request->validated());
 
@@ -35,13 +35,15 @@ class ProfileController extends Controller
 
         $request->user()->save();
 
-        return Redirect::route('profile.edit')->with('status', 'profile-updated');
+        return sendResponse([
+            'user' => $request->user(),
+        ], 'User updated successfully', 200);
     }
 
     /**
      * Delete the user's account.
      */
-    public function destroy(Request $request): RedirectResponse
+    public function destroy(Request $request)
     {
         $request->validateWithBag('userDeletion', [
             'password' => ['required', 'current_password'],
@@ -56,7 +58,9 @@ class ProfileController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return Redirect::to('/');
+        return sendResponse([
+            'user' => $user,
+        ], 'User deleted successfully', 200);
     }
     public function updatephoto(Request $request)
     {
@@ -71,6 +75,8 @@ class ProfileController extends Controller
         $user->profile_photo = $request->file('profile_photo')->store('profiles', 'public');
         $user->save();
 
-        return redirect()->route('profile.update')->with('success', 'Utilisateur modifié avec succès.');
+        return sendResponse([
+            'user' => $user,
+        ], 'User updated successfully', 200);
     }
 }
