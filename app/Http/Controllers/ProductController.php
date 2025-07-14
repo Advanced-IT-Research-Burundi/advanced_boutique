@@ -44,13 +44,7 @@ class ProductController extends Controller
         $categories = Category::orderBy('name')->get();
         $agencies = Agency::orderBy('name')->get();
 
-        // return json if api request
-        if ($request->wantsJson()) {
-            return response()->json([
-                'success' => true,
-                'data' => $products
-            ]);
-        }
+
 
         return view('product.index', compact('products', 'categories', 'agencies'));
     }
@@ -59,13 +53,7 @@ class ProductController extends Controller
     {
         $product->load(['category', 'agency', 'createdBy', 'user']);
 
-        // return json if api request
-        if ($request->wantsJson()) {
-            return response()->json([
-                'success' => true,
-                'data' => $product
-            ]);
-        }
+
 
         return view('product.show', compact('product'));
     }
@@ -78,13 +66,7 @@ class ProductController extends Controller
 
         $selectedCategoryId = $request->query('category_id');
 
-        // return json if api request
-        if ($request->wantsJson()) {
-            return response()->json([
-                'success' => true,
-                'data' => $product
-            ]);
-        }
+
 
         return view('product.create', compact('categories', 'stocks', 'selectedCategoryId'));
     }
@@ -127,7 +109,8 @@ class ProductController extends Controller
             $product->category_id = $validated['category_id'];
             $product->description = $validated['description'];
             $product->purchase_price = $validated['purchase_price'];
-            $product->sale_price = $validated['sale_price'];
+            $product->sale_price_ht = $validated['sale_price'];
+            $product->sale_price_ttc = $validated['sale_price'];
             $product->unit = $validated['unit'];
             $product->alert_quantity = $validated['alert_quantity'];
             $product->image = $imagePath;
@@ -136,8 +119,15 @@ class ProductController extends Controller
 
             // Créer l'entrée dans la table pivot stock_products
             $product->stocks()->attach($validated['stock_id'], [
-                'quantity' => 0, // Initialiser la quantité à 0
+                'product_name' => $product->name,
+                'price' => $product->sale_price_ttc,
+                'purchase_price' => $product->purchase_price,
+                'sale_price_ht' => $product->sale_price_ht,
+                'sale_price_ttc' => $product->sale_price_ttc,
                 'agency_id' => Auth::user()->agency_id,
+                'category_id' => $product->category_id,
+                'user_id' => Auth::id(),
+                'quantity' => 0, // Initialiser la quantité à 0
             ]);
 
             DB::commit();
@@ -176,12 +166,7 @@ class ProductController extends Controller
         $currentQuantity = $stockProduct ? $stockProduct->pivot->quantity : 0;
 
         // return json if api request
-        if ($request->wantsJson()) {
-            return response()->json([
-                'success' => true,
-                'data' => $product
-            ]);
-        }
+
 
         return view('product.edit', compact(
             'product',
@@ -210,6 +195,8 @@ class ProductController extends Controller
             'stock_id' => 'required|exists:stocks,id',
             // 'quantity' => 'required|numeric|min:0',
         ]);
+        $validated['sale_price_ttc'] = $validated['sale_price'];
+        $validated['sale_price_ht'] = $validated['sale_price'] ;
 
         DB::beginTransaction();
 
@@ -237,18 +224,46 @@ class ProductController extends Controller
                 'category_id' => $validated['category_id'],
                 'description' => $validated['description'],
                 'purchase_price' => $validated['purchase_price'],
-                'sale_price' => $validated['sale_price'],
+                'sale_price_ht' => $validated['sale_price'],
+                'sale_price_ttc' => $validated['sale_price'],
                 'unit' => $validated['unit'],
                 'alert_quantity' => $validated['alert_quantity'],
                 'image' => $imagePath,
             ]);
 
-            // Mettre à jour ou créer l'entrée dans la table pivot
-            $product->stocks()->wherePivot('agency_id', Auth::user()->agency_id)->detach();
-            $product->stocks()->attach($validated['stock_id'], [
-                'quantity' => 0,
-                'agency_id' => Auth::user()->agency_id,
-            ]);
+                // Recuper la quantite de la table pivot , le supprimer et recréer l'entrée dans la table pivot
+                $stockProduct = $product->stockProducts()->first();
+                $currentQuantity = $stockProduct ? $stockProduct->quantity : 0;
+                // dd($currentQuantity);
+                // Supprimer l'entrée existante dans la table pivot
+                if ($stockProduct) {
+                    $product->stocks()->wherePivot('agency_id', Auth::user()->agency_id)->detach();
+
+                    $product->stocks()->attach($validated['stock_id'], [
+                    'product_name' => $product->name,
+                    'price' => $product->sale_price_ttc,
+                    'quantity' => $currentQuantity,
+                    'purchase_price' => $product->purchase_price,
+                    'sale_price_ht' => $product->sale_price_ht,
+                    'sale_price_ttc' => $product->sale_price_ttc,
+                    'agency_id' => Auth::user()->agency_id,
+                    'category_id' => $product->category_id,
+                    'user_id' => Auth::id(),
+                ]);
+            } else {
+                $product->stocks()->attach($validated['stock_id'], [
+                    'product_name' => $product->name,
+                    'price' => $product->sale_price_ttc,
+                    'quantity' => 0,
+                    'purchase_price' => $product->purchase_price,
+                    'sale_price_ht' => $product->sale_price_ht,
+                    'sale_price_ttc' => $product->sale_price_ttc,
+                    'agency_id' => Auth::user()->agency_id,
+                    'category_id' => $product->category_id,
+                    'user_id' => Auth::id(),
+                ]);
+            }
+
 
             DB::commit();
 
@@ -271,13 +286,7 @@ class ProductController extends Controller
 
         $product->delete();
 
-        // return json if api request
-        if ($request->wantsJson()) {
-            return response()->json([
-                'success' => true,
-                'data' => $product
-            ]);
-        }
+
 
         return redirect()->route('products.index')
                         ->with('success', 'Produit supprimé avec succès.');

@@ -59,7 +59,7 @@
                                     </thead>
                                     <tbody>
                                         @foreach ($recentProducts as $stockProduct)
-                                            {{-- {{$stockProduct}} --}}
+                                          @if ($stockProduct->product)
                                             <tr>
                                                 <td>
                                                     <div class="d-flex align-items-center">
@@ -109,6 +109,7 @@
                                                     </div>
                                                 </td>
                                             </tr>
+                                            @endif
                                         @endforeach
                                     </tbody>
                                 </table>
