@@ -57,13 +57,13 @@ class ProformaController extends Controller
         $totalDue = Proforma::sum('due_amount');
         $todayProformas = Proforma::whereDate('created_at', today())->count();
 
-        return view('proforma.index', compact(
-            'proformas',
-            'totalRevenue',
-            'paidProformas',
-            'totalDue',
-            'todayProformas'
-        ));
+        return  sendResponse([
+            'proformas' => $proformas,
+            'totalRevenue' => $totalRevenue,
+            'paidProformas' => $paidProformas,
+            'totalDue' => $totalDue,
+            'todayProformas' => $todayProformas
+        ], 'Proformas retrieved successfully', 200);
     }
 
     public function show(Proforma $proforma)
@@ -76,44 +76,54 @@ class ProformaController extends Controller
         // Decode client data
         $client = json_decode($proforma->client, true) ?? [];
 
-        return view('proforma.show', compact('proforma', 'items', 'client'));
+        return sendResponse([
+            'proforma' => $proforma,
+            'items' => $items,
+            'client' => $client
+        ], 'Proforma retrieved successfully', 200);
     }
 
-    public function create(Request $request): Response
+    public function create(Request $request)
     {
-        return view('proforma.create');
+        return sendResponse([
+            'proforma' => new Proforma(),
+        ], 'Proforma created successfully', 200);
     }
 
-    public function store(ProformaStoreRequest $request): Response
+    public function store(ProformaStoreRequest $request)
     {
         $proforma = Proforma::create($request->validated());
 
-        $request->session()->flash('proforma.id', $proforma->id);
-
-        return redirect()->route('proformas.index');
-    }
-
-    public function edit(Request $request, Proforma $proforma): Response
-    {
-        return view('proforma.edit', [
+        return sendResponse([
             'proforma' => $proforma,
-        ]);
+        ], 'Proforma created successfully', 200);
     }
 
-    public function update(ProformaUpdateRequest $request, Proforma $proforma): Response
+    public function edit(Request $request, Proforma $proforma)
+    {
+        return sendResponse([
+            'proforma' => $proforma,
+        ], 'Proforma edited successfully', 200);
+    }
+
+    public function update(ProformaUpdateRequest $request, Proforma $proforma)
     {
         $proforma->update($request->validated());
 
-        $request->session()->flash('proforma.id', $proforma->id);
-
-        return redirect()->route('proformas.index');
+        return sendResponse([
+            'proforma' => $proforma,
+        ], 'Proforma updated successfully', 200);
     }
 
-    public function destroy(Request $request, Proforma $proforma): Response
+
+
+    public function destroy(Request $request, Proforma $proforma)
     {
         $proforma->delete();
 
-        return redirect()->route('proformas.index');
+        return sendResponse([
+            'proforma' => $proforma,
+        ], 'Proforma deleted successfully', 200);
     }
 
     public function validateProforma(Proforma $proforma)
@@ -163,17 +173,15 @@ class ProformaController extends Controller
 
             \DB::commit();
 
-            return redirect()->route('sales.show', $sale->id)
-                ->with('success', 'Proforma validée et convertie en vente avec succès.');
+            return sendResponse([
+                'sale' => $sale,
+            ], 'Proforma validée et convertie en vente avec succès.', 200);
 
         } catch (\Exception $e) {
             \DB::rollBack();
             \Log::error('Erreur lors de la validation du proforma: ' . $e->getMessage());
 
-            return response()->json([
-                'success' => false,
-                'message' => 'Erreur lors de la validation du proforma: ' . $e->getMessage()
-            ], 500);
+            return sendError('Erreur lors de la validation du proforma: ' . $e->getMessage());
         }
     }
 }

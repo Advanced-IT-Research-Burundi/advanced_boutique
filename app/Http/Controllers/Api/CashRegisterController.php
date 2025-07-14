@@ -128,7 +128,8 @@ class CashRegisterController extends Controller
             'totalIn' => $totalIn,
             'totalOut' => $totalOut,
             'currentBalance' => $currentBalance
-        ));
+        ])
+        ;
     }
 
     public function edit(CashRegister $cashRegister)
