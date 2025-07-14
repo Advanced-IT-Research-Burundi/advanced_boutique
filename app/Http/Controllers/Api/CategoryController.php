@@ -6,7 +6,6 @@ use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\DB;
 use Exception;
 
 class CategoryController extends Controller
@@ -40,8 +39,9 @@ class CategoryController extends Controller
     }
     }
 
-    public function store(Request $request): JsonResponse
+    public function store(Request $request)
     {
+
         try {
             $validator = Validator::make($request->all(), [
                 'name' => 'required|string|max:255|unique:categories,name',
@@ -52,7 +52,12 @@ class CategoryController extends Controller
                 return sendError('Données invalides', 422, $validator->errors());
             }
 
-            $category = Category::create($request->validated());
+            $category = Category::create(
+                $validator->validated()
+                + [
+                    'created_by' => auth()->id(),
+                ]
+            );
 
             return sendResponse($category, 'Catégorie créée avec succès', 201);
 
@@ -61,7 +66,7 @@ class CategoryController extends Controller
         }
     }
 
-    public function show($id): JsonResponse
+    public function show($id)
     {
         try {
             $category = Category::findOrFail($id);
@@ -75,7 +80,7 @@ class CategoryController extends Controller
 
 
 
-    public function update(Request $request, $id): JsonResponse
+    public function update(Request $request, $id)
     {
         try {
             $category = Category::findOrFail($id);
@@ -89,7 +94,7 @@ class CategoryController extends Controller
                 return sendError('Données invalides', 422, $validator->errors());
             }
 
-            $category->update($request->validated());
+            $category->update($validator->validated());
 
             return sendResponse($category, 'Catégorie mise à jour avec succès');
 
@@ -99,7 +104,7 @@ class CategoryController extends Controller
     }
 
 
-    public function destroy($id): JsonResponse
+    public function destroy($id)
     {
         try {
             $category = Category::findOrFail($id);
@@ -112,7 +117,7 @@ class CategoryController extends Controller
         }
     }
 
-    public function bulkDelete(Request $request): JsonResponse
+    public function bulkDelete(Request $request)
     {
         try {
             $validator = Validator::make($request->all(), [
@@ -124,7 +129,7 @@ class CategoryController extends Controller
                 return sendError('Données invalides', 422, $validator->errors());
             }
 
-            $deletedCount = Category::whereIn('id', $request->ids)->delete();
+            $deletedCount = Category::whereIn('id', $validator->validated()->ids)->delete();
 
             return sendResponse(null, "{$deletedCount} catégories supprimées avec succès");
 
@@ -133,7 +138,7 @@ class CategoryController extends Controller
         }
     }
 
-    public function restore($id): JsonResponse
+    public function restore($id)
     {
         try {
             $category = Category::onlyTrashed()->findOrFail($id);
@@ -146,7 +151,7 @@ class CategoryController extends Controller
         }
     }
 
-    public function bulkRestore(Request $request): JsonResponse
+    public function bulkRestore(Request $request)
     {
         try {
             $validator = Validator::make($request->all(), [
@@ -158,7 +163,7 @@ class CategoryController extends Controller
                 return sendError('Données invalides', 422, $validator->errors());
             }
 
-            $restoredCount = Category::onlyTrashed()->whereIn('id', $request->ids)->restore();
+            $restoredCount = Category::onlyTrashed()->whereIn('id', $validator->validated()->ids)->restore();
 
             return sendResponse(null, "{$restoredCount} catégories restaurées avec succès");
 
