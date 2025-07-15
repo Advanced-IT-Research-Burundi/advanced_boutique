@@ -203,7 +203,7 @@
                     <td class="text-center">{{ $product->product->category->name ?? 'N/A' }}</td>
                     <td class="product-name">{{ $product->product->name ?? 'N/A' }}</td>
                     <td class="text-center">{{ number_format($product->quantity, 0, ',', ' ') }}</td>
-                    <td class="text-right amount">{{ number_format($product->sale_price_ttc, 0, ',', ' ') }} €</td>
+                    <td class="text-right amount">{{ number_format($product->sale_price_ttc, 0, ',', ' ') }} BIF</td>
                     <td class="text-right amount">{{ number_format($stockValue, 0, ',', ' ') }} BIF</td>
                     <td class="text-center date-cell">{{ \Carbon\Carbon::parse($product->created_at)->format('d/m/Y H:i') }}</td>
                 </tr>
