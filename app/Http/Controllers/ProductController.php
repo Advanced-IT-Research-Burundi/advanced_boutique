@@ -192,7 +192,7 @@ class ProductController extends Controller
             'unit' => 'required|string|max:50',
             'alert_quantity' => 'required|numeric|min:0',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'stock_id' => 'required|exists:stocks,id',
+            // 'stock_id' => 'required|exists:stocks,id',
             // 'quantity' => 'required|numeric|min:0',
         ]);
         $validated['sale_price_ttc'] = $validated['sale_price'];
@@ -201,11 +201,6 @@ class ProductController extends Controller
         DB::beginTransaction();
 
         try {
-            // Vérifier que le stock appartient à la même agence que l'utilisateur
-            $stock = Stock::findOrFail($validated['stock_id']);
-            if ($stock->agency_id !== Auth::user()->agency_id) {
-                return back()->withErrors(['stock_id' => 'Vous ne pouvez pas modifier ce produit dans ce stock.']);
-            }
 
             // Traitement de l'image
             $imagePath = $product->image;
@@ -217,7 +212,7 @@ class ProductController extends Controller
                 $imagePath = $request->file('image')->store('products', 'public');
             }
 
-            // Mettre à jour le produit
+          // Mettre à jour le produit
             $product->update([
                 'code' => $validated['code'],
                 'name' => $validated['name'],
@@ -231,30 +226,15 @@ class ProductController extends Controller
                 'image' => $imagePath,
             ]);
 
-                // Recuper la quantite de la table pivot , le supprimer et recréer l'entrée dans la table pivot
-                $stockProduct = $product->stockProducts()->first();
-                $currentQuantity = $stockProduct ? $stockProduct->quantity : 0;
-                // dd($currentQuantity);
-                // Supprimer l'entrée existante dans la table pivot
-                if ($stockProduct) {
-                    $product->stocks()->wherePivot('agency_id', Auth::user()->agency_id)->detach();
+            $linkedStocks = $product->stocks()->withPivot('quantity')->get();
 
-                    $product->stocks()->attach($validated['stock_id'], [
+            foreach ($linkedStocks as $stock) {
+                $product->stocks()->detach($stock->id);
+
+                $product->stocks()->attach($stock->id, [
                     'product_name' => $product->name,
                     'price' => $product->sale_price_ttc,
-                    'quantity' => $currentQuantity,
-                    'purchase_price' => $product->purchase_price,
-                    'sale_price_ht' => $product->sale_price_ht,
-                    'sale_price_ttc' => $product->sale_price_ttc,
-                    'agency_id' => Auth::user()->agency_id,
-                    'category_id' => $product->category_id,
-                    'user_id' => Auth::id(),
-                ]);
-            } else {
-                $product->stocks()->attach($validated['stock_id'], [
-                    'product_name' => $product->name,
-                    'price' => $product->sale_price_ttc,
-                    'quantity' => 0,
+                    'quantity' => $stock->pivot->quantity,
                     'purchase_price' => $product->purchase_price,
                     'sale_price_ht' => $product->sale_price_ht,
                     'sale_price_ttc' => $product->sale_price_ttc,
@@ -271,15 +251,15 @@ class ProductController extends Controller
                             ->with('success', 'Produit mis à jour avec succès.');
 
         } catch (\Exception $e) {
+            dd($e);
             DB::rollback();
 
-            return back()->withErrors(['error' => 'Une erreur est survenue lors de la mise à jour du produit.'])
+            return back()->with('error', 'Une erreur est survenue lors de la mise à jour du produit.')
                         ->withInput();
         }
     }
     public function destroy(Product $product)
     {
-        // Supprimer l'image si elle existe
         if ($product->image) {
             Storage::disk('public')->delete($product->image);
         }

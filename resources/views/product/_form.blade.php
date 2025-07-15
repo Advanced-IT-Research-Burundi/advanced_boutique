@@ -174,7 +174,7 @@
     </div>
 
     <!-- Stock et Quantité -->
-    <div class="col-md-6 mb-3">
+    {{-- <div class="col-md-6 mb-3">
         <label for="stock_id" class="form-label">
             <i class="bi bi-archive me-1"></i>
             Stock <span class="text-danger">*</span>
@@ -194,7 +194,7 @@
         @error('stock_id')
             <div class="invalid-feedback">{{ $message }}</div>
         @enderror
-    </div>
+    </div> --}}
 
     {{-- <div class="col-md-12 mb-3">
         <label for="quantity" class="form-label">
