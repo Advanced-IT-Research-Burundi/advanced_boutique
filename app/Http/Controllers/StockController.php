@@ -19,7 +19,10 @@ class StockController extends Controller
      public function exportToPdf($stock)
      {
 
-        $stockProducts = StockProduct::with(['product'])->where('stock_id', $stock)->get();
+        $stockProducts = StockProduct::with(['product'])
+        ->where('stock_id', $stock)
+        ->where('quantity', '>', 0)
+        ->get();
 
 
 
