@@ -72,16 +72,8 @@ class AddProductStock extends Component
 
         public function exportToPdf()
         {
-            $stockProducts = StockProduct::with(['product'])->where('stock_id', $this->stock->id)->get();
-            $pdf = PDF::loadView('exports.stock-product-pdf', compact('stockProducts'))
-            ->setPaper('a4', 'landscape');
-            $filename = 'stock_' . preg_replace('/[^A-Za-z0-9\-_]/', '_', $this->stock->name) . '.pdf';
 
-            return response()->streamDownload(function () use ($pdf) {
-                echo $pdf->output();
-            }, $filename, [
-                'Content-Type' => 'application/pdf',
-            ]);
+            return redirect()->route('stock.export.pdf', ['stock' => $this->stock->id]);
 
         }
 
