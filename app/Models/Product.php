@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\URL;
 
 class Product extends Model
 {
@@ -136,5 +138,10 @@ class Product extends Model
     public function getAvailableStockAttribute()
     {
         return \App\Models\StockProduct::where('product_id', $this->id)->sum('quantity') ?? 0;
+    }
+
+    public function getImageAttribute($value)
+    {
+        return $value ? URL::to('/') .Storage::url($value) : null;
     }
 }
