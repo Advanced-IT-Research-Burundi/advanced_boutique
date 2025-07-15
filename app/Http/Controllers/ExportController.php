@@ -22,7 +22,10 @@ class ExportController extends Controller
         // Stock ID
         $stockId = $data['stock_id'];
 
-        $stockProducts = StockProduct::with(['product'])->where('stock_id', $stockId)->get();
+        $stockProducts = StockProduct::with(['product'])
+        ->where('stock_id', $stockId)
+        ->where('quantity', '>', 0)
+        ->get();
 
         $data = [];
         // Add Header

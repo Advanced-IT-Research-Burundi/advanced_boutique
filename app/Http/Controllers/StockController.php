@@ -24,8 +24,6 @@ class StockController extends Controller
         ->where('quantity', '>', 0)
         ->get();
 
-
-
         $pdf = Pdf::loadView('exports.stock-product-pdf', compact('stockProducts'))
         ->setPaper('a4', 'landscape');
         $filename = 'stock_' . preg_replace('/[^A-Za-z0-9\-_]/', '_', $stockProducts->first()->stock->name) . '.pdf';
