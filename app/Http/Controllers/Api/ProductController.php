@@ -44,11 +44,8 @@ class ProductController extends Controller
         $categories = Category::orderBy('name')->get();
         $agencies = Agency::orderBy('name')->get();
 
-        return sendResponse([
-            'products' => $products,
-            'categories' => $categories,
-            'agencies' => $agencies
-        ], 'Products retrieved successfully', 200);
+        return sendResponse($products, 'Produits récupérés avec succès');
+
     }
 
     public function show(Product $product)
