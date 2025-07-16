@@ -23,9 +23,7 @@ class ProductController extends Controller
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                ->orWhere('code', 'like', "%{$search}%")
-                ->orWhere('description', 'like', "%{$search}%")
-                ->orWhere('unit', 'like', "%{$search}%");
+                ->orWhere('code', 'like', "%{$search}%");
             });
         }
 
@@ -37,15 +35,30 @@ class ProductController extends Controller
             $query->where('agency_id', $request->agency_id);
         }
 
+        // Gestion du tri
+        $sortField = $request->get('sort', 'created_at');
+        $sortOrder = $request->get('order', 'desc');
+        $allowedSortFields = ['id', 'name', 'unit', 'sale_price_ttc', 'sale_price', 'created_at', 'updated_at'];
+        if (!in_array($sortField, $allowedSortFields)) {
+            $sortField = 'created_at';
+        }
 
-        $products = $query->orderBy('created_at', 'desc')->paginate(15);
+        $sortOrder = in_array(strtolower($sortOrder), ['asc', 'desc']) ? strtolower($sortOrder) : 'desc';
 
-        // Données pour les filtres
+
+
+        $query->orderBy($sortField, $sortOrder);
+
+        $perPage = $request->get('per_page', 10);
+        $perPage = in_array($perPage, [5, 10, 25, 50, 100]) ? $perPage : 10;
+
+        $products = $query->paginate($perPage);
+
+
         $categories = Category::orderBy('name')->get();
         $agencies = Agency::orderBy('name')->get();
 
         return sendResponse($products, 'Produits récupérés avec succès');
-
     }
 
     public function show(Product $product)
@@ -57,7 +70,6 @@ class ProductController extends Controller
         ], 'Product retrieved successfully', 200);
     }
 
-
     public function create(Request $request)
     {
         $categories = Category::latest()->get();
@@ -65,14 +77,12 @@ class ProductController extends Controller
 
         $selectedCategoryId = $request->query('category_id');
 
-        // return json if api request
         return sendResponse([
             'categories' => $categories,
             'stocks' => $stocks,
             'selectedCategoryId' => $selectedCategoryId
         ], 'Product retrieved successfully', 200);
     }
-
 
     /**
     * Store a newly created resource in storage.
@@ -90,15 +100,11 @@ class ProductController extends Controller
             'alert_quantity' => 'required|numeric|min:0',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'stock_id' => 'required|exists:stocks,id',
-            // 'quantity' => 'required|numeric|min:0',
         ]);
-
 
         DB::beginTransaction();
 
         try {
-
-
             // Traitement de l'image
             $imagePath = null;
             if ($request->hasFile('image')) {
@@ -132,7 +138,6 @@ class ProductController extends Controller
             ], 'Produit créé avec succès', 201);
 
         } catch (\Exception $e) {
-            dd($e);
             DB::rollback();
 
             // Supprimer l'image si elle a été uploadée
@@ -182,7 +187,6 @@ class ProductController extends Controller
             'alert_quantity' => 'required|numeric|min:0',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'stock_id' => 'required|exists:stocks,id',
-            // 'quantity' => 'required|numeric|min:0',
         ]);
 
         DB::beginTransaction();
@@ -191,7 +195,7 @@ class ProductController extends Controller
             // Vérifier que le stock appartient à la même agence que l'utilisateur
             $stock = Stock::findOrFail($validated['stock_id']);
             if ($stock->agency_id !== Auth::user()->agency_id) {
-                return back()->withErrors(['stock_id' => 'Vous ne pouvez pas modifier ce produit dans ce stock.']);
+                return sendError('Vous ne pouvez pas modifier ce produit dans ce stock.', 403);
             }
 
             // Traitement de l'image
@@ -236,6 +240,7 @@ class ProductController extends Controller
             return sendError('Une erreur est survenue lors de la mise à jour du produit.' . $e->getMessage(), 400);
         }
     }
+
     public function destroy(Product $product)
     {
         // Supprimer l'image si elle existe
@@ -248,24 +253,5 @@ class ProductController extends Controller
         return sendResponse([
             'product' => $product
         ], 'Produit supprimé avec succès', 200);
-    }
-
-    public function multDestroy(Request $request)
-    {
-        $productIds = $request->input('product_ids', []);
-
-        if (empty($productIds)) {
-            return sendError('Aucun produit sélectionné.');
-        }
-
-        try {
-            Product::whereIn('id', $productIds)->delete();
-
-            return sendResponse([
-                'products' => $productIds
-            ], 'Produits supprimés avec succès.', 200);
-        } catch (\Exception $e) {
-            return sendError('Une erreur est survenue lors de la suppression des produits.');
-        }
     }
 }

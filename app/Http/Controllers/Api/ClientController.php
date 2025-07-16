@@ -43,11 +43,12 @@ class ClientController extends Controller
             $query->where('created_by', $request->created_by);
         }
 
-        $clients = $query->latest()->paginate(15);
+        $perPage = $request->get('perPage', 10);
+        $clients = $query->latest()->paginate($perPage);
         $agencies = Agency::all();
         $creators = User::all();
 
-        return view('client.index', compact('clients', 'agencies', 'creators'));
+        return sendResponse($clients, 'Clients récupérés avec succès');
     }
 
     public function create()

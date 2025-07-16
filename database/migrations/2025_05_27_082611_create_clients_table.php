@@ -18,7 +18,6 @@ return new class extends Migration
             $table->string('patient_type')->default('physique');
             $table->string('nif')->nullable();
             $table->string('societe')->nullable();
-
             $table->string('name');
             $table->string('first_name')->nullable();
             $table->string('last_name')->nullable();
