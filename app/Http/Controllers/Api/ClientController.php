@@ -85,6 +85,7 @@ class ClientController extends Controller
 
     public function show(Client $client)
     {
+        
         if (!$client) {
             return sendError('Client non trouvé', 404);
         }
