@@ -85,6 +85,9 @@ class ClientController extends Controller
 
     public function show(Client $client)
     {
+        if (!$client) {
+            return sendError('Client non trouvé', 404);
+        }
         $client->load(['agency', 'createdBy']);
 
         return sendResponse($client, 'Client rencontré avec succès');
