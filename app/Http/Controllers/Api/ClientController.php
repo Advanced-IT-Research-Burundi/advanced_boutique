@@ -86,7 +86,8 @@ class ClientController extends Controller
     public function show(Client $client)
     {
         $client->load(['agency', 'createdBy']);
-        return view('client.show', compact('client'));
+
+        return sendResponse($client, 'Client rencontré avec succès');
     }
 
     public function edit(Client $client)
