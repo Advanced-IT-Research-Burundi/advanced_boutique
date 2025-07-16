@@ -51,17 +51,12 @@ class ClientController extends Controller
         return sendResponse($clients, 'Clients récupérés avec succès');
     }
 
-    public function create()
-    {
-        $agencies = Agency::all();
-        return view('client.create', compact('agencies'));
-    }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
             'patient_type' => 'required|in:physique,morale',
-            'name' => 'required|string|max:255',
+            'name' => 'nullable|string|max:255',
             'first_name' => 'nullable|string|max:255',
             'last_name' => 'nullable|string|max:255',
             'nif' => 'nullable|string|max:255',
@@ -77,28 +72,17 @@ class ClientController extends Controller
         $validated['balance'] = $validated['balance'] ?? 0;
         $validated['agency_id'] = auth()->user()->agency_id ?? 1;
 
-        Client::create($validated);
-
-        return redirect()->route('clients.index')
-            ->with('success', 'Client créé avec succès.');
+        $client = Client::create($validated);
+        return sendResponse($client, 'Client créé avec succès', 201);
     }
 
     public function show(Client $client)
     {
-        
-        if (!$client) {
-            return sendError('Client non trouvé', 404);
-        }
         $client->load(['agency', 'createdBy']);
 
         return sendResponse($client, 'Client rencontré avec succès');
     }
 
-    public function edit(Client $client)
-    {
-        $agencies = Agency::all();
-        return view('client.edit', compact('client', 'agencies'));
-    }
 
     public function update(Request $request, Client $client)
     {
@@ -118,15 +102,14 @@ class ClientController extends Controller
 
         $client->update($validated);
 
-        return redirect()->route('clients.index')
-            ->with('success', 'Client mis à jour avec succès.');
+        return sendResponse($client, 'Client mis à jour avec succès');
     }
 
     public function destroy(Client $client)
     {
         $client->delete();
 
-        return redirect()->route('clients.index')
-            ->with('success', 'Client supprimé avec succès.');
+        return sendResponse(null, 'Client supprimé avec succès');
+
     }
 }

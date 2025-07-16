@@ -14,170 +14,115 @@ use Illuminate\Support\Facades\Auth;
 
 class PurchaseController extends Controller
 {
-    public function index()
+    /**
+     * Liste des achats
+     */
+    public function index(Request $request)
     {
-        $purchases = Purchase::with(['supplier', 'stock', 'agency', 'createdBy'])
-            ->orderBy('created_at', 'desc')
-            ->paginate(10);
+        $query = Purchase::query()->with(['supplier', 'stock']);
 
-        return view('purchase.index', compact('purchases'));
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $query->where(function ($q) use ($search) {
+                $q->where('total_amount', 'like', "%$search%")
+                    ->orWhere('paid_amount', 'like', "%$search%")
+                    ->orWhere('due_amount', 'like', "%$search%");
+            });
+        }
+
+        if ($request->filled('supplier_id')) {
+            $query->where('supplier_id', $request->input('supplier_id'));
+        }
+
+        if ($request->filled('stock_id')) {
+            $query->where('stock_id', $request->input('stock_id'));
+        }
+
+        $purchases = $query->orderByDesc('purchase_date')->paginate(15);
+
+        return sendResponse($purchases, 'Liste des achats récupérée avec succès');
     }
 
-    public function create()
-    {
-        $suppliers = Supplier::all();
-        $stocks = Stock::all();
-        $products = Product::with('category')->get();
-        $agencies = Agency::all();
-
-        return view('purchase.create', compact('suppliers', 'stocks', 'products', 'agencies'));
-    }
-
+    /**
+     * Créer un nouvel achat
+     */
     public function store(Request $request)
     {
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'supplier_id' => 'required|exists:suppliers,id',
             'stock_id' => 'required|exists:stocks,id',
+            'total_amount' => 'required|numeric|min:0',
+            'paid_amount' => 'required|numeric|min:0',
+            'due_amount' => 'required|numeric|min:0',
             'purchase_date' => 'required|date',
-            'items' => 'required|array|min:1',
-            'items.*.product_id' => 'required|exists:products,id',
-            'items.*.quantity' => 'required|numeric|min:1',
-            'items.*.purchase_price' => 'required|numeric|min:0',
         ]);
 
-        DB::transaction(function () use ($request) {
-            // Calculate totals
-            $totalAmount = 0;
-            foreach ($request->items as $item) {
-                $totalAmount += $item['quantity'] * $item['purchase_price'];
-            }
+        if ($validator->fails()) {
+            return sendError('Erreur de validation', 422, $validator->errors());
+        }
 
-            $paidAmount = $request->paid_amount ?? 0;
-            $dueAmount = $totalAmount - $paidAmount;
+        // Vérifier que paid_amount + due_amount = total_amount
+        $data = $validator->validated();
+        if (abs(($data['paid_amount'] + $data['due_amount']) - $data['total_amount']) > 0.01) {
+            return sendError('Les montants ne correspondent pas au total.', 422);
+        }
 
-            // Create purchase
-            $purchase = Purchase::create([
-                'supplier_id' => $request->supplier_id,
-                'stock_id' => $request->stock_id,
-                'total_amount' => $totalAmount,
-                'paid_amount' => $paidAmount,
-                'due_amount' => $dueAmount,
-                'purchase_date' => $request->purchase_date,
-                'agency_id' => $request->agency_id,
-                'created_by' => Auth::id(),
-            ]);
+        $purchase = Purchase::create($data);
 
-            // Create purchase items
-            foreach ($request->items as $item) {
-                $subtotal = $item['quantity'] * $item['purchase_price'];
-
-                PurchaseItem::create([
-                    'purchase_id' => $purchase->id,
-                    'product_id' => $item['product_id'],
-                    'quantity' => $item['quantity'],
-                    'purchase_price' => $item['purchase_price'],
-                    'subtotal' => $subtotal,
-                    'agency_id' => $request->agency_id,
-                    'created_by' => Auth::id(),
-                ]);
-            }
-        });
-
-        return redirect()->route('purchases.index')
-            ->with('success', 'Achat créé avec succès!');
+        return sendResponse($purchase, 'Achat créé avec succès', 201);
     }
 
+    /**
+     * Afficher un achat
+     */
     public function show(Purchase $purchase)
     {
-        $purchase->load(['supplier', 'stock', 'agency', 'createdBy', 'purchaseItems.product']);
-
-        return view('purchase.show', compact('purchase'));
+        return sendResponse($purchase->load(['supplier', 'stock']), 'Détail de l\'achat récupéré avec succès');
     }
 
-    public function edit(Purchase $purchase)
-    {
-        // dd($purchase->purchaseItems);
-        // $purchase->load('purchaseItems.product');
-        $suppliers = Supplier::all();
-        $stocks = Stock::all();
-        $products = Product::with('category')->get();
-        $agencies = Agency::all();
-
-        return view('purchase.edit', compact('purchase', 'suppliers', 'stocks', 'products', 'agencies'));
-    }
-
+    /**
+     * Mettre à jour un achat
+     */
     public function update(Request $request, Purchase $purchase)
     {
-        $request->validate([
-            'supplier_id' => 'required|exists:suppliers,id',
-            'stock_id' => 'required|exists:stocks,id',
-            'purchase_date' => 'required|date',
-            'items' => 'required|array|min:1',
-            'items.*.product_id' => 'required|exists:products,id',
-            'items.*.quantity' => 'required|numeric|min:1',
-            'items.*.purchase_price' => 'required|numeric|min:0',
+        $validator = Validator::make($request->all(), [
+            'supplier_id' => 'sometimes|required|exists:suppliers,id',
+            'stock_id' => 'sometimes|required|exists:stocks,id',
+            'total_amount' => 'sometimes|required|numeric|min:0',
+            'paid_amount' => 'sometimes|required|numeric|min:0',
+            'due_amount' => 'sometimes|required|numeric|min:0',
+            'purchase_date' => 'sometimes|required|date',
         ]);
 
-        DB::transaction(function () use ($request, $purchase) {
-            // Delete existing items
-            $purchase->purchaseItems()->delete();
+        if ($validator->fails()) {
+            return sendError('Erreur de validation', 422, $validator->errors());
+        }
 
-            // Calculate totals
-            $totalAmount = 0;
-            foreach ($request->items as $item) {
-                $totalAmount += $item['quantity'] * $item['purchase_price'];
+        $data = $validator->validated();
+
+        // Si des montants sont mis à jour, vérifier la cohérence
+        if (isset($data['total_amount']) || isset($data['paid_amount']) || isset($data['due_amount'])) {
+            $total = $data['total_amount'] ?? $purchase->total_amount;
+            $paid = $data['paid_amount'] ?? $purchase->paid_amount;
+            $due = $data['due_amount'] ?? $purchase->due_amount;
+
+            if (abs(($paid + $due) - $total) > 0.01) {
+                return sendError('Les montants ne correspondent pas au total.', 422);
             }
+        }
 
-            $paidAmount = $request->paid_amount ?? 0;
-            $dueAmount = $totalAmount - $paidAmount;
+        $purchase->update($data);
 
-            // Update purchase
-            $purchase->update([
-                'supplier_id' => $request->supplier_id,
-                'stock_id' => $request->stock_id,
-                'total_amount' => $totalAmount,
-                'paid_amount' => $paidAmount,
-                'due_amount' => $dueAmount,
-                'purchase_date' => $request->purchase_date,
-                'agency_id' => $request->agency_id,
-            ]);
-
-            // Create new purchase items
-            foreach ($request->items as $item) {
-                $subtotal = $item['quantity'] * $item['purchase_price'];
-
-                PurchaseItem::create([
-                    'purchase_id' => $purchase->id,
-                    'product_id' => $item['product_id'],
-                    'quantity' => $item['quantity'],
-                    'purchase_price' => $item['purchase_price'],
-                    'subtotal' => $subtotal,
-                    'agency_id' => $request->agency_id,
-                    'created_by' => Auth::id(),
-                ]);
-            }
-        });
-
-        return redirect()->route('purchases.index')
-            ->with('success', 'Achat mis à jour avec succès!');
+        return sendResponse($purchase->load(['supplier', 'stock']), 'Achat mis à jour avec succès');
     }
 
+    /**
+     * Supprimer un achat
+     */
     public function destroy(Purchase $purchase)
     {
         $purchase->delete();
 
-        return redirect()->route('purchases.index')
-            ->with('success', 'Achat supprimé avec succès!');
-    }
-
-    /**
- * Afficher la page d'impression pour un achat
- */
-    public function print(Purchase $purchase)
-    {
-        // Charger les relations nécessaires
-        $purchase->load(['supplier', 'purchaseItems.product', 'stock', 'agency']);
-
-        return view('purchase.print', compact('purchase'));
+        return sendResponse(null, 'Achat supprimé avec succès');
     }
 }

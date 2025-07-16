@@ -2,25 +2,26 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Requests\SupplierStoreRequest;
-use App\Http\Requests\SupplierUpdateRequest;
 use App\Models\Supplier;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\View\View;
+use App\Models\Agency;
+use Illuminate\Support\Facades\Validator;
 
-class SupplierController extends Controller
+class SupplierController extends \App\Http\Controllers\Controller
 {
-    public function index(Request $request): View
+    /**
+     * Liste des fournisseurs (API)
+     */
+    public function index(Request $request)
     {
         $query = Supplier::query()->with('agency');
 
         if ($request->filled('search')) {
             $search = $request->input('search');
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%$search%")
-                  ->orWhere('email', 'like', "%$search%")
-                  ->orWhere('phone', 'like', "%$search%");
+                    ->orWhere('email', 'like', "%$search%")
+                    ->orWhere('phone', 'like', "%$search%");
             });
         }
 
@@ -28,59 +29,78 @@ class SupplierController extends Controller
             $query->where('agency_id', $request->input('agency_id'));
         }
 
-        $suppliers = $query->orderBy('name')->paginate(15)->withQueryString();
-        $agencies = \App\Models\Agency::orderBy('name')->get();
+        $suppliers = $query->orderBy('name')->paginate(15);
 
-        return view('supplier.index', [
-            'suppliers' => $suppliers,
-            'agencies' => $agencies,
+        return sendResponse($suppliers, 'Liste des fournisseurs récupérée avec succès');
+    }
+
+    /**
+     * Créer un fournisseur
+     */
+    public function store(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:255',
+            'email' => 'nullable|email|max:255',
+            'phone' => 'nullable|string|max:20',
+            'address' => 'nullable|string',
         ]);
-    }
 
-    public function create(Request $request): View
-    {
-        $agencies = \App\Models\Agency::orderBy('name')->get();
-        return view('supplier.create', compact('agencies'));
-    }
 
-    public function store(SupplierStoreRequest $request): RedirectResponse
-    {
-        $data = $request->validated();
+
+        if ($validator->fails()) {
+            return sendError('Erreur de validation', 422, $validator->errors());
+        }
+
+
+        $data = $validator->validated();
         $data['created_by'] = auth()->id();
+        $data['agency_id'] = $request->input('agency_id', auth()->user()->agency_id);
 
         $supplier = Supplier::create($data);
 
-        return redirect()
-            ->route('suppliers.index')
-            ->with('success', 'Fournisseur créé avec succès.');
+        return sendResponse($supplier, 'Fournisseur créé avec succès', 201);
     }
 
-    public function show(Request $request, Supplier $supplier): View
+    /**
+     * Afficher un fournisseur
+     */
+    public function show(Supplier $supplier)
     {
-        return view('supplier.show', compact('supplier'));
+        return sendResponse($supplier, 'Détail du fournisseur récupéré avec succès');
     }
 
-    public function edit(Request $request, Supplier $supplier): View
+    /**
+     * Mettre à jour un fournisseur
+     */
+    public function update(Request $request, Supplier $supplier)
     {
-        $agencies = \App\Models\Agency::orderBy('name')->get();
-        return view('supplier.edit', compact('supplier', 'agencies'));
+        $validator = Validator::make($request->all(), [
+            'name' => 'sometimes|required|string|max:255',
+            'email' => 'nullable|email|max:255',
+            'phone' => 'nullable|string|max:20',
+            'address' => 'nullable|string',
+        ]);
+
+        if ($validator->fails()) {
+            return sendError('Erreur de validation', 422, $validator->errors());
+        }
+        $data = $validator->validated();
+        $data['agency_id'] = $request->input('agency_id', auth()->user()->agency_id);
+        $data['user_id'] = auth()->id();
+
+        $supplier->update($data);
+
+        return sendResponse($supplier, 'Fournisseur mis à jour avec succès');
     }
 
-    public function update(SupplierUpdateRequest $request, Supplier $supplier): RedirectResponse
-    {
-        $supplier->update($request->validated());
-
-        return redirect()
-            ->route('suppliers.index')
-            ->with('success', 'Fournisseur modifié avec succès.');
-    }
-
-    public function destroy(Request $request, Supplier $supplier): RedirectResponse
+    /**
+     * Supprimer un fournisseur
+     */
+    public function destroy(Supplier $supplier)
     {
         $supplier->delete();
 
-        return redirect()
-            ->route('suppliers.index')
-            ->with('success', 'Fournisseur supprimé avec succès.');
+        return sendResponse(null, 'Fournisseur supprimé avec succès');
     }
 }
