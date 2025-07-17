@@ -22,7 +22,10 @@ class ExportController extends Controller
         // Stock ID
         $stockId = $data['stock_id'];
 
-        $stockProducts = StockProduct::with(['product'])->where('stock_id', $stockId)->get();
+        $stockProducts = StockProduct::with(['product'])
+        ->where('stock_id', $stockId)
+        ->where('quantity', '>', 0)
+        ->get();
 
         $data = [];
         // Add Header
@@ -35,11 +38,11 @@ class ExportController extends Controller
         ];
         foreach ($stockProducts as $stockProduct) {
             $data[] = [
-                'product_code' => $stockProduct->product->code,
-                'product_name' => $stockProduct->product->name,
+                'product_code' => $stockProduct->product?->code ?? '',
+                'product_name' => $stockProduct->product?->name ?? '',
                 'quantity' => $stockProduct->quantity,
-                'price' => $stockProduct->sale_price_ttc,
-                'total' => $stockProduct->quantity * $stockProduct->sale_price_ttc,
+                'price' => $stockProduct->sale_price_ttc ?? 0,
+                'total' => $stockProduct->quantity * $stockProduct->sale_price_ttc ?? 0,
             ];
         }
 
@@ -52,6 +55,6 @@ class ExportController extends Controller
             public function array(): array {
                 return $this->data;
             }
-        }, 'stock_' . $stockId . '.xlsx');
+        }, time(). 'stock_' . $stockId . '.xlsx');
     }
 }

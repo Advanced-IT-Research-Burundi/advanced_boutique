@@ -18,8 +18,7 @@
 
         body {
             font-family: 'DejaVu Sans', Arial, sans-serif;
-            font-size: 9px;
-            line-height: 1.2;
+            font-size: 12px;
             color: #333;
             background: white;
             padding: 15px;
@@ -53,7 +52,7 @@
         table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 8px;
+            font-size: 12px;
             background: white;
         }
 
@@ -64,7 +63,7 @@
             text-align: center;
             font-weight: bold;
             border: 1px solid #2c3e50;
-            font-size: 7px;
+            font-size: 12px;
             line-height: 1.1;
         }
 
@@ -73,7 +72,7 @@
             border: 1px solid #bdc3c7;
             text-align: center;
             vertical-align: middle;
-            font-size: 7px;
+            font-size: 12px;
             line-height: 1.1;
         }
 
@@ -127,7 +126,7 @@
             margin-top: 10px;
             padding-top: 8px;
             border-top: 1px solid #bdc3c7;
-            font-size: 7px;
+            font-size: 12px;
             color: #666;
             text-align: center;
         }
@@ -147,8 +146,8 @@
 
         /* Responsive pour petites colonnes */
         @media print {
-            body { font-size: 8px; }
-            th, td { font-size: 6px; padding: 2px 1px; }
+            body { font-size: 12px; }
+            th, td { font-size: 12px; padding: 2px 1px; }
             .header h1 { font-size: 14px; }
         }
 
@@ -201,10 +200,10 @@
                 <tr>
                     <td class="text-center">{{ $product->id }}</td>
                     <td class="text-center">{{ $product->product->code ?? 'N/A' }}</td>
-                    <td class="text-center category">{{ $product->product->category->name ?? 'N/A' }}</td>
+                    <td class="text-center">{{ $product->product->category->name ?? 'N/A' }}</td>
                     <td class="product-name">{{ $product->product->name ?? 'N/A' }}</td>
                     <td class="text-center">{{ number_format($product->quantity, 0, ',', ' ') }}</td>
-                    <td class="text-right amount">{{ number_format($product->sale_price_ttc, 0, ',', ' ') }} €</td>
+                    <td class="text-right amount">{{ number_format($product->sale_price_ttc, 0, ',', ' ') }} BIF</td>
                     <td class="text-right amount">{{ number_format($stockValue, 0, ',', ' ') }} BIF</td>
                     <td class="text-center date-cell">{{ \Carbon\Carbon::parse($product->created_at)->format('d/m/Y H:i') }}</td>
                 </tr>

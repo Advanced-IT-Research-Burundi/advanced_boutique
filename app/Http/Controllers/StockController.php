@@ -6,6 +6,7 @@ use App\Models\Stock;
 use App\Models\Agency;
 use App\Models\StockProduct;
 use App\Models\User;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -14,6 +15,21 @@ class StockController extends Controller
     /**
      * Display a listing of the resource.
      */
+
+     public function exportToPdf($stock)
+     {
+
+        $stockProducts = StockProduct::with(['product'])
+        ->where('stock_id', $stock)
+        ->where('quantity', '>', 0)
+        ->get();
+
+        $pdf = Pdf::loadView('exports.stock-product-pdf', compact('stockProducts'))
+        ->setPaper('a4', 'landscape');
+        $filename = 'stock_' . preg_replace('/[^A-Za-z0-9\-_]/', '_', $stockProducts->first()->stock->name) . '.pdf';
+
+        return $pdf->stream($filename);
+     }
 
      public function transfer()
      {

@@ -26,6 +26,15 @@
         </ul>
     </div>
 
+    <div class="row">
+        <div class="col">
+            Quantite total des Produits : {{ $stockProducts->sum('quantity') }}
+        </div>
+        <div class="col">
+            Montant total des Produits : {{ $stockProducts->sum('quantity * sale_price_ttc') }}
+        </div>
+    </div>
+
     <div>
 
         <div class="card">

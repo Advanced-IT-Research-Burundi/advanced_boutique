@@ -28,6 +28,9 @@ Route::middleware('auth')->group(function () {
     Route::get('parametres', [App\Http\Controllers\ParametrageController::class, 'index'])->name('parametres');
     Route::put('/parametrage/company/update', [App\Http\Controllers\ParametrageController::class, 'updateCompany'])->name('parametrage.company.update');
     Route::get('stocks/{stock}/show', [App\Http\Controllers\StockController::class, 'list'])->name('stocks.list');
+
+    Route::get('stocks/{stock}/export/pdf', [App\Http\Controllers\StockController::class, 'exportToPdf'])
+    ->name('stock.export.pdf');
     Route::get('stocks/{stock}/mouvement', [App\Http\Controllers\StockController::class, 'mouvement'])->name('stocks.mouvement');
     Route::get('stocks/transfer', [App\Http\Controllers\StockController::class, 'transfer'])->name('stocks.transfer');
     Route::resource('companies', App\Http\Controllers\CompanyController::class);
