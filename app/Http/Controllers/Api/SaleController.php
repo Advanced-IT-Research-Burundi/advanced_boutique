@@ -65,11 +65,6 @@ class SaleController extends Controller
 
     public function create()
     {
-        // $stock = auth()->user()->stocks()->first();
-
-        // if (!$stock) {
-        //     abort('403');
-        // }
 
         return view('sale.create');
     }
@@ -120,8 +115,6 @@ class SaleController extends Controller
 
             $paidAmount = floatval($request->paid_amount);
             $dueAmount = max(0, $totalAmount - $paidAmount);
-
-            // Create sale
             $sale = Sale::create([
                 'client_id' => $request->client_id,
                 'stock_id' => 1, // You might want to handle this differently
@@ -134,7 +127,6 @@ class SaleController extends Controller
                 'created_by' => Auth::id(),
             ]);
 
-            // Create sale items and update stock
             foreach ($items as $item) {
                 SaleItem::create([
                     'sale_id' => $sale->id,
