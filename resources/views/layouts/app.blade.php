@@ -160,14 +160,14 @@
             </div>
 
             <div class="d-flex align-items-center ms-auto">
-                <button class="btn btn-outline-secondary position-relative me-3" type="button" >
+                <a href="{{ route('sales.create') }}" class="btn btn-outline-secondary position-relative me-3" type="button" >
                         <i class="bi bi-cart-plus"></i>
 
                         <span class="top-0 position-absolute start-100 translate-middle badge rounded-pill bg-danger">
                             {{ Cart::getContent()->count() }}
                             <span class="visually-hidden">notifications aux element du panier</span>
                         </span>
-                    </button>
+                    </a>
                 <!-- Notifications (optionnel) -->
                 <div class="dropdown me-3">
                     <button class="btn btn-outline-secondary position-relative" type="button" data-bs-toggle="dropdown">
@@ -179,9 +179,9 @@
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end">
                         <li><h6 class="dropdown-header">Notifications</h6></li>
-                        <li><a class="dropdown-item" href="#">Nouvelle commande reçue</a></li>
+                        {{-- <li><a class="dropdown-item" href="#">Nouvelle commande reçue</a></li>
                         <li><a class="dropdown-item" href="#">Stock faible pour le produit X</a></li>
-                        <li><a class="dropdown-item" href="#">Paiement en attente</a></li>
+                        <li><a class="dropdown-item" href="#">Paiement en attente</a></li> --}}
                         <li><hr class="dropdown-divider"></li>
                         <li><a class="text-center dropdown-item" href="#">Voir toutes les notifications</a></li>
                     </ul>
