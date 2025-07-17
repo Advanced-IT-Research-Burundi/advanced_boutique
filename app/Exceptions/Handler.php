@@ -162,19 +162,20 @@ class Handler extends ExceptionHandler
                 'error' => $exception->getMessage(),
             ], 404);
         }
+        // message ne francais
         if ($exception instanceof NotFoundHttpException) {
             return response()->json([
                 'success' => false,
-                'message' => 'The route ' . $request->path() . ' could not be found.',
+                'message' => 'La route ' . $request->path() . ' n\'a pas été trouvée.',
                 'data' => null,
-                'error' => get_class($exception),
+                'error' => $exception->getMessage(),
             ], 404);
         }
-        //Unauthenticated
+
         if ($exception instanceof \Illuminate\Auth\AuthenticationException) {
             return response()->json([
                 'success' => false,
-                'message' => 'Unauthenticated.',
+                'message' => 'L\'authentification a echoué.',
                 'data' => null,
                 'error' => $exception->getMessage(),
             ], 401);
