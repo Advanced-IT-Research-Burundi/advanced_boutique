@@ -166,7 +166,13 @@
     </style>
 </head>
 <body>
+    <div>
+    <div>
+    <img src="logo/Image1.png" alt="Logo" width="60%" height="150px">
+    </div>
+    </div>
     <div class="header">
+
         <h1>Rapport Stock Products</h1>
         <div class="date">Généré le {{ date('d/m/Y à H:i') }}</div>
     </div>
