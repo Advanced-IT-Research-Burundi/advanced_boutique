@@ -240,7 +240,7 @@ class SaleCreate extends Component
                         }
                     })
                     ->whereHas('stockProducts', function ($query) use ($selectedStock) {
-                        $query->where('quantity', '>=', 0)
+                        $query->where('quantity', '>', 0)
                         ->where('stock_id', $selectedStock);
                     })
                     ->whereNotIn('id', $this->selected_products)
