@@ -6,6 +6,8 @@ use App\Http\Requests\ProformaStoreRequest;
 use App\Http\Requests\ProformaUpdateRequest;
 use App\Models\Proforma;
 use App\Models\Sale;
+use App\Models\CashRegister;
+use App\Models\CashTransaction;
 use App\Models\SaleItem;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -122,6 +124,11 @@ class ProformaController extends Controller
             \DB::beginTransaction();
 
 
+            $caisse = CashRegister::where('user_id', auth()->user()->id)->first();
+
+            if (!$caisse) {
+                return redirect()->back()->with('error','Vous n\'avez pas le droit de créer une facture. Caisse introuvable.');
+            }
             $proformaItems = json_decode($proforma->proforma_items, true);
             $clientData = json_decode($proforma->client, true);
 
@@ -159,6 +166,16 @@ class ProformaController extends Controller
             $proforma->update([
                 'invoice_type' => 'F. PROFORMA VALIDÉE',
                 'updated_at' => now()
+            ]);
+            CashTransaction::create([
+                'cash_register_id' => $caisse->id,
+                'type' => 'in',
+                'reference_id' => 'Ref ' . $sale->id,
+                'amount' =>  $proforma->total_amount,
+                'description' => '',
+                'agency_id' => $caisse->agency_id,
+                'created_by' => auth()->user()->id,
+                'user_id' => auth()->user()->id,
             ]);
 
             \DB::commit();
