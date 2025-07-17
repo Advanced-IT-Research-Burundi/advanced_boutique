@@ -173,7 +173,7 @@
                     <button class="btn btn-outline-secondary position-relative" type="button" data-bs-toggle="dropdown">
                         <i class="bi bi-bell"></i>
                         <span class="top-0 position-absolute start-100 translate-middle badge rounded-pill bg-danger">
-                            3
+                            0
                             <span class="visually-hidden">notifications non lues</span>
                         </span>
                     </button>
