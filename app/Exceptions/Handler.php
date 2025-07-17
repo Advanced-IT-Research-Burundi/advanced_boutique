@@ -176,7 +176,7 @@ class Handler extends ExceptionHandler
                 'success' => false,
                 'message' => 'Unauthenticated.',
                 'data' => null,
-                'error' => get_class($exception),
+                'error' => $exception->getMessage(),
             ], 401);
         }
 
