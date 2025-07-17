@@ -182,7 +182,6 @@
                     <th class="col-qty">Qté</th>
                     <th class="col-price">Prix Unit.</th>
                     <th class="col-value">Val. Stock</th>
-                    <th class="col-date">Date Création</th>
                 </tr>
             </thead>
             <tbody>
@@ -198,14 +197,14 @@
                     $totalValue += $stockValue;
                 @endphp
                 <tr>
-                    <td class="text-center">{{ $product->id }}</td>
+                    <td class="text-center">{{ $loop->iteration }}</td>
                     <td class="text-center">{{ $product->product->code ?? 'N/A' }}</td>
                     <td class="text-center">{{ $product->product->category->name ?? 'N/A' }}</td>
                     <td class="product-name">{{ $product->product->name ?? 'N/A' }}</td>
                     <td class="text-center">{{ number_format($product->quantity, 0, ',', ' ') }}</td>
-                    <td class="text-right amount">{{ number_format($product->sale_price_ttc, 0, ',', ' ') }} BIF</td>
-                    <td class="text-right amount">{{ number_format($stockValue, 0, ',', ' ') }} BIF</td>
-                    <td class="text-center date-cell">{{ \Carbon\Carbon::parse($product->created_at)->format('d/m/Y H:i') }}</td>
+                    <td class="text-right amount">{{ number_format($product->sale_price_ttc, 0, ',', ' ') }} </td>
+                    <td class="text-right amount">{{ number_format($stockValue, 0, ',', ' ') }} </td>
+
                 </tr>
                 @endforeach
             </tbody>
@@ -214,8 +213,7 @@
                     <td colspan="4" class="text-right"><strong>TOTAUX:</strong></td>
                     <td class="text-center"><strong>{{ number_format($totalQuantity, 0, ',', ' ') }}</strong></td>
                     <td class="text-center">-</td>
-                    <td class="text-right"><strong>{{ number_format($totalValue, 0, ',', ' ') }} BIF</strong></td>
-                    <td class="text-center">-</td>
+                    <td class="text-right"><strong>{{ number_format($totalValue, 0, ',', ' ') }} </strong></td>
                 </tr>
             </tfoot>
         </table>
