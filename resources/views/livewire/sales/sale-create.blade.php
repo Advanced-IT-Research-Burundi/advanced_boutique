@@ -25,7 +25,7 @@
                         <select class="mb-2 form-select" wire:model="invoiceTye" wire:change="invoiceTye">
                             <option value="FACTURE">FACTURE</option>
                             <option value="PROFORMA">PROFORMA</option>
-                            <option value="BON">BON</option>
+                            {{-- <option value="BON">BON</option> --}}
                         </select>
                     </div>
                 </div>
