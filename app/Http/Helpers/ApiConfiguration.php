@@ -2,12 +2,12 @@
 
 
 
-function sendResponse($data, $message = 'Success', $code = 200, $error = []) {
+function sendResponse($data, $message = 'Success', $code = 200) {
     return response()->json([
         'success' => true,
         'message' => $message,
         'data' => $data,
-        'error' => $error,
+        'error' => null,
     ], $code);
 }
 

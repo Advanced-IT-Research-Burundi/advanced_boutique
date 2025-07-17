@@ -18,62 +18,69 @@ class SaleController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Sale::with(['client', 'saleItems.product', 'user'])
-                    ->orderBy('created_at', 'desc');
-        // Apply filters
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->where('id', 'like', "%{$search}%")
-                  ->orWhereHas('client', function($clientQuery) use ($search) {
-                      $clientQuery->where('name', 'like', "%{$search}%")
-                                 ->orWhere('phone', 'like', "%{$search}%");
-                  });
-            });
-        }
+        try {
+            $query = Sale::with(['client', 'saleItems.product', 'user'])
+                        ->orderBy('created_at', 'desc');
 
-        if ($request->filled('date_from')) {
-            $query->whereDate('sale_date', '>=', $request->date_from);
-        }
-
-        if ($request->filled('date_to')) {
-            $query->whereDate('sale_date', '<=', $request->date_to);
-        }
-
-        if ($request->filled('status')) {
-            switch ($request->status) {
-                case 'paid':
-                    $query->where('due_amount', 0);
-                    break;
-                case 'partial':
-                    $query->where('due_amount', '>', 0)
-                          ->where('paid_amount', '>', 0);
-                    break;
-                case 'unpaid':
-                    $query->where('paid_amount', 0);
-                    break;
+            // Apply filters
+            if ($request->filled('search')) {
+                $search = $request->search;
+                $query->where(function($q) use ($search) {
+                    $q->where('id', 'like', "%{$search}%")
+                      ->orWhereHas('client', function($clientQuery) use ($search) {
+                          $clientQuery->where('name', 'like', "%{$search}%")
+                                     ->orWhere('phone', 'like', "%{$search}%");
+                      });
+                });
             }
+
+            if ($request->filled('date_from')) {
+                $query->whereDate('sale_date', '>=', $request->date_from);
+            }
+
+            if ($request->filled('date_to')) {
+                $query->whereDate('sale_date', '<=', $request->date_to);
+            }
+
+            if ($request->filled('status')) {
+                switch ($request->status) {
+                    case 'paid':
+                        $query->where('due_amount', 0);
+                        break;
+                    case 'partial':
+                        $query->where('due_amount', '>', 0)
+                              ->where('paid_amount', '>', 0);
+                        break;
+                    case 'unpaid':
+                        $query->where('paid_amount', 0);
+                        break;
+                }
+            }
+
+            $sales = $query->paginate(20);
+            $stats = $this->calculateStats();
+
+            $data = [
+                'sales' => $sales,
+                'stats' => $stats,
+                'filters' => $request->only(['search', 'date_from', 'date_to', 'status'])
+            ];
+
+            return sendResponse($data,'Ventes récupérées avec succès');
+
+        } catch (\Exception $e) {
+            return sendError('Erreur lors de la récupération des ventes: ' ,500, $e->getMessage());
         }
-
-        $sales = $query->paginate(20);
-
-        // Calculate statistics
-        $stats = $this->calculateStats();
-
-        return view('sale.index', compact('sales') + $stats);
     }
 
-    public function create()
-    {
 
-        return view('sale.create');
-    }
 
     public function store(Request $request)
     {
         $request->validate([
             'client_id' => 'required|exists:clients,id',
             'sale_date' => 'required|date',
+            'type_facture' => 'required|string',
             'items' => 'required|array|min:1',
             'items.*.product_id' => 'required|exists:products,id',
             'items.*.quantity' => 'required|numeric|min:0.01',
@@ -110,19 +117,22 @@ class SaleController extends Controller
                 $stock = Stock::where('product_id', $product->id)->first();
                 if (!$stock || $stock->quantity < $quantity) {
                     throw new \Exception("Stock insuffisant pour le produit: {$product->name}");
+                    return sendError("Stock insuffisant pour le produit: {$product->name}", 400);
                 }
             }
 
             $paidAmount = floatval($request->paid_amount);
             $dueAmount = max(0, $totalAmount - $paidAmount);
+
             $sale = Sale::create([
                 'client_id' => $request->client_id,
-                'stock_id' => 1, // You might want to handle this differently
+                'stock_id' => 1,
                 'user_id' => Auth::id(),
                 'total_amount' => $totalAmount,
                 'paid_amount' => $paidAmount,
                 'due_amount' => $dueAmount,
                 'sale_date' => $request->sale_date,
+                'type_facture' => $request->type_facture,
                 'agency_id' => Auth::user()->agency_id,
                 'created_by' => Auth::id(),
             ]);
@@ -147,34 +157,32 @@ class SaleController extends Controller
 
             DB::commit();
 
-            return redirect()
-                ->route('sales.show', $sale)
-                ->with('success', 'Vente créée avec succès!');
+            $sale->load(['client', 'saleItems.product', 'user']);
+
+            return sendResponse( $sale,'Vente créée avec succès', 201);
 
         } catch (\Exception $e) {
             DB::rollback();
-            return back()
-                ->withInput()
-                ->withErrors(['error' => $e->getMessage()]);
+            return sendError('Erreur lors de la création de la vente: ' ,500, $e->getMessage());
         }
     }
 
     public function show(Sale $sale)
     {
-        $sale->load(['client', 'saleItems.product', 'user']);
-        $company = Company::where('is_actif', true)->first();
+        try {
+            $sale->load(['client', 'saleItems.product', 'user']);
+            $company = Company::where('is_actif', true)->first();
 
-        // dd($company);
-        return view('sale.show', compact(['sale', 'company']));
-    }
+            $data = [
+                'sale' => $sale,
+                'company' => $company
+            ];
 
-    public function edit(Sale $sale)
-    {
-        $sale->load(['saleItems.product']);
-        $clients = Client::orderBy('name')->get();
-        $products = Product::with('stocks')->orderBy('name')->get();
+            return sendResponse('Vente récupérée avec succès', $data);
 
-        return view('sale.edit', compact('sale', 'clients', 'products'));
+        } catch (\Exception $e) {
+            return sendError('Erreur lors de la récupération de la vente: ' . $e->getMessage());
+        }
     }
 
     public function update(Request $request, Sale $sale)
@@ -182,6 +190,7 @@ class SaleController extends Controller
         $request->validate([
             'client_id' => 'required|exists:clients,id',
             'sale_date' => 'required|date',
+            'type_facture' => 'required|string',
             'items' => 'required|array|min:1',
             'items.*.product_id' => 'required|exists:products,id',
             'items.*.quantity' => 'required|numeric|min:0.01',
@@ -242,6 +251,7 @@ class SaleController extends Controller
                 'paid_amount' => $paidAmount,
                 'due_amount' => $dueAmount,
                 'sale_date' => $request->sale_date,
+                'type_facture' => $request->type_facture,
             ]);
 
             // Create new sale items and update stock
@@ -265,15 +275,13 @@ class SaleController extends Controller
 
             DB::commit();
 
-            return redirect()
-                ->route('sale.show', $sale)
-                ->with('success', 'Vente modifiée avec succès!');
+            $sale->load(['client', 'saleItems.product', 'user']);
+
+            return sendResponse( $sale,'Vente modifiée avec succès');
 
         } catch (\Exception $e) {
             DB::rollback();
-            return back()
-                ->withInput()
-                ->withErrors(['error' => $e->getMessage()]);
+            return sendError('Erreur lors de la modification de la vente: ' ,500, $e->getMessage());
         }
     }
 
@@ -284,7 +292,7 @@ class SaleController extends Controller
         try {
             // Restore stock quantities
             foreach ($sale->saleItems as $item) {
-                $stock = StockProduct::where('product_id', $item->product_id)->first();
+                $stock = Stock::where('product_id', $item->product_id)->first();
                 if ($stock) {
                     $stock->increment('quantity', $item->quantity);
                 }
@@ -296,36 +304,64 @@ class SaleController extends Controller
 
             DB::commit();
 
-            return redirect()
-                ->route('sales.index')
-                ->with('success', 'Vente supprimée avec succès!');
+            return sendResponse(null,'Vente supprimée avec succès');
 
         } catch (\Exception $e) {
-            // dd($e);
             DB::rollback();
-            return back()->with('error', 'Erreur lors de la suppression de la vente: ' . $e->getMessage());
+            return sendError('Erreur lors de la suppression de la vente: ' ,500,$e->getMessage());
         }
     }
 
-    /**
-     * Get product details for AJAX requests
-     */
     public function getProduct(Product $product)
     {
-        $product->load('stocks');
+        try {
+            $product->load('stocks');
 
-        return response()->json([
-            'id' => $product->id,
-            'name' => $product->name,
-            'sale_price' => $product->sale_price,
-            'unit' => $product->unit,
-            'available_quantity' => $product->stocks->sum('quantity') ?? 0,
-        ]);
+            $data = [
+                'id' => $product->id,
+                'name' => $product->name,
+                'sale_price' => $product->sale_price,
+                'unit' => $product->unit,
+                'available_quantity' => $product->stocks->sum('quantity') ?? 0,
+            ];
+
+            return sendResponse( $data,'Produit récupéré avec succès');
+
+        } catch (\Exception $e) {
+            return sendError('Erreur lors de la récupération du produit: ' ,500,$e->getMessage());
+        }
     }
 
-    /**
-     * Calculate dashboard statistics
-     */
+    public function downloadPDF(Sale $sale)
+    {
+        try {
+            $sale->load(['client', 'saleItems.product']);
+            $company = Company::where('is_actif', true)->first();
+
+            $data = [
+                'sale' => $sale,
+                'company' => $company,
+                'title' => 'Facture #' . str_pad($sale->id, 6, '0', STR_PAD_LEFT)
+            ];
+
+            $pdf = Pdf::loadView('sale.invoice-pdf', $data);
+            $pdf->setPaper('A4', 'portrait');
+            $pdf->setOptions([
+                'defaultFont' => 'DejaVu Sans',
+                'isHtml5ParserEnabled' => true,
+                'isPhpEnabled' => true,
+                'isRemoteEnabled' => true,
+            ]);
+
+            $filename = 'facture_' . str_pad($sale->id, 6, '0', STR_PAD_LEFT) . '.pdf';
+
+            return $pdf->download($filename);
+
+        } catch (\Exception $e) {
+            return sendError('Erreur lors de la génération du PDF: ' . $e->getMessage());
+        }
+    }
+
     private function calculateStats()
     {
         $today = now()->startOfDay();
@@ -336,37 +372,5 @@ class SaleController extends Controller
             'totalDue' => Sale::sum('due_amount'),
             'todaySales' => Sale::whereDate('sale_date', $today)->count(),
         ];
-    }
-
-    public function downloadPDF(Sale $sale)
-    {
-        $sale->load(['client', 'saleItems.product']);
-
-        $company = Company::where('is_actif', true)->first();
-
-
-        $data = [
-            'sale' => $sale,
-            'company' => $company,
-            'title' => 'Facture #' . str_pad($sale->id, 6, '0', STR_PAD_LEFT)
-        ];
-
-        // Générer le PDF avec DomPDF
-        $pdf = Pdf::loadView('sale.invoice-pdf', $data);
-
-        // Configuration du PDF
-        $pdf->setPaper('A4', 'portrait');
-        $pdf->setOptions([
-            'defaultFont' => 'DejaVu Sans',
-            'isHtml5ParserEnabled' => true,
-            'isPhpEnabled' => true,
-            'isRemoteEnabled' => true,
-        ]);
-
-        // Nom du fichier
-        $filename = 'facture_' . str_pad($sale->id, 6, '0', STR_PAD_LEFT) . '.pdf';
-
-        // Retourner le PDF pour téléchargement
-        return $pdf->download($filename);
     }
 }
