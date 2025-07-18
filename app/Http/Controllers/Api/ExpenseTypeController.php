@@ -25,7 +25,7 @@ class ExpenseTypeController extends Controller
         $agencies = Agency::whereIn('id', ExpenseType::select('agency_id')->distinct()->pluck('agency_id'))->get();
 
         $data = [
-            'expenseTypes' => $query->paginate(15)->withQueryString(),
+            'expense_types' => $query->paginate(15)->withQueryString(),
             'agencies' => $agencies
         ];
 

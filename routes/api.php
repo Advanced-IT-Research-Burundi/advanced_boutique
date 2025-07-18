@@ -23,6 +23,7 @@ use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\UserStockController;
 use App\Http\Controllers\Api\VehiculeController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ReportsController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -40,6 +41,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/updatephoto',[AuthController::class, 'updatephoto']);
 
     Route::get('dashboard', [DashboardController::class, 'index']);
+
+    Route::get('/reports', [ReportsController::class, 'index']);
+    Route::get('/reports/export', [ReportsController::class, 'export']);
 
     Route::apiResource('products', ProductController::class);
 

@@ -45,10 +45,20 @@ class AgencyController extends Controller
 
         // Données pour les filtres
         $companies = Company::latest()->get();
-        $managers = User::latest()->get();
         $parentAgencies = Agency::whereNull('parent_agency_id')->latest()->get();
+        $managers = User::whereIn('id', Agency::select('user_id')->distinct()->pluck('user_id'))->get();
 
-        return view('agency.index', compact('agencies', 'companies', 'managers', 'parentAgencies'));
+
+        $data = [
+            'agencies' => $agencies,
+            'companies' => $companies,
+            'parentAgencies' => $parentAgencies,
+            'managers' => $managers
+        ];
+
+        return sendResponse($data, 'Produits récupérés avec succès');
+
+
     }
 
     public function create()
