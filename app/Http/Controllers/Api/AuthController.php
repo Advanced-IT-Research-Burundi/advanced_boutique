@@ -103,11 +103,16 @@ class AuthController extends Controller
         ]);
     }
 
-    public function me(Request $request)
+    public function profil()
     {
-        return response()->json([
-            'success' => true,
-            'data' => $request->user()
-        ]);
+        try{
+            $user = \Auth::user();
+
+            return sendResponse($user, 'Profil récupérés avec succès');
+
+        } catch(\Throwable $e) {
+            return sendError('Erreur lors du chargement du profil', 500, ['error' => $e->getMessage()]);
+        }
+
     }
 }
