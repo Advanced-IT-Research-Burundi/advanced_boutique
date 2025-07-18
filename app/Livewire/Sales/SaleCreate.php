@@ -375,7 +375,7 @@ class SaleCreate extends Component
             }
 
             $this->calculateTotals();
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->items = [];
             $this->selected_products = [];
         }

@@ -287,6 +287,7 @@ class SaleController extends Controller
 
     public function destroy(Sale $sale)
     {
+        return sendResponse(null,'Vente supprimée avec succès');
         DB::beginTransaction();
 
         try {

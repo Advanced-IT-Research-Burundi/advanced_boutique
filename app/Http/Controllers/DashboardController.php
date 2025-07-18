@@ -203,7 +203,7 @@ class DashboardController extends Controller
         });
     }
 
-    private function getRecentActivities($agency_id, $limit = 10)
+    private function getRecentActivities($agency_id, $limit = 5)
     {
         $activities = collect();
 
