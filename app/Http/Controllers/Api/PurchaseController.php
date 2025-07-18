@@ -39,8 +39,19 @@ class PurchaseController extends Controller
         }
 
         $purchases = $query->orderByDesc('purchase_date')->paginate(15);
+        $stats = [
+            'totalPurchases'=> Purchase::count(),
+            'totalAmount' => Purchase::sum('total_amount'),
+            'paidPurchases' => Purchase::where('due_amount', 0)->count(),
+            'pendingPurchases' => Purchase::where('due_amount', '>', 0)->count()
+        ];
+         $data = [
+            'purchases'=> $purchases,
+            'stats' => $stats
+         ];
 
-        return sendResponse($purchases, 'Liste des achats récupérée avec succès');
+
+        return sendResponse($data, 'Liste des achats récupérée avec succès');
     }
 
     /**
