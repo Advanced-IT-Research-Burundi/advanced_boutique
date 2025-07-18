@@ -16,7 +16,7 @@ class ProductController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Product::with(['category', 'agency', 'createdBy', 'user']);
+        $query = Product::with(['category', 'agency']);
 
         // Filtres de recherche
         if ($request->filled('search')) {
@@ -35,30 +35,20 @@ class ProductController extends Controller
             $query->where('agency_id', $request->agency_id);
         }
 
-        // Gestion du tri
-        $sortField = $request->get('sort', 'created_at');
-        $sortOrder = $request->get('order', 'desc');
-        $allowedSortFields = ['id', 'name', 'unit', 'sale_price_ttc', 'sale_price', 'created_at', 'updated_at'];
-        if (!in_array($sortField, $allowedSortFields)) {
-            $sortField = 'created_at';
-        }
-
-        $sortOrder = in_array(strtolower($sortOrder), ['asc', 'desc']) ? strtolower($sortOrder) : 'desc';
+        $products = $query->paginate(10);
 
 
-
-        $query->orderBy($sortField, $sortOrder);
-
-        $perPage = $request->get('per_page', 10);
-        $perPage = in_array($perPage, [5, 10, 25, 50, 100]) ? $perPage : 10;
-
-        $products = $query->paginate($perPage);
+        $categories = Category::whereIn('id', $products->pluck('category_id')->unique())->get();
+        $agencies = Agency::whereIn('id', $products->pluck('agency_id')->unique())->get();
 
 
-        $categories = Category::orderBy('name')->get();
-        $agencies = Agency::orderBy('name')->get();
+        $data = [
+            'products' => $products,
+            'categories' => $categories,
+            'agencies' => $agencies
+        ];
 
-        return sendResponse($products, 'Produits récupérés avec succès');
+        return sendResponse($data, 'Produits récupérés avec succès');
     }
 
     public function show(Product $product)

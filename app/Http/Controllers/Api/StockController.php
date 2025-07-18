@@ -11,35 +11,11 @@ use Illuminate\Support\Facades\Auth;
 
 class StockController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
 
-     public function transfer()
-     {
-        return view('stock.transfer');
-     }
 
-     public function entreMultiple($stock){
-
-        return view('stock.entre_multiple', compact('stock'));
-     }
-
-    public function mouvement($stock)
-    {
-        $stock = StockProduct::with(['stock', 'product', 'agency', 'stockProductMouvements'])->findOrFail($stock);
-
-      //  dd($stock->stockProductMouvements);
-
-        return view('stock.mouvement', compact('stock'));
-    }
-
-    public function list(Stock $stock)
-    {
-        return view('stock.list', compact('stock'));
-    }
     public function index(Request $request)
     {
+        try{
         $query = Stock::where('agency_id',auth()->user()->agency_id)->with(['agency', 'createdBy', 'user']);
 
         // Filtres de recherche
@@ -67,12 +43,34 @@ class StockController extends Controller
         // Tri par défaut
         $query->orderBy('created_at', 'desc');
 
+
+
         $stocks = $query->paginate(15)->withQueryString();
 
+        $agencies = Agency::whereIn('id', $stocks->pluck('agency_id')->unique())->latest()->get();
+        $creators = User::whereIn('id', $stocks->pluck('creator_id')->unique())->latest()->get();
+        $users    = User::whereIn('id', $stocks->pluck('user_id')->unique())->get();
+
+
+
+        $data = [
+            'stocks' => $stocks,
+            'agencies' => $agencies,
+            'creators' => $creators,
+            'users' => $users,
+        ];
+
+
+        return sendResponse($data,'Stocks  récupérées avec succès');
+
+    }catch(\Throwable $e){
+
+        return sendError('Erreur lors de la récupération des stocks: ' ,500,$e->getMessage());
+
+    }
+
+
         // Données pour les filtres
-        $agencies = Agency::latest()->get();
-        $creators = User::latest()->get();
-        $users = User::latest()->get();
 
         return view('stock.index', compact('stocks', 'agencies', 'creators', 'users'));
     }
