@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Models\User;
+use App\Models\Agency;
+use App\Models\Company;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
@@ -46,7 +48,19 @@ class UserController extends \App\Http\Controllers\Controller
 
         $users = $query->orderByDesc('created_at')->paginate(15);
 
-        return sendResponse($users, 'Liste des utilisateurs récupérée avec succès');
+        $agencies = Agency::whereIn('id', User::select('agency_id')->distinct()->pluck('agency_id'))->get();
+        $companies = Company::whereIn('id', User::select('company_id')->distinct()->pluck('company_id'))->get();
+
+
+        $data = [
+            'users' => $users,
+            'agencies' => $agencies,
+            'companies' => $companies,
+            'roles' => ['admin', 'manager', 'employee', 'user'],
+            'statuses' => ['active', 'inactive', 'suspended']
+        ];
+
+        return sendResponse($data, 'Liste des utilisateurs récupérée avec succès');
     }
 
     /**
