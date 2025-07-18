@@ -36,32 +36,18 @@ class VehiculeController extends Controller
             $query->where('year', $request->get('year'));
         }
 
-        // // Tri
-        // $sortBy = $request->get('sort_by', 'created_at');
-        // $sortOrder = $request->get('sort_order', 'desc');
-        // $query->orderBy($sortBy, $sortOrder);
 
         $vehicules = $query->latest()->paginate(10)->appends($request->query());
 
-        // // Données pour les filtres
-        // $brands = Vehicule::distinct()->pluck('brand')->sort();
-        // $years = Vehicule::distinct()->pluck('year')->sort()->reverse();
-        // $statuses = [
-        //     'disponible' => 'Disponible',
-        //     'en_location' => 'En location',
-        //     'en_reparation' => 'En réparation'
-        // ];
+        $data = [
+            'vehicules' => $vehicules
+        ];
 
-        return view('vehicules.index', compact('vehicules'));
+
+        return sendResponse($data, 'Liste des véhicules récupérée avec succès');
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        return view('vehicules.create');
-    }
+
 
     /**
      * Store a newly created resource in storage.
@@ -94,13 +80,6 @@ class VehiculeController extends Controller
         return view('vehicules.show', compact('vehicule'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Vehicule $vehicule)
-    {
-        return view('vehicules.edit', compact('vehicule'));
-    }
 
     /**
      * Update the specified resource in storage.

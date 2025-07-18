@@ -54,17 +54,17 @@ class CashRegisterController extends Controller
 
         $cashRegisters = $query->orderBy('created_at', 'desc')->paginate(15);
 
-        // Données pour les filtres
-        $agencies = Agency::all();
-        $users = User::all();
-        $stocks = Stock::all();
 
-        return sendResponse([
-            'cashRegisters' => $cashRegisters,
+
+        $agencies = Agency::whereIn('id', CashRegister::select('agency_id')->distinct()->pluck('agency_id'))->get();
+
+        $data = [
+            'cash_registers' => $cashRegisters,
             'agencies' => $agencies,
-            'users' => $users,
-            'stocks' => $stocks
-        ], 'Cash registers retrieved successfully', 200);
+        ];
+
+
+        return sendResponse($data, 'Liste des caisses récupérée avec succès', 200);
     }
 
     public function create()

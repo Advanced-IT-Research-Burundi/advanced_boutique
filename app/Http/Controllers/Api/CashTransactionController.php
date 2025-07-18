@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use App\Models\CashTransaction;
 use App\Models\CashRegister;
+use App\Models\Agency;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -72,59 +74,30 @@ class CashTransactionController extends Controller
 
         $transactions = $query->paginate(15);
 
-        // Données pour les filtres
-        $cashRegisters = CashRegister::with('user')->get();
-        $agencies = \App\Models\Agency::all();
-        $users = \App\Models\User::all();
+
+        $agencies = Agency::whereIn('id', CashTransaction::select('agency_id')->distinct()->pluck('agency_id'))->get();
+        $cashRegisters = CashRegister::whereIn('id', CashTransaction::select('cash_register_id')->distinct()->pluck('cash_register_id'))->get();
+        $users = User::whereIn('id', CashTransaction::select('created_by')->distinct()->pluck('created_by'))->get();
 
         // Statistiques
-        $allRecords = $query->get();
-        $stats = [
-            'total_count' => $allRecords->count(),
-            'total_in' => $allRecords->where('type', 'in')->sum('amount'),
-            'total_out' => $allRecords->where('type', 'out')->sum('amount'),
-            'today_count' => $allRecords->where('created_at', '>=', today()->startOfDay())->count(),
-        ];
-        // dd($stats['total_out']);
 
-        return sendResponse([
+        $stats = [
+            'total_count' => CashTransaction::count(),
+            'total_in' => CashTransaction::where('type', 'in')->sum('amount'),
+            'total_out' => CashTransaction::where('type', 'out')->sum('amount'),
+            'today_count' => CashTransaction::where('created_at', '>=', today()->startOfDay())->count(),
+        ];
+
+
+        $data = [
             'transactions' => $transactions,
             'cashRegisters' => $cashRegisters,
             'agencies' => $agencies,
             'users' => $users,
-            'stats' => $stats
-        ], 'Cash transactions retrieved successfully', 200);
-    }
+            'stats' => $stats,
+        ];
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create(Request $request)
-    {
-        $cashRegister = null;
-
-        // Si une caisse est spécifiée
-        if ($request->filled('cash_register_id')) {
-            $cashRegister = CashRegister::findOrFail($request->cash_register_id);
-
-            // Vérifier que la caisse est ouverte
-            if ($cashRegister->status !== 'open') {
-                return redirect()->route('cash-registers.show', $cashRegister)
-                                ->with('error', 'Impossible d\'ajouter des transactions à une caisse fermée.');
-            }
-        }
-
-        $cashRegisters = CashRegister::where('status', 'open')
-                                   ->with('user')
-                                   ->get();
-
-        $agencies = \App\Models\Agency::all();
-
-        return sendResponse([
-            'cashRegister' => $cashRegister,
-            'cashRegisters' => $cashRegisters,
-            'agencies' => $agencies
-        ], 'Cash transaction created successfully', 200);
+        return sendResponse($data, 'Liste des transactions récupérée avec succès', 200);
     }
 
     /**
@@ -249,32 +222,7 @@ class CashTransactionController extends Controller
         ], 'Cash transaction retrieved successfully', 200);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(CashTransaction $cashTransaction)
-    {
-        // Vérifier que la transaction peut être modifiée
-        if (!$this->canEditTransaction($cashTransaction)) {
-            return sendResponse([
-                'cashTransaction' => $cashTransaction,
-            ], 'Cash transaction retrieved successfully', 200);
-        }
-
-        $cashTransaction->load(['cashRegister', 'agency']);
-
-        $cashRegisters = CashRegister::where('status', 'open')
-                                   ->with('user')
-                                   ->get();
-
-        $agencies = \App\Models\Agency::all();
-
-        return sendResponse([
-            'cashTransaction' => $cashTransaction,
-            'cashRegisters' => $cashRegisters,
-            'agencies' => $agencies
-        ], 'Cash transaction retrieved successfully', 200);
-    }
+    
 
     /**
      * Update the specified resource in storage.
