@@ -13,7 +13,7 @@ use Illuminate\View\View;
 
 class ExpenseController extends Controller
 {
-    public function index(Request $request): View
+    public function index(Request $request)
     {
         $query = Expense::with(['stock', 'user', 'expenseType', 'agency']);
 
@@ -35,10 +35,22 @@ class ExpenseController extends Controller
         }
 
         $expenses = $query->orderByDesc('expense_date')->paginate(15)->withQueryString();
-        $expenseTypes = ExpenseType::orderBy('name')->get();
-        $agencies = Agency::orderBy('name')->get();
-        $users = User::orderBy('first_name')->get();
-        
+
+
+
+        $agencies = Agency::whereIn('id', Expense::select('agency_id')->distinct()->pluck('agency_id'))->get();
+        $expenseTypes = ExpenseType::whereIn('id', Expense::select('expense_type_id')->distinct()->pluck('expense_type_id'))->get();
+        $users = User::whereIn('id', Expense::select('user_id')->distinct()->pluck('user_id'))->get();
+
+
+        $data = [
+            'expenses' => $expenses,
+            'expenseTypes' => $expenseTypes,
+            'agencies' => $agencies,
+            'users' => $users
+        ];
+
+        return sendResponse($data, 'Produits récupérés avec succès');
     }
 
     public function create(): View

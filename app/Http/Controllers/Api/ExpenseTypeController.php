@@ -10,7 +10,7 @@ use Illuminate\View\View;
 
 class ExpenseTypeController extends Controller
 {
-    public function index(Request $request): View
+    public function index(Request $request)
     {
         $query = ExpenseType::with('agency');
 
@@ -22,10 +22,14 @@ class ExpenseTypeController extends Controller
             $query->where('agency_id', $request->input('agency_id'));
         }
 
-        $expenseTypes = $query->orderBy('name')->paginate(15)->withQueryString();
-        $agencies = Agency::orderBy('name')->get();
+        $agencies = Agency::whereIn('id', ExpenseType::select('agency_id')->distinct()->pluck('agency_id'))->get();
 
-        return view('expenseType.index', compact('expenseTypes', 'agencies'));
+        $data = [
+            'expenseTypes' => $query->paginate(15)->withQueryString(),
+            'agencies' => $agencies
+        ];
+
+        return sendResponse($data, 'Types de depenses  récupérés avec succès');
     }
 
     public function create(): View
