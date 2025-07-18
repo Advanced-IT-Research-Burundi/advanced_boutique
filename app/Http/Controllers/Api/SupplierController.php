@@ -30,8 +30,13 @@ class SupplierController extends \App\Http\Controllers\Controller
         }
 
         $suppliers = $query->orderBy('name')->paginate(15);
+        $agencies = Agency::whereIn('id', Supplier::select('agency_id')->distinct()->pluck('agency_id'))->latest()->get();
 
-        return sendResponse($suppliers, 'Liste des fournisseurs récupérée avec succès');
+        $data = [
+            'suppliers' => $suppliers,
+            'agencies' => $agencies
+        ];
+        return sendResponse($data, 'Liste des fournisseurs récupérée avec succès');
     }
 
     /**

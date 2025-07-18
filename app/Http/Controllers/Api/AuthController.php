@@ -115,4 +115,26 @@ class AuthController extends Controller
         }
 
     }
+    public function updatephoto(Request $request)
+    {
+        try{
+
+            $request->validate([
+            'profile_photo' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            ]);
+
+            $user = Auth::user();
+            if ($user->profile_photo) {
+                Storage::disk('public')->delete($user->profile_photo);
+            }
+            $user->profile_photo = $request->file('profile_photo')->store('profiles', 'public');
+            $user->save();
+
+            return sendResponse($user, 'Utilisateur modifié avec succès.');
+
+        } catch(\Throwable $e) {
+            return sendError('Erreur lors du modification du profil', 500, ['error' => $e->getMessage()]);
+        }
+
+    }
 }
