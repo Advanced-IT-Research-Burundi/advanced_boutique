@@ -38,8 +38,7 @@ class ExpenseController extends Controller
         $expenseTypes = ExpenseType::orderBy('name')->get();
         $agencies = Agency::orderBy('name')->get();
         $users = User::orderBy('first_name')->get();
-
-        return view('expense.index', compact('expenses', 'expenseTypes', 'agencies', 'users'));
+        
     }
 
     public function create(): View
