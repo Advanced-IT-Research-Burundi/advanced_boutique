@@ -57,7 +57,7 @@ class SaleController extends Controller
                 }
             }
 
-            $sales = $query->paginate(20);
+            $sales = $query->paginate(10);
             $stats = $this->calculateStats();
 
             $data = [
