@@ -43,12 +43,17 @@ class ClientController extends Controller
             $query->where('created_by', $request->created_by);
         }
 
-        $perPage = $request->get('perPage', 10);
-        $clients = $query->latest()->paginate($perPage);
-        $agencies = Agency::all();
-        $creators = User::all();
+        $clients = $query->latest()->paginate(10);
+        $agencies = Agency::whereIn('id', Client::select('agency_id')->distinct()->pluck('agency_id'))->latest()->get();
+        $creators = User::whereIn('id', Client::select('created_by')->distinct()->pluck('created_by'))->latest()->get();
 
-        return sendResponse($clients, 'Clients récupérés avec succès');
+        $data = [
+            'clients' =>  $clients,
+            'agencies' => $agencies,
+            'creators' => $creators
+        ];
+
+        return sendResponse($data, 'Clients récupérés avec succès');
     }
 
 

@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Models\Category;
+use App\Models\Agency;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Validator;
@@ -23,16 +25,20 @@ class CategoryController extends Controller
                 });
             }
 
-            // Tri
-            $sortBy = $request->get('sortBy', 'name');
-            $sortOrder = $request->get('sortOrder', 'asc');
-            $query->orderBy($sortBy, $sortOrder);
 
-            // Pagination
-            $perPage = $request->get('perPage', 10);
-            $categories = $query->paginate($perPage);
+            $categories = $query->paginate(10);
 
-            return sendResponse($categories, 'Catégories récupérées avec succès');
+            $agencies = Agency::whereIn('id', Category::select('agency_id')->distinct()->pluck('agency_id'))->latest()->get();
+            $creators = User::whereIn('id', Category::select('created_by')->distinct()->pluck('created_by'))->latest()->get();
+
+            $data = [
+                'categories' => $categories,
+                'agencies' => $agencies,
+                'creators' => $creators,
+            ];
+
+
+            return sendResponse($data, 'Catégories récupérées avec succès');
 
         } catch (Exception $e) {
             return sendError('Erreur lors de la récupération des catégories', 500, $e->getMessage());

@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use App\Models\Stock;
 use App\Models\Agency;
-use App\Models\StockProduct;
 use App\Models\User;
+use App\Models\StockProduct;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -47,10 +47,10 @@ class StockController extends Controller
 
         $stocks = $query->paginate(15)->withQueryString();
 
-        $agencies = Agency::whereIn('id', $stocks->pluck('agency_id')->unique())->latest()->get();
-        $creators = User::whereIn('id', $stocks->pluck('creator_id')->unique())->latest()->get();
-        $users    = User::whereIn('id', $stocks->pluck('user_id')->unique())->get();
 
+        $agencies = Agency::whereIn('id', Stock::select('agency_id')->distinct()->pluck('agency_id'))->latest()->get();
+        $creators = User::whereIn('id', Stock::select('created_by')->distinct()->pluck('created_by'))->latest()->get();
+        $users    = User::whereIn('id', Stock::select('user_id')->distinct()->pluck('user_id'))->get();
 
 
         $data = [

@@ -38,8 +38,8 @@ class ProductController extends Controller
         $products = $query->paginate(10);
 
 
-        $categories = Category::whereIn('id', $products->pluck('category_id')->unique())->get();
-        $agencies = Agency::whereIn('id', $products->pluck('agency_id')->unique())->get();
+        $categories = Category::whereIn('id', Product::select('category_id')->distinct()->pluck('category_id'))->get();
+        $agencies = Agency::whereIn('id', Product::select('agency_id')->distinct()->pluck('agency_id'))->get();
 
 
         $data = [
