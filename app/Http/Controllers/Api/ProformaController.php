@@ -57,13 +57,20 @@ class ProformaController extends Controller
         $totalDue = Proforma::sum('due_amount');
         $todayProformas = Proforma::whereDate('created_at', today())->count();
 
-        return  sendResponse([
-            'proformas' => $proformas,
+
+         $stats = [
             'totalRevenue' => $totalRevenue,
-            'paidProformas' => $paidProformas,
+            'paidProformas'=> $paidProformas,
             'totalDue' => $totalDue,
             'todayProformas' => $todayProformas
-        ], 'Proformas retrieved successfully', 200);
+         ];
+
+        $data = [
+            'proformas' =>$proformas,
+            'stats'=> $stats
+        ];
+
+        return  sendResponse($data,'Proformas retrieved successfully');
     }
 
     public function show(Proforma $proforma)

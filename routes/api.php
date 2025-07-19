@@ -22,6 +22,7 @@ use App\Http\Controllers\Api\SupplierController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\UserStockController;
 use App\Http\Controllers\Api\VehiculeController;
+use App\Http\Controllers\Api\SalesController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ReportsController;
 use Illuminate\Http\Request;
@@ -49,6 +50,15 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::post('categories/bulk-delete', [CategoryController::class, 'bulkDelete'])->name('categories.bulk-delete');
     Route::post('categories/{id}/restore', [CategoryController::class, 'restore'])->name('categories.restore');
+
+    Route::prefix('sales')->group(function () {
+        Route::get('/create-data', [SalesController::class, 'getCreateData']);
+        Route::get('/categories/{stockId}', [SalesController::class, 'getCategories']);
+        Route::get('/clients/search', [SalesController::class, 'searchClients']);
+        Route::get('/products/search', [SalesController::class, 'searchProducts']);
+        Route::get('/products/{productId}/stock', [SalesController::class, 'getProductStock']);
+        Route::post('/store', [SalesController::class, 'store']);
+    });
 
     Route::prefix('users/{user}/stocks')->name('users.stocks.')->group(function () {
         Route::get('/manage', [UserStockController::class, 'manage']);
