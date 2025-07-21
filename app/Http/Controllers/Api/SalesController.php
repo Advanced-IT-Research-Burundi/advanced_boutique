@@ -45,20 +45,19 @@ class SalesController extends Controller
             //         ];
             //     });
 
-            return response()->json([
-                'success' => true,
-                'data' => [
-                    'stocks' => $stocks,
-                    'current_date' => now()->format('Y-m-d\TH:i'),
-                    'invoice_types' => ['FACTURE', 'PROFORMA', 'BON']
-                ]
-            ]);
 
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Erreur lors du chargement des données: ' . $e->getMessage()
-            ], 500);
+
+            $data = [
+                'stocks' => $stocks,
+                'current_date' => now()->format('Y-m-d\TH:i'),
+                'invoice_types' => ['FACTURE', 'PROFORMA', 'BON']
+            ];
+
+         return sendResponse($data, 'Produits récupérés avec succès');
+
+        } catch (\Throwable $e) {
+            return sendError('Erreur lors du chargement des données', 500, ['error' => $e->getMessage()]);
+
         }
     }
 
@@ -80,18 +79,14 @@ class SalesController extends Controller
                 ->get()
                 ->pluck('name', 'id');
 
-            return response()->json([
-                'success' => true,
-                'data' => [
-                    'categories' => $categories
-                ]
-            ]);
 
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Erreur lors du chargement des catégories: ' . $e->getMessage()
-            ], 500);
+            $data = [
+                'categories' => $categories
+            ];
+            return sendResponse($data, 'Catégories récupérées avec succès');
+
+        } catch (\Throwable $e) {
+            return sendError('Erreur lors du chargement des catégories', 500, ['error' => $e->getMessage()]);
         }
     }
 
@@ -103,12 +98,13 @@ class SalesController extends Controller
         try {
             $search = $request->get('search', '');
 
-            if (strlen($search) < 2) {
-                return response()->json([
-                    'success' => true,
-                    'data' => ['clients' => []]
-                ]);
-            }
+            // if (strlen($search) < 2) {
+            //     return response()->json([
+            //         'success' => true,
+            //         'data' => ['clients' => []]
+            //     ]);
+
+            // }
 
             $clients = Client::select('id', 'name', 'phone', 'email')
                 ->where(function ($query) use ($search) {
@@ -120,18 +116,13 @@ class SalesController extends Controller
                 ->limit(10)
                 ->get();
 
-            return response()->json([
-                'success' => true,
-                'data' => [
-                    'clients' => $clients
-                ]
-            ]);
 
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Erreur lors de la recherche de clients: ' . $e->getMessage()
-            ], 500);
+            $data = [
+                'clients' => $clients
+            ];
+            return sendResponse($data, 'Clients récupérés avec succès');
+        } catch (\Throwable $e) {
+            return sendError('Erreur lors de la recherche de clients', 500, ['error' => $e->getMessage()]);
         }
     }
 
@@ -147,10 +138,8 @@ class SalesController extends Controller
             $perPage = $request->get('per_page', 50);
 
             if (!$stockId) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Stock ID requis'
-                ], 400);
+
+                return sendError('Stock ID requis', 400, ['error' => 'Stock ID requis']);
             }
 
             $query = Product::with(['stockProducts' => function ($query) use ($stockId) {
@@ -190,18 +179,15 @@ class SalesController extends Controller
                 unset($product->stockProducts);
             });
 
-            return response()->json([
-                'success' => true,
-                'data' => [
-                    'products' => $products
-                ]
-            ]);
+
+
+            $data = [
+                'products' => $products
+            ];
+            return sendResponse($data, 'Produits récupérés avec succès');
 
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Erreur lors de la recherche de produits: ' . $e->getMessage()
-            ], 500);
+            return sendError('Erreur lors de la recherche de produits', 500, ['error' => $e->getMessage()]);
         }
     }
 
@@ -232,11 +218,8 @@ class SalesController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Données invalides',
-                'errors' => $validator->errors()
-            ], 422);
+
+            return sendError('Données invalides', 422, $validator->errors());
         }
 
         try {
@@ -245,20 +228,14 @@ class SalesController extends Controller
             // Vérifier la caisse
             $caisse = CashRegister::where('user_id', Auth::id())->first();
             if (!$caisse) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Vous n\'avez pas le droit de créer une facture. Caisse introuvable.'
-                ], 403);
+
+                return sendError('Caisse introuvable', 403, ['error' => 'Vous n\'avez pas le droit de créer une facture.']);
             }
 
             // Valider les stocks
             $stockErrors = $this->validateStock($request->items, $request->stock_id);
             if (!empty($stockErrors)) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Stock insuffisant',
-                    'errors' => $stockErrors
-                ], 400);
+                return sendError('Stocks insuffisants', 400, ['errors' => $stockErrors]);
             }
 
             // Calculer les totaux
@@ -272,21 +249,18 @@ class SalesController extends Controller
 
             DB::commit();
 
-            return response()->json([
-                'success' => true,
-                'message' => $request->invoice_type === 'PROFORMA'
-                    ? 'Proforma enregistrée avec succès'
-                    : 'Vente enregistrée avec succès',
-                'data' => $result
-            ]);
+
+            $data = $result;
+            $message = $request->invoice_type === 'PROFORMA'
+                ? 'Proforma enregistrée avec succès'
+                : 'Vente enregistrée avec succès';
+            return sendResponse($data, $message);
 
         } catch (\Exception $e) {
             DB::rollBack();
 
-            return response()->json([
-                'success' => false,
-                'message' => 'Erreur lors de l\'enregistrement: ' . $e->getMessage()
-            ], 500);
+
+             return sendError('Erreur lors de l\'enregistrement', 500, ['error' => $e->getMessage()]);
         }
     }
 
@@ -486,10 +460,8 @@ class SalesController extends Controller
             $stockId = $request->get('stock_id');
 
             if (!$stockId) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Stock ID requis'
-                ], 400);
+
+                return sendError('Stock ID requis', 400, ['error' => 'Stock ID requis']);
             }
 
             $product = Product::with(['stockProducts' => function ($query) use ($stockId) {
@@ -498,29 +470,22 @@ class SalesController extends Controller
                 ->find($productId);
 
             if (!$product) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Produit non trouvé'
-                ], 404);
+
+                return sendError('Produit non trouvé', 404, ['error' => 'Produit non trouvé']);
             }
 
             $stockProduct = $product->stockProducts->first();
             $availableStock = $stockProduct ? $stockProduct->quantity : 0;
 
-            return response()->json([
-                'success' => true,
-                'data' => [
-                    'product' => $product,
-                    'available_stock' => $availableStock,
-                    'stock_id' => $stockId
-                ]
-            ]);
-
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Erreur lors de la récupération du produit: ' . $e->getMessage()
-            ], 500);
+          
+            $data = [
+                'product' => $product,
+                'available_stock' => $availableStock,
+                'stock_id' => $stockId
+            ];
+            return sendResponse($data, 'Produit récupéré avec succès');
+        } catch (\Throwable $e) {
+            return sendError('Erreur lors de la récupération du produit: ' . $e->getMessage(), 500);
         }
     }
 }
