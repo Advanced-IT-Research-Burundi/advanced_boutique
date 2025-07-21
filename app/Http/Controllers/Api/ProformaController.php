@@ -126,11 +126,14 @@ class ProformaController extends Controller
 
     public function destroy(Request $request, Proforma $proforma)
     {
-        $proforma->delete();
+        try{
+            $proforma->delete();
+            return sendResponse(null, 'Proforma deleted successfully', 200);
 
-        return sendResponse([
-            'proforma' => $proforma,
-        ], 'Proforma deleted successfully', 200);
+        } catch (\Throwable $e) {
+            return sendError('Erreur lors de la suppression', 500, $e->getMessage());
+        }
+
     }
 
     public function validateProforma(Proforma $proforma)
@@ -184,7 +187,7 @@ class ProformaController extends Controller
                 'sale' => $sale,
             ], 'Proforma validée et convertie en vente avec succès.', 200);
 
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             \DB::rollBack();
             \Log::error('Erreur lors de la validation du proforma: ' . $e->getMessage());
 

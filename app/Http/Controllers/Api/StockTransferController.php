@@ -2,65 +2,216 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Requests\StockTransferStoreRequest;
-use App\Http\Requests\StockTransferUpdateRequest;
+use App\Http\Controllers\Controller;
+use App\Models\Stock;
+use App\Models\Category;
+use App\Models\Product;
 use App\Models\StockTransfer;
-use Illuminate\Http\RedirectResponse;
+use App\Models\StockProduct;
+use App\Models\StockProductMouvement;
 use Illuminate\Http\Request;
-use Illuminate\View\View;
+use Illuminate\Support\Facades\DB;
 
 class StockTransferController extends Controller
 {
-    public function index(Request $request): View
+    public function getStocks()
     {
-        $stockTransfers = StockTransfer::all();
+        try {
+            $stocks = Stock::select('id', 'name')->get();
+            return sendResponse(['stocks' => $stocks], 'Stocks récupérés avec succès');
+        } catch (\Exception $e) {
+            return sendError('Erreur lors de la récupération des stocks', 500, $e->getMessage());
+        }
+    }
 
-        return view('stockTransfer.index', [
-            'stockTransfers' => $stockTransfers,
+    public function getStockCategories($stockId)
+    {
+        try {
+            $categories = Category::with('products.stockProducts')
+                ->whereHas('products.stockProducts', function ($query) use ($stockId) {
+                    $query->where('stock_id', $stockId);
+                })->get();
+
+            return sendResponse(['categories' => $categories], 'Catégories récupérées avec succès');
+        } catch (\Exception $e) {
+            return sendError('Erreur lors de la récupération des catégories', 500, $e->getMessage());
+        }
+    }
+
+    public function getProducts(Request $request)
+{
+    try {
+        $stockId = $request->stock_id;
+        $categoryId = $request->category_id;
+        $search = $request->search;
+        $excludeProducts = $request->exclude_products ?? [];
+
+        // Convertir exclude_products en tableau si c'est une chaîne
+        if (is_string($excludeProducts)) {
+            $excludeProducts = array_filter(explode(',', $excludeProducts));
+        }
+
+        $query = Product::with(['stockProducts', 'category'])
+            ->whereHas('stockProducts', function ($query) use ($stockId) {
+                $query->where('stock_id', $stockId);
+            });
+
+        if ($categoryId) {
+            $query->where('category_id', $categoryId);
+        }
+
+        if ($search) {
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', '%' . $search . '%')
+                  ->orWhere('code', 'like', '%' . $search . '%')
+                  ->orWhere('description', 'like', '%' . $search . '%');
+            });
+        }
+
+        if (!empty($excludeProducts)) {
+            $query->whereNotIn('id', $excludeProducts);
+        }
+
+        $products = $query->get()->map(function ($product) use ($stockId) {
+            $stockProduct = $product->stockProducts->where('stock_id', $stockId)->first();
+            $product->stock_quantity = $stockProduct ? $stockProduct->quantity : 0;
+            return $product;
+        });
+
+        return sendResponse(['products' => $products], 'Produits récupérés avec succès');
+    } catch (\Throwable $e) {
+        return sendError('Erreur lors de la récupération des produits', 500, $e->getMessage());
+    }
+}
+
+
+    public function transfer(Request $request)
+    {
+        $request->validate([
+            'from_stock_id' => 'required|exists:stocks,id',
+            'to_stock_id' => 'required|exists:stocks,id|different:from_stock_id',
+            'products' => 'required|array|min:1',
+            'products.*.product_id' => 'required|exists:products,id',
+            'products.*.quantity' => 'required|integer|min:1',
         ]);
+
+        try {
+            DB::beginTransaction();
+
+            $fromStock = Stock::find($request->from_stock_id);
+            $toStock = Stock::find($request->to_stock_id);
+            $transferCode = time();
+
+            foreach ($request->products as $productData) {
+                $product = Product::find($productData['product_id']);
+                $quantity = $productData['quantity'];
+
+                // Vérifier le stock source
+                $sourceStockProduct = $product->stockProducts()
+                    ->where('stock_id', $request->from_stock_id)
+                    ->first();
+
+                if (!$sourceStockProduct || $sourceStockProduct->quantity < $quantity) {
+                    throw new \Exception("Quantité insuffisante pour le produit {$product->name}");
+                }
+
+                // Mettre à jour le stock source
+                $sourceStockProduct->quantity -= $quantity;
+                $sourceStockProduct->save();
+
+                // Mettre à jour ou créer le stock destination
+                $destStockProduct = $product->stockProducts()
+                    ->where('stock_id', $request->to_stock_id)
+                    ->first();
+
+                if (!$destStockProduct) {
+                    $destStockProduct = StockProduct::create([
+                        'stock_id' => $request->to_stock_id,
+                        'product_id' => $product->id,
+                        'product_name' => $product->name,
+                        'quantity' => $quantity,
+                    ]);
+                } else {
+                    $destStockProduct->quantity += $quantity;
+                    $destStockProduct->save();
+                }
+
+                // Enregistrer le transfert
+                StockTransfer::create([
+                    'from_stock_id' => $request->from_stock_id,
+                    'to_stock_id' => $request->to_stock_id,
+                    'product_id' => $product->id,
+                    'quantity' => $quantity,
+                    'price' => 0,
+                    'user_id' => auth()->id(),
+                    'transfer_date' => now(),
+                    'note' => $transferCode,
+                    'product_code' => $product->code,
+                    'product_name' => $product->name,
+                    'agency_id' => auth()->user()->agency_id,
+                    'created_by' => auth()->id(),
+                ]);
+
+                // Créer les mouvements de stock
+                $this->createStockMovements($fromStock, $toStock, $product, $quantity, $transferCode, $sourceStockProduct, $destStockProduct);
+            }
+
+            DB::commit();
+
+
+            $data =[
+                'transfer_code' => $transferCode,
+            ];
+            return sendResponse($data, 'Transfert effectué avec succès');
+
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return sendError('Erreur lors du transfert: ' , 500,[
+                'error' => $e->getMessage(),
+            ]);
+        }
     }
 
-    public function create(Request $request): View
+    private function createStockMovements($fromStock, $toStock, $product, $quantity, $transferCode, $sourceStockProduct, $destStockProduct)
     {
-        return view('stockTransfer.create');
-    }
-
-    public function store(StockTransferStoreRequest $request): RedirectResponse
-    {
-        $stockTransfer = StockTransfer::create($request->validated());
-
-        $request->session()->flash('stockTransfer.id', $stockTransfer->id);
-
-        return redirect()->route('stockTransfers.index');
-    }
-
-    public function show(Request $request, StockTransfer $stockTransfer): View
-    {
-        return view('stockTransfer.show', [
-            'stockTransfer' => $stockTransfer,
+        // Mouvement de sortie (stock source)
+        StockProductMouvement::create([
+            'agency_id' => auth()->user()->agency_id,
+            'stock_id' => $fromStock->id,
+            'stock_product_id' => $sourceStockProduct->id,
+            'item_code' => $product->code,
+            'item_designation' => $product->name,
+            'item_quantity' => $quantity,
+            'item_measurement_unit' => $product->unit ?? 'Piece',
+            'item_purchase_or_sale_price' => $product->sale_price_ht,
+            'item_purchase_or_sale_currency' => $product->sale_price_currency ?? 'BIF',
+            'item_movement_type' => 'ST',
+            'item_movement_invoice_ref' => '',
+            'item_movement_description' => $transferCode . ' - Transfert vers ' . $toStock->name,
+            'item_movement_date' => now(),
+            'item_product_detail_id' => $product->id,
+            'user_id' => auth()->id(),
+            'item_movement_note' => 'Transfert de stock',
         ]);
-    }
 
-    public function edit(Request $request, StockTransfer $stockTransfer): View
-    {
-        return view('stockTransfer.edit', [
-            'stockTransfer' => $stockTransfer,
+        // Mouvement d'entrée (stock destination)
+        StockProductMouvement::create([
+            'agency_id' => auth()->user()->agency_id,
+            'stock_id' => $toStock->id,
+            'stock_product_id' => $destStockProduct->id,
+            'item_code' => $product->code,
+            'item_designation' => $product->name,
+            'item_quantity' => $quantity,
+            'item_measurement_unit' => $product->unit ?? 'Piece',
+            'item_purchase_or_sale_price' => $product->sale_price_ht,
+            'item_purchase_or_sale_currency' => $product->sale_price_currency ?? 'BIF',
+            'item_movement_type' => 'ET',
+            'item_movement_invoice_ref' => $transferCode,
+            'item_movement_description' => $transferCode . ' - Entrée depuis ' . $fromStock->name,
+            'item_movement_date' => now(),
+            'item_product_detail_id' => $product->id,
+            'user_id' => auth()->id(),
+            'item_movement_note' => 'Transfert de destination',
         ]);
-    }
-
-    public function update(StockTransferUpdateRequest $request, StockTransfer $stockTransfer): RedirectResponse
-    {
-        $stockTransfer->update($request->validated());
-
-        $request->session()->flash('stockTransfer.id', $stockTransfer->id);
-
-        return redirect()->route('stockTransfers.index');
-    }
-
-    public function destroy(Request $request, StockTransfer $stockTransfer): RedirectResponse
-    {
-        $stockTransfer->delete();
-
-        return redirect()->route('stockTransfers.index');
     }
 }

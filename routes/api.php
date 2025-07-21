@@ -59,6 +59,16 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/products/{productId}/stock', [SalesController::class, 'getProductStock']);
         Route::post('/store', [SalesController::class, 'store']);
     });
+    Route::prefix('stock-transfers')->group(function () {
+        Route::get('/stocks', [StockTransferController::class, 'getStocks']);
+        Route::get('/stocks/{id}/categories', [StockTransferController::class, 'getStockCategories']);
+        Route::get('/stocks/products', [StockTransferController::class, 'getProducts']);
+        Route::post('/stocks/transfer', [StockTransferController::class, 'transfer']);
+    });
+
+    Route::resource('stocks', StockController::class);
+    Route::delete('/stocks/{stockId}/users/{userId}', [StockShowController::class, 'detachUser']);
+
 
     Route::prefix('users/{user}/stocks')->name('users.stocks.')->group(function () {
         Route::get('/manage', [UserStockController::class, 'manage']);
@@ -86,7 +96,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::resource('companies', CompanyController::class);
     Route::resource('agencies', AgencyController::class);
     Route::resource('users', UserController::class);
-    Route::resource('stocks', StockController::class);
     Route::resource('categories', CategoryController::class);
     Route::resource('products', ProductController::class);
     Route::resource('clients', ClientController::class);
