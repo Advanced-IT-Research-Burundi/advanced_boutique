@@ -31,17 +31,19 @@ class SalesController extends Controller
             $user = Auth::user();
 
             // Récupérer les stocks de l'utilisateur
-            $stocks = $user->stocks()
-                ->withCount('products')
-                ->select('id', 'name', 'agency_id')
-                ->get()
-                ->map(function ($stock) {
-                    return [
-                        'id' => $stock->id,
-                        'name' => $stock->name,
-                        'products_count' => $stock->products_count
-                    ];
-                });
+            $stocks = auth()->user()->stocks()
+                ->get();
+            // $stocks = $user->stocks()
+            //     ->withCount('products')
+            //     ->select('id', 'name', 'agency_id')
+            //     ->get()
+            //     ->map(function ($stock) {
+            //         return [
+            //             'id' => $stock->id,
+            //             'name' => $stock->name,
+            //             'products_count' => $stock->products_count
+            //         ];
+            //     });
 
             return response()->json([
                 'success' => true,
@@ -460,7 +462,7 @@ class SalesController extends Controller
             'type' => 'in',
             'reference_id' => 'Ref ' . $sale->id,
             'amount' => $totals['total_amount'],
-            'description' => $request->note,
+            'description' => $request->note ?? 'Vente Normale facture no '.$sale->id,
             'agency_id' => $caisse->agency_id,
             'created_by' => Auth::id(),
             'user_id' => Auth::id(),
