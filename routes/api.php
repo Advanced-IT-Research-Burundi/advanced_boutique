@@ -23,6 +23,7 @@ use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\UserStockController;
 use App\Http\Controllers\Api\VehiculeController;
 use App\Http\Controllers\Api\SalesController;
+use App\Http\Controllers\Api\StockProductController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ReportsController;
 use Illuminate\Http\Request;
@@ -64,10 +65,21 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/stocks/{id}/categories', [StockTransferController::class, 'getStockCategories']);
         Route::get('/stocks/products', [StockTransferController::class, 'getProducts']);
         Route::post('/stocks/transfer', [StockTransferController::class, 'transfer']);
+
+    });
+    Route::prefix('stock-products')->group(function () {
+        Route::get('/', [StockProductController::class, 'getStockProducts']);
+        Route::post('/', [StockProductController::class, 'addProduct']);
+        Route::delete('{id}', [StockProductController::class, 'removeProduct']);
+        Route::put('{id}/quantity', [StockProductController::class, 'updateQuantity']);
+        Route::post('/bulk', [StockProductController::class, 'addBulkProducts']);
+        Route::get('available', [StockProductController::class, 'getAvailableProducts']);
     });
 
     Route::resource('stocks', StockController::class);
     Route::delete('/stocks/{stockId}/users/{userId}', [StockShowController::class, 'detachUser']);
+    Route::get('stocks/{id}/export/excel', [StockProductController::class, 'exportToExcel']);
+    Route::get('stocks/{id}/export/pdf', [StockProductController::class, 'exportToPdf']);
 
 
     Route::prefix('users/{user}/stocks')->name('users.stocks.')->group(function () {
