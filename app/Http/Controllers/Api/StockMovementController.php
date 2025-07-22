@@ -32,31 +32,19 @@ class StockMovementController extends Controller
             $stockProduct = StockProduct::with(['product', 'stock'])->findOrFail($stockProduct->id);
 
             // Récupérer l'historique des mouvements
-            $movements = StockProductMouvement::with(['user:id,name'])
-                ->where('stock_product_id', $stockProduct->id)
+            $movements = StockProductMouvement::where('stock_product_id', $stockProduct->id)
                 ->orderBy('item_movement_date', 'desc')
                 ->paginate(10);
 
-            return response()->json([
-                'success' => true,
-                'data' => [
-                    'stock_product' => [
-                        'id' => $stockProduct->id,
-                        'product_name' => $stockProduct->product->name,
-                        'stock_name' => $stockProduct->stock->name,
-                        'quantity' => $stockProduct->quantity,
-                        'measurement_unit' => $stockProduct->measurement_unit ?? 'pcs'
-                    ],
-                    'movements' => $movements,
-                    'movement_types' => self::MOVEMENT_TYPES
-                ]
-            ]);
+            $data = [
+                'stock_product' => $stockProduct,
+                'movements' => $movements,
+                'movement_types' => self::MOVEMENT_TYPES
+            ];
+            return sendResponse($data, 'Mouvements du produit récupérés avec succès');
 
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Produit non trouvé: ' . $e->getMessage()
-            ], 404);
+            return sendError('Produit non trouvé', 404, $e->getMessage());
         }
     }
 
@@ -111,23 +99,11 @@ class StockMovementController extends Controller
                 $stockProduct->save();
             });
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Mouvement enregistré avec succès'
-            ]);
-
+            return sendResponse(null, 'Mouvement enregistré avec succès');
         } catch (\Illuminate\Validation\ValidationException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Erreurs de validation',
-                'errors' => $e->errors()
-            ], 422);
-
+            return sendError('Erreur de validation', 422, $e->getMessage());
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Erreur: ' . $e->getMessage()
-            ], 500);
+            return sendError('Erreur lors de l\'enregistrement du mouvement', 500, $e->getMessage());
         }
     }
 }

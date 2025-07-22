@@ -24,6 +24,7 @@ use App\Http\Controllers\Api\UserStockController;
 use App\Http\Controllers\Api\VehiculeController;
 use App\Http\Controllers\Api\SalesController;
 use App\Http\Controllers\Api\StockProductController;
+use App\Http\Controllers\Api\StockMovementController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ReportsController;
 use Illuminate\Http\Request;
@@ -75,6 +76,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/bulk', [StockProductController::class, 'addBulkProducts']);
         Route::get('available', [StockProductController::class, 'getAvailableProducts']);
     });
+    Route::get('stock-movements/{stockProduct}', [StockMovementController::class, 'show']);
 
     Route::resource('stocks', StockController::class);
     Route::delete('/stocks/{stockId}/users/{userId}', [StockShowController::class, 'detachUser']);
