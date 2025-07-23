@@ -25,6 +25,7 @@ use App\Http\Controllers\Api\VehiculeController;
 use App\Http\Controllers\Api\SalesController;
 use App\Http\Controllers\Api\StockProductController;
 use App\Http\Controllers\Api\StockMovementController;
+use App\Http\Controllers\Api\EntreMultipleController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ReportsController;
 use Illuminate\Http\Request;
@@ -75,12 +76,20 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('{id}/quantity', [StockProductController::class, 'updateQuantity']);
         Route::post('/bulk', [StockProductController::class, 'addBulkProducts']);
         Route::get('available', [StockProductController::class, 'getAvailableProducts']);
+        Route::get('for-entry', [EntreMultipleController::class, 'getProductsForEntry']);
+        Route::post('bulk-entry', [EntreMultipleController::class, 'processBulkEntry']);
     });
+    Route::prefix('stocks/{stockId}')->group(function () {
+        Route::get('categories', [EntreMultipleController::class, 'getStockCategories']);
+        Route::get('entry-summary', [EntreMultipleController::class, 'getEntrySummary']);
+        Route::delete('/users/{userId}', [StockShowController::class, 'detachUser']);
+    });
+
+
     Route::get('stock-movements/{stockProduct}', [StockMovementController::class, 'show']);
     Route::post('stock-movements/{stockProduct}', [StockMovementController::class, 'store']);
 
     Route::resource('stocks', StockController::class);
-    Route::delete('/stocks/{stockId}/users/{userId}', [StockShowController::class, 'detachUser']);
     Route::get('stocks/{id}/export/excel', [StockProductController::class, 'exportToExcel']);
     Route::get('stocks/{id}/export/pdf', [StockProductController::class, 'exportToPdf']);
 
