@@ -78,6 +78,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('available', [StockProductController::class, 'getAvailableProducts']);
         Route::get('for-entry', [EntreMultipleController::class, 'getProductsForEntry']);
         Route::post('bulk-entry', [EntreMultipleController::class, 'processBulkEntry']);
+        Route::get('{id}', [StockMovementController::class, 'getStockProduct']);
     });
     Route::prefix('stocks/{stockId}')->group(function () {
         Route::get('categories', [EntreMultipleController::class, 'getStockCategories']);
@@ -86,8 +87,13 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
 
-    Route::get('stock-movements/{stockProduct}', [StockMovementController::class, 'show']);
-    Route::post('stock-movements/{stockProduct}', [StockMovementController::class, 'store']);
+
+
+    Route::prefix('stock-movements')->group(function () {
+        Route::get('/', [StockMovementController::class, 'getMovements']);
+        Route::post('/', [StockMovementController::class, 'createMovement']);
+        Route::get('stats/{stockProductId}', [StockMovementController::class, 'getMovementStats']);
+    });
 
     Route::resource('stocks', StockController::class);
     Route::get('stocks/{id}/export/excel', [StockProductController::class, 'exportToExcel']);
