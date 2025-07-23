@@ -77,6 +77,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('available', [StockProductController::class, 'getAvailableProducts']);
     });
     Route::get('stock-movements/{stockProduct}', [StockMovementController::class, 'show']);
+    Route::post('stock-movements/{stockProduct}', [StockMovementController::class, 'store']);
 
     Route::resource('stocks', StockController::class);
     Route::delete('/stocks/{stockId}/users/{userId}', [StockShowController::class, 'detachUser']);
