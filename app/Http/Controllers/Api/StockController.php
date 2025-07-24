@@ -79,21 +79,27 @@ class StockController extends Controller
      */
     public function store(Request $request)
     {
-        $validated = $request->validate([
+
+        try{
+            $validated = $request->validate([
             'name' => 'required|string|max:255',
             'location' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'agency_id' => 'required|exists:agencies,id',
-            'user_id' => 'required|exists:users,id',
         ]);
 
+        $validated['user_id']  = Auth::id();
+        $validated['agency_id'] =   Auth::user()->agency_id;
         $validated['created_by'] = Auth::id();
-        // $validated['agency_id'] = $request->agency_id ?: null;
-        // dd($validated);
-        Stock::create($validated);
 
-        return redirect()->route('stocks.index')
-                        ->with('success', 'Stock créé avec succès.');
+            $stock = Stock::create($validated);
+
+            return sendResponse($stock,'Les stock est cree avec succes');
+
+        } catch (\Throwable $e) {
+            return sendError('Erreur lors de la création du stock: '.$e->getMessage(), 500, $e->getMessage());
+
+        }
+
     }
 
     /**
@@ -151,10 +157,10 @@ class StockController extends Controller
             'name' => 'required|string|max:255',
             'location' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'agency_id' => 'required|exists:agencies,id',
-            'user_id' => 'required|exists:users,id',
         ]);
 
+        $validated['user_id']  = Auth::id();
+        $validated['agency_id'] =   Auth::user()->agency_id;
         $validated['created_by'] = Auth::id();
 
         $stock->update($validated);

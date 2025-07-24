@@ -180,6 +180,14 @@ class Handler extends ExceptionHandler
                 'error' => $exception->getMessage(),
             ], 401);
         }
+        if ($exception instanceof \Illuminate\Validation\ValidationException) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur de validation',
+                'data' => $exception->errors(),
+                'error' => $exception->getMessage(),
+            ], 422);
+        }
 
         return parent::render($request, $exception);
     }
