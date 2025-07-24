@@ -62,6 +62,14 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/products/{productId}/stock', [SalesController::class, 'getProductStock']);
         Route::post('/store', [SalesController::class, 'store']);
     });
+    Route::prefix('proformas')->group(function () {
+        Route::get('/create-data', [ProformaController::class, 'getCreateData']);
+        Route::get('/categories/{stockId}', [ProformaController::class, 'getCategories']);
+        Route::get('/clients/search', [ProformaController::class, 'searchClients']);
+        Route::get('/products/search', [ProformaController::class, 'searchProducts']);
+        Route::get('/products/{productId}/stock', [ProformaController::class, 'getProductStock']);
+        Route::post('/store', [ProformaController::class, 'store']);
+    });
     Route::prefix('stock-transfers')->group(function () {
         Route::get('/stocks', [StockTransferController::class, 'getStocks']);
         Route::get('/stocks/{id}/categories', [StockTransferController::class, 'getStockCategories']);

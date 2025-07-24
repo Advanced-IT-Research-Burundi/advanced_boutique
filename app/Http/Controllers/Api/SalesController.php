@@ -241,10 +241,10 @@ class SalesController extends Controller
             // Calculer les totaux
             $totals = $this->calculateTotals($request->items);
 
-            if ($request->invoice_type === 'PROFORMA') {
-                $result = $this->createProforma($request, $totals, $caisse);
-            } else {
+            if ($request->invoice_type === 'FACTURE') {
                 $result = $this->createSale($request, $totals, $caisse);
+            } else {
+                return sendError('Type de facture non supporté', 400, ['error' => 'Type de facture non supporté']);
             }
 
             DB::commit();
@@ -460,7 +460,6 @@ class SalesController extends Controller
             $stockId = $request->get('stock_id');
 
             if (!$stockId) {
-
                 return sendError('Stock ID requis', 400, ['error' => 'Stock ID requis']);
             }
 
@@ -477,7 +476,7 @@ class SalesController extends Controller
             $stockProduct = $product->stockProducts->first();
             $availableStock = $stockProduct ? $stockProduct->quantity : 0;
 
-          
+
             $data = [
                 'product' => $product,
                 'available_stock' => $availableStock,
