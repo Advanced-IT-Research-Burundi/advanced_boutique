@@ -24,6 +24,7 @@ class StockProductController extends Controller
     try {
         $stockId = $request->get('stock_id');
         $search = $request->get('search', '');
+
         $query = Product::query();
 
         if (!empty($search)) {
@@ -37,13 +38,12 @@ class StockProductController extends Controller
             $query->whereNotIn('id', function ($subQuery) use ($stockId) {
                 $subQuery->select('product_id')
                          ->from('stock_products')
+                         ->where('deleted_at', null)
                          ->where('stock_id', $stockId);
             });
         }
 
-        $products = $query->latest()
-            ->orderBy('created_at', 'desc')
-            ->paginate(10);
+        $products = $query->take(50)->get();
 
 
         $data = [
@@ -311,13 +311,9 @@ class StockProductController extends Controller
                 }
             }
 
-
-            return sendResponse($data, "{$addedCount} produit(s) ajouté(s) au stock avec succès");
+            return sendResponse(null, "{$addedCount} produit(s) ajouté(s) au stock avec succès");
         } catch (\Exception $e) {
-
-
-
-            return sendError('Erreur lors de l\'ajout des produits: ' , 500, $e->getMessage());
+            return sendError('Erreur lors de l\'ajout des produits: '.$e->getMessage() , 500, $e->getMessage());
         }
     }
 }
