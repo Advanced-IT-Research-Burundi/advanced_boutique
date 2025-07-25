@@ -439,6 +439,16 @@ class ProformaController extends Controller
     {
         $dueAmount = $totals['total_amount'] - $request->paid_amount;
 
+        $items = array_map(function ($item) {
+            return [
+                'product_id' => $item['product_id'],
+                'quantity' => $item['quantity'],
+                'sale_price' => $item['sale_price'],
+                'discount' => $item['discount'] ?? 0,
+                'subtotal' => $item['quantity'] * $item['sale_price'],
+            ];
+        }, $request->items);
+
         $proforma = Proforma::create([
             'client_id' => $request->client_id,
             'stock_id' => $request->stock_id,
@@ -451,7 +461,7 @@ class ProformaController extends Controller
             'invoice_type' => $request->invoice_type,
             'agency_id' => Auth::user()->agency_id,
             'created_by' => Auth::id(),
-            'proforma_items' => json_encode($request->items),
+            'proforma_items' => json_encode($items),
             'client' => json_encode(Client::find($request->client_id)),
         ]);
 
