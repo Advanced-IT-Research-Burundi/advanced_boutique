@@ -121,7 +121,7 @@ Route::middleware('auth:sanctum')->group(function () {
         });
     });
     Route::resource('proformas', ProformaController::class);
-    Route::get('proformas/{proforma}/validate', [ProformaController::class, 'validateProforma']);
+    Route::post('proformas/{proforma}/validate', [ProformaController::class, 'validateProforma']);
     Route::get('/profile', [ProfileController::class, 'edit']);
     Route::patch('/profile', [ProfileController::class, 'update']);
     Route::patch('/profile/update-photo', [ProfileController::class, 'updatephoto']);

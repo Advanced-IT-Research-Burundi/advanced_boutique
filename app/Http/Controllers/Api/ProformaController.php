@@ -163,17 +163,34 @@ class ProformaController extends Controller
                 'updated_at' => now()
             ]);
 
+             // Vérifier la caisse
+            $caisse = CashRegister::where('user_id', Auth::id())->first();
+            if (!$caisse) {
+
+                return sendError('Caisse introuvable', 403, ['error' => 'Vous n\'avez pas le droit de créer une facture.']);
+            }
+
+            // Créer la transaction de caisse
+            CashTransaction::create([
+                'cash_register_id' => $caisse->id,
+                'type' => 'in',
+                'reference_id' => 'Ref ' . $sale->id,
+                'amount' => $proforma->total_amount,
+                'description' => $request->note ?? 'Vente Normale facture no '.$sale->id,
+                'agency_id' => $caisse->agency_id,
+                'created_by' => Auth::id(),
+                'user_id' => Auth::id(),
+            ]);
+
             \DB::commit();
 
-            return sendResponse([
-                'sale' => $sale,
-            ], 'Proforma validée et convertie en vente avec succès.', 200);
+            return sendResponse($sale, 'Proforma validée et convertie en vente avec succès.', 200);
 
         } catch (\Throwable $e) {
             \DB::rollBack();
             \Log::error('Erreur lors de la validation du proforma: ' . $e->getMessage());
 
-            return sendError('Erreur lors de la validation du proforma: ' . $e->getMessage());
+            return sendError('Erreur lors de la validation du proforma: ' . $e->getMessage(), 500, ['error' => $e->getMessage()]);
         }
     }
 
