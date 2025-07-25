@@ -54,7 +54,7 @@ class ProductController extends Controller
     public function show(Product $product)
     {
         $product->load(['category', 'agency', 'createdBy', 'user']);
-
+       
         return sendResponse([
             'product' => $product
         ], 'Product retrieved successfully', 200);

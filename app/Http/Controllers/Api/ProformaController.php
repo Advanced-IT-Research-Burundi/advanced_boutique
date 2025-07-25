@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Requests\ProformaStoreRequest;
 use App\Http\Requests\ProformaUpdateRequest;
+use App\Models\Company;
 use App\Models\Proforma;
 use App\Models\Sale;
 use App\Models\SaleItem;
@@ -98,7 +99,8 @@ class ProformaController extends Controller
         return sendResponse([
             'proforma' => $proforma,
             'items' => $items,
-            'client' => $client
+            'client' => $client,
+            'company' =>   Company::where('is_actif', true)->first()
         ], 'Proforma retrieved successfully', 200);
     }
 

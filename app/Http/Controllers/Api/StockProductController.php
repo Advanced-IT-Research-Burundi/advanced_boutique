@@ -24,7 +24,6 @@ class StockProductController extends Controller
     try {
         $stockId = $request->get('stock_id');
         $search = $request->get('search', '');
-
         $query = Product::query();
 
         if (!empty($search)) {
@@ -42,9 +41,11 @@ class StockProductController extends Controller
             });
         }
 
-        $products = $query->take(50)->get();
+        $products = $query->latest()
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);
 
-       
+
         $data = [
             'products' => $products
         ];

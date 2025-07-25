@@ -17,7 +17,7 @@ class StockProductMouvement extends Model
         return $this->belongsTo(User::class);
     }
 
-    public static function addStockProductMouvement(StockProduct $stockProduct, double $quantite,Sale $sale , string $type,string $description,  string $note = 'Vente Normal'){
+    public static function addStockProductMouvement(StockProduct $stockProduct,  $quantite,Sale $sale , string $type,string $description,  string $note = 'Vente Normal'){
 
         StockProductMouvement::create([
             'agency_id' => auth()->user()->agency_id,

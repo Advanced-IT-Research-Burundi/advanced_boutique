@@ -47,7 +47,7 @@ class UpdateDatabaseCommand extends Command
                         'stock_id' => $stock->id,
                         'product_name' => $product->name,
                         'product_id' => $product->id,
-                        'quantity' => 0,
+                        'quantity' => 20,
                         'price' => $product->sale_price,
                         'purchase_price' => $product->purchase_price,
                         'sale_price_ht' => $product->sale_price_ht,

@@ -178,7 +178,7 @@ class SaleController extends Controller
                 'company' => $company
             ];
 
-            return sendResponse('Vente récupérée avec succès', $data);
+            return sendResponse( $data ,'Vente récupérée avec succès', 200);
 
         } catch (\Exception $e) {
             return sendError('Erreur lors de la récupération de la vente: ' . $e->getMessage());
