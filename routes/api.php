@@ -72,6 +72,7 @@ Route::middleware('auth:sanctum')->group(function () {
     });
     Route::prefix('stock-transfers')->group(function () {
         Route::get('/stocks', [StockTransferController::class, 'getStocks']);
+        Route::get('/stocks/{id}/proformas', [StockTransferController::class, 'getStockProformas']);
         Route::get('/stocks/{id}/categories', [StockTransferController::class, 'getStockCategories']);
         Route::get('/stocks/products', [StockTransferController::class, 'getProducts']);
         Route::post('/stocks/transfer', [StockTransferController::class, 'transfer']);

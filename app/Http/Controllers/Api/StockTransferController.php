@@ -24,6 +24,16 @@ class StockTransferController extends Controller
         }
     }
 
+    public function getStockProformas($id)
+    {
+        try {
+            $proformas = Stock::find($id)->proformas()->get();
+
+            return sendResponse(['proformas' => $proformas], 'Proformas récupérées avec succès');
+        } catch (\Exception $e) {
+            return sendError('Erreur lors de la récupération des proformas', 500, $e->getMessage());
+        }
+    }
     public function getStockCategories($stockId)
     {
         try {
