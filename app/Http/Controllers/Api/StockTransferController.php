@@ -27,7 +27,7 @@ class StockTransferController extends Controller
     public function getStockProformas($id)
     {
         try {
-            $proformas = Stock::find($id)->proformas()->get();
+            $proformas = Stock::find($id)->proformaNonValides()->get();
 
             return sendResponse(['proformas' => $proformas], 'Proformas récupérées avec succès');
         } catch (\Exception $e) {

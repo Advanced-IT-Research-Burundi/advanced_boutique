@@ -26,6 +26,7 @@ return new class extends Migration
             $table->foreignId('created_by')->nullable()->constrained('users');
             $table->text('proforma_items')->nullable();
             $table->text('client')->nullable();
+            $table->boolean('is_valid')->default(false);
             $table->timestamps();
             $table->softDeletes();
         });

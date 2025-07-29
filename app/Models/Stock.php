@@ -90,6 +90,14 @@ class Stock extends Model
     {
         return $this->hasMany(Proforma::class);
     }
+    public function proformaValides(): HasMany
+    {
+        return $this->hasMany(Proforma::class)->where('is_valid', true)->latest('sale_date');
+    }
+    public function proformaNonValides(): HasMany
+    {
+        return $this->hasMany(Proforma::class)->where('is_valid', false)->latest('created_at');
+    }
 
     public function stockTransfers(): HasMany
     {

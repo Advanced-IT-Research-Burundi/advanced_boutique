@@ -160,6 +160,8 @@ class ProformaController extends Controller
 
             $proforma->update([
                 'invoice_type' => 'F. PROFORMA VALIDÉE',
+                'is_valid' => true,
+                'sale_date' => now(),
                 'updated_at' => now()
             ]);
 
