@@ -28,7 +28,6 @@ use App\Http\Controllers\Api\StockMovementController;
 use App\Http\Controllers\Api\EntreMultipleController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ReportsController;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 
