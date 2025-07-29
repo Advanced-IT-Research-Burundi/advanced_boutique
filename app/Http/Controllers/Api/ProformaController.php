@@ -159,7 +159,7 @@ class ProformaController extends Controller
                 ->first();
 
             if (!$stockProduct || $stockProduct->quantity < $item['quantity']) {
-                throw new \Exception("Stock insuffisant pour le produit {$item['product_id']}");
+                throw new \Exception("Stock insuffisant pour le produit code :  {$stockProduct->product->code} - {$stockProduct->product->name}");
             }
 
             $stockProduct->update([
@@ -193,6 +193,7 @@ class ProformaController extends Controller
                 'sale_date' => now(),
                 'updated_at' => now()
             ]);
+
 
 
 

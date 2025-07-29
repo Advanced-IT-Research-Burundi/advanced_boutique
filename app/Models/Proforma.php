@@ -21,7 +21,8 @@ class Proforma extends Model
         'agency_id',
         'created_by',
         'proforma_items',
-        'client'
+        'client',
+        'is_valid'
     ];
 
     protected $casts = [
