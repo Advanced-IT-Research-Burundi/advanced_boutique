@@ -122,7 +122,7 @@ Route::middleware('auth:sanctum')->group(function () {
     });
     Route::resource('proformas', ProformaController::class);
     Route::post('proformas/{proforma}/validate', [ProformaController::class, 'validateProforma']);
-    Route::post('proformas/validate/bulk', [ProformaController::class, 'setValidatingProformaIds']);
+    Route::post('proformas/validate/bulk', [ProformaController::class, 'validateBulkProformas']);
     Route::get('/profile', [ProfileController::class, 'edit']);
     Route::patch('/profile', [ProfileController::class, 'update']);
     Route::patch('/profile/update-photo', [ProfileController::class, 'updatephoto']);
@@ -131,7 +131,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/parametrage/company/update', [ParametrageController::class, 'updateCompany']);
     Route::get('stocks/{stock}/show', [StockController::class, 'list']);
     Route::get('stocks/{stock}/mouvement', [StockController::class, 'mouvement']);
-    Route::get('stocks/transfer', [StockController::class, 'transfer']);
     Route::resource('companies', CompanyController::class);
     Route::resource('agencies', AgencyController::class);
     Route::resource('users', UserController::class);

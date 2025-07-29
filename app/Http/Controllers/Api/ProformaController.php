@@ -118,11 +118,7 @@ class ProformaController extends Controller
 
     }
 
-    public function validateProforma(Proforma $proforma)
-    {
-         try {
-            \DB::beginTransaction();
-
+    public function valide(Proforma $proforma, $caisse){
 
             $proformaItems = json_decode($proforma->proforma_items, true);
             $clientData = json_decode($proforma->client, true);
@@ -151,11 +147,44 @@ class ProformaController extends Controller
                     'quantity' => $item['quantity'],
                     'sale_price' => $item['sale_price'],
                     'discount' => $item['discount'] ?? 0,
-                    'subtotal' => $item['subtotal'],
+                    'subtotal' => $item['quantity'] * $item['sale_price'],
                     'agency_id' => $proforma->agency_id,
                     'created_by' => auth()->id() ?? $proforma->created_by,
                     'user_id' => $proforma->user_id,
                 ]);
+
+                // Mettre à jour le stock
+            $stockProduct = StockProduct::where('product_id', $item['product_id'])
+                ->where('stock_id', $proforma->stock_id)
+                ->first();
+
+            if (!$stockProduct || $stockProduct->quantity < $item['quantity']) {
+                throw new \Exception("Stock insuffisant pour le produit {$item['product_id']}");
+            }
+
+            $stockProduct->update([
+                'quantity' => $stockProduct->quantity - $item['quantity']
+            ]);
+
+            // Créer le mouvement de stock
+            StockProductMouvement::create([
+                'agency_id' => Auth::user()->agency_id,
+                'stock_id' => $stockProduct->stock_id,
+                'stock_product_id' => $stockProduct->id,
+                'item_code' => $stockProduct->id,
+                'item_designation' => $stockProduct->product->name,
+                'item_quantity' => $item['quantity'],
+                'item_measurement_unit' => $stockProduct->product->unit ?? 'Piece',
+                'item_purchase_or_sale_price' => $stockProduct->sale_price_ttc ?? 0,
+                'item_purchase_or_sale_currency' => $stockProduct->product->sale_price_currency ?? 'BIF',
+                'item_movement_type' => 'SN',
+                'item_movement_invoice_ref' => $sale->id,
+                'item_movement_description' => 'Vente',
+                'item_movement_date' => now(),
+                'item_product_detail_id' => $stockProduct->product->id,
+                'user_id' => Auth::id(),
+                'item_movement_note' => 'Vente Normale',
+            ]);
             }
 
             $proforma->update([
@@ -165,12 +194,7 @@ class ProformaController extends Controller
                 'updated_at' => now()
             ]);
 
-             // Vérifier la caisse
-            $caisse = CashRegister::where('user_id', Auth::id())->first();
-            if (!$caisse) {
 
-                return sendError('Caisse introuvable', 403, ['error' => 'Vous n\'avez pas le droit de créer une facture.']);
-            }
 
             // Créer la transaction de caisse
             CashTransaction::create([
@@ -184,6 +208,25 @@ class ProformaController extends Controller
                 'user_id' => Auth::id(),
             ]);
 
+
+    }
+
+    public function validateProforma(Proforma $proforma)
+    {
+         try {
+            \DB::beginTransaction();
+
+             // Vérifier la caisse
+            $caisse = CashRegister::where('user_id', Auth::id())->first();
+            if (!$caisse) {
+
+                return sendError('Caisse introuvable', 403, ['error' => 'Vous n\'avez pas le droit de créer une facture.']);
+            }
+
+
+            // Valider le proforma
+            $this->valide($proforma, $caisse);
+
             \DB::commit();
 
             return sendResponse($sale, 'Proforma validée et convertie en vente avec succès.', 200);
@@ -193,6 +236,39 @@ class ProformaController extends Controller
             \Log::error('Erreur lors de la validation du proforma: ' . $e->getMessage());
 
             return sendError('Erreur lors de la validation du proforma: ' . $e->getMessage(), 500, ['error' => $e->getMessage()]);
+        }
+    }
+
+    public function validateBulkProformas(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'proforma_ids' => 'required|array|min:1',
+            'proforma_ids.*' => 'exists:proformas,id',
+        ]);
+
+        if ($validator->fails()) {
+            return sendError('Données invalides', 422, $validator->errors());
+        }
+
+        try {
+            \DB::beginTransaction();
+
+            $proformas = Proforma::whereIn('id', $request->proforma_ids)->get();
+            $caisse = CashRegister::where('user_id', Auth::id())->first();
+            if (!$caisse) {
+                return sendError('Caisse introuvable', 403, ['error' => 'Vous n\'avez pas le droit de créer une facture.']);
+            }
+
+            foreach ($proformas as $proforma) {
+                $this->valide($proforma, $caisse);
+            }
+
+            \DB::commit();
+            return sendResponse(null, 'Proformas validées avec succès.', 200);
+
+        } catch (\Throwable $e) {
+            \DB::rollBack();
+            return sendError('Erreur lors de la validation des proformas: ' . $e->getMessage(), 500);
         }
     }
 
