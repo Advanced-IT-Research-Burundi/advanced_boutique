@@ -109,17 +109,12 @@ class StockController extends Controller
     {
         try {
             // $stock->load(['agency', 'user', 'createdBy']);
-
-            $recentProducts = $stock->stockProducts()
+          /*   $recentProducts = $stock->stockProducts()
                 ->with(['product'])
-                ->orderBy('created_at', 'desc')
+                ->orderBy('updated_at', 'desc')
                 ->take(1)
-                ->get();
-
-            $recentProducts = $stock->stockProducts()
-                ->with(['product' => function($query) {
-                    $query->select('id', 'name', 'code', 'unit', 'image');
-                }])
+                ->get(); */
+            $recentProducts = $stock->stockProductsWithProduct()
                 ->latest()
                 ->limit(5)
                 ->get();

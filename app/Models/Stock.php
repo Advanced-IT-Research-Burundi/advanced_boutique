@@ -68,7 +68,12 @@ class Stock extends Model
 
     public function stockProducts(): HasMany
     {
-        return $this->hasMany(StockProduct::class);
+        return $this->hasMany(StockProduct::class)->with('product')->whereHas('product');
+    }
+
+    public function stockProductsWithProduct()
+    {
+        return $this->hasMany(StockProduct::class)->with('product')->whereHas('product');
     }
 
     public function purchases(): HasMany
