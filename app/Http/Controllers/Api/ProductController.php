@@ -34,14 +34,9 @@ class ProductController extends Controller
         if ($request->filled('agency_id')) {
             $query->where('agency_id', $request->agency_id);
         }
-
         $products = $query->paginate(10);
-
-
         $categories = Category::whereIn('id', Product::select('category_id')->distinct()->pluck('category_id'))->get();
         $agencies = Agency::whereIn('id', Product::select('agency_id')->distinct()->pluck('agency_id'))->get();
-
-
         $data = [
             'products' => $products,
             'categories' => $categories,
@@ -54,7 +49,6 @@ class ProductController extends Controller
     public function show(Product $product)
     {
         $product->load(['category', 'agency', 'createdBy', 'user']);
-       
         return sendResponse([
             'product' => $product
         ], 'Product retrieved successfully', 200);

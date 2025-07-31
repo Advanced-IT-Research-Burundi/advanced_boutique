@@ -400,8 +400,8 @@ class ProformaController extends Controller
                 }])
                 ->select('id', 'name', 'code', 'description', 'sale_price_ttc', 'unit', 'image', 'category_id')
                 ->whereHas('stockProducts', function ($query) use ($stockId) {
-                    // $query->where('quantity', '>=', 0)
-                          $query->where('stock_id', $stockId);
+                     $query->where('quantity', '>=', 0)
+                          ->where('stock_id', $stockId);
                 });
 
             // Recherche par mot-clé
