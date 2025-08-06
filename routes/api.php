@@ -27,6 +27,7 @@ use App\Http\Controllers\Api\StockProductController;
 use App\Http\Controllers\Api\StockMovementController;
 use App\Http\Controllers\Api\EntreMultipleController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ProductCompanyNameController;
 use App\Http\Controllers\ReportsController;
 use Illuminate\Support\Facades\Route;
 
@@ -107,7 +108,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('stocks/{id}/export/excel', [StockProductController::class, 'exportToExcel']);
     Route::get('stocks/{id}/export/pdf', [StockProductController::class, 'exportToPdf']);
 
-
     Route::prefix('users/{user}/stocks')->name('users.stocks.')->group(function () {
         Route::get('/manage', [UserStockController::class, 'manage']);
         Route::post('/attach', [UserStockController::class, 'attach']);
@@ -154,4 +154,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::resource('user-stocks', UserStockController::class);
     Route::resource('vehicules', VehiculeController::class);
     Route::delete('products/mul_destroy', [ProductController::class, 'multDestroy']);
+
+    Route::apiResource('product-company-names',ProductCompanyNameController::class);
+    Route::post('imports/company_products', [ProductCompanyNameController::class, 'importCompanyProducts']);
 });
+
+

@@ -35,14 +35,10 @@ class VehiculeController extends Controller
         if ($request->filled('year')) {
             $query->where('year', $request->get('year'));
         }
-
-
         $vehicules = $query->latest()->paginate(10)->appends($request->query());
-
         $data = [
             'vehicules' => $vehicules
         ];
-
 
         return sendResponse($data, 'Liste des véhicules récupérée avec succès');
     }
@@ -55,10 +51,11 @@ class VehiculeController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'brand' => 'required|string|max:255',
-            'model' => 'required|string|max:255',
+            'brand' => 'nullable|string|max:255',
+            'model' => 'nullable|string|max:255',
             'year' => 'required|integer|min:1900|max:' . (date('Y') + 1),
             'immatriculation' => 'required|string|unique:vehicules|max:20',
+            'poids' => 'nullable|numeric|min:0',
             'status' => 'required|in:disponible,en_location,en_reparation',
             'description' => 'nullable|string',
         ]);
@@ -77,7 +74,7 @@ class VehiculeController extends Controller
      */
     public function show(Vehicule $vehicule)
     {
-        return view('vehicules.show', compact('vehicule'));
+        return sendResponse($vehicule    , 'Véhicule récupéré avec succès');
     }
 
 

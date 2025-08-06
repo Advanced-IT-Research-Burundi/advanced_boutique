@@ -1,17 +1,15 @@
 created:
-    - app/Http/Controllers/ProformaController.php
-    - database/factories/ProformaFactory.php
-    - database/migrations/2025_06_27_095735_create_proformas_table.php
-    - app/Models/Proforma.php
-    - tests/Feature/Http/Controllers/ProformaControllerTest.php
-    - app/Http/Requests/ProformaStoreRequest.php
-    - app/Http/Requests/ProformaUpdateRequest.php
-    - resources/views/proforma/index.blade.php
-    - resources/views/proforma/create.blade.php
-    - resources/views/proforma/show.blade.php
-    - resources/views/proforma/edit.blade.php
+    - app/Http/Controllers/ProductCompanyNameController.php
+    - database/factories/ProductCompanyNameFactory.php
+    - database/migrations/2025_08_05_053014_create_product_company_names_table.php
+    - app/Models/ProductCompanyName.php
+    - tests/Feature/Http/Controllers/ProductCompanyNameControllerTest.php
+    - app/Http/Requests/ProductCompanyNameStoreRequest.php
+    - app/Http/Requests/ProductCompanyNameUpdateRequest.php
+    - app/Http/Resources/ProductCompanyNameCollection.php
+    - app/Http/Resources/ProductCompanyNameResource.php
 updated:
-    - routes/web.php
+    - routes/api.php
 models:
     User: { first_name: string, last_name: string, email: 'string unique', email_verified_at: 'timestamp nullable', password: string, phone: 'string nullable', address: 'text nullable', date_of_birth: 'date nullable', gender: 'enum[male,female,other] nullable', profile_photo: 'string nullable', status: 'enum[active,inactive,suspended] default:active', role: 'enum[super_admin,company_admin,agency_manager,cashier,salesperson,accountant,stock_manager] default:salesperson', permissions: 'json nullable', last_login_at: 'timestamp nullable', must_change_password: 'boolean default:false', two_factor_enabled: 'boolean default:false', two_factor_secret: 'string nullable', recovery_codes: 'json nullable', company_id: 'id foreign:companies nullable', agency_id: 'id foreign:agencies nullable', created_by: 'id foreign:users nullable', remember_token: 'string nullable', timestamps: timestamps, softdeletes: softDeletes, relationships: { belongsTo: 'Company, Agency, User', hasMany: 'Company, Agency, Stock, UserStock, Category, Product, Client, Supplier, Purchase, Sale, CashRegister, CashTransaction, Expense, ExpenseType, StockTransfer, Payment, User', belongsToMany: Stock } }
     Company: { tp_name: string, tp_type: string, tp_TIN: string, tp_trade_number: 'string nullable', tp_postal_number: 'string nullable', tp_phone_number: 'string nullable', tp_address_province: 'string nullable', tp_address_commune: 'string nullable', tp_address_quartier: 'string nullable', tp_address_avenue: 'string nullable', tp_address_rue: 'string nullable', tp_address_number: 'string nullable', vat_taxpayer: 'string nullable', ct_taxpayer: 'string nullable', tl_taxpayer: 'string nullable', tp_fiscal_center: 'string nullable', tp_activity_sector: 'string nullable', tp_legal_form: 'string nullable', payment_type: 'string nullable', is_actif: 'boolean default:true', user_id: 'id foreign:users', timestamps: timestamps, softdeletes: softDeletes, relationships: { belongsTo: User, hasMany: 'Agency, Stock, Category, Product, Client, Supplier, Purchase, Sale, CashRegister, Expense, ExpenseType' } }
@@ -36,3 +34,4 @@ models:
     Agency: { company_id: 'id foreign:companies', code: 'string unique', name: string, adresse: string, manager_id: 'id foreign:users nullable', parent_agency_id: 'id foreign:agencies nullable', is_main_office: 'boolean default:false', created_by: 'id foreign:users', timestamps: timestamps, softdeletes: softDeletes, relationships: { belongsTo: 'Company, User, Agency, User', hasMany: 'Agency, Stock, Category, Product, Client, Supplier, Purchase, Sale, CashRegister, Expense, ExpenseType, UserStock, StockTransfer, CashTransaction' } }
     Vehicule: { name: string, model: 'string nullable', brand: 'string nullable', year: 'integer nullable', color: 'string nullable', price: 'decimal nullable', status: 'enum[available,rented,unavailable] default:available', description: 'text nullable', agency_id: 'id foreign:agencies nullable', created_by: 'id foreign:users', timestamps: timestamps, softdeletes: softDeletes, relationships: { belongsTo: 'Agency, User', hasMany: Vehicule } }
     Proforma: { stock_id: 'id foreign:stocks', user_id: 'id foreign:users', total_amount: double, due_amount: double, sale_date: date, note: 'text nullable', invoice_type: 'string nullable', agency_id: 'id foreign:agencies', created_by: 'id foreign:users', proforma_items: 'text nullable', client: 'text nullable', timestamps: timestamps, softdeletes: softDeletes, relationships: { belongsTo: 'Stock, User, Agency' } }
+    ProductCompanyName: { product_code: 'string null', company_code: 'string null', item_name: 'string null', size: 'string null', packing_details: 'string null', mfg_location: 'string null', weight_kg: 'double null', order_qty: 'double null', total_weight: 'double null', pu: 'string null', total_weight_pu: float }

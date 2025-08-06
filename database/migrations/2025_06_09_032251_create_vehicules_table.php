@@ -21,6 +21,7 @@ return new class extends Migration
             $table->string('brand')->nullable();
             $table->integer('year')->nullable();
             $table->string('color')->nullable();
+            $table->double('poids')->nullable();
             $table->decimal('price')->nullable();
             $table->string('status')->default('disponible');
             $table->text('description')->nullable();

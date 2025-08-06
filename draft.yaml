@@ -1,21 +1,17 @@
 models:
-  Proforma:
-    stock_id: id foreign:stocks
-    user_id: id foreign:users
-    total_amount: double
-    due_amount: double
-    sale_date: date
-    note: text nullable
-    invoice_type: string nullable
-    agency_id: id foreign:agencies
-    created_by: id foreign:users
-    proforma_items: text nullable
-    client: text nullable
-    timestamps: true
-    softDeletes: true
-    relationships:
-      belongsTo: Stock, User, Agency
+  ProductCompanyName:
+    product_code : string null
+    company_code : string null
+    item_name : string null
+    size : string null
+    packing_details : string null
+    mfg_location : string null
+    weight_kg : double null
+    order_qty : double null
+    total_weight : double null
+    pu : string null
+    total_weight_pu : float
 
 controllers:
-  Proforma:
-    resource: web
+  ProductCompanyName:
+    resource: api

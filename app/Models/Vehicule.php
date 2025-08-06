@@ -24,6 +24,7 @@ class Vehicule extends Model
         'brand',
         'year',
         'color',
+        'poids',
         'price',
         'status',
         'description',
