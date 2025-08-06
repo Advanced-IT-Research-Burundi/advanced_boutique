@@ -19,9 +19,27 @@ class ProductCompanyNameController extends Controller
      */
     public function index(Request $request)
     {
-        $productCompanyNames = ProductCompanyName::all();
+        $searchTerm = $request->input('search');
+        if ($searchTerm) {
+            $productCompanyNames = ProductCompanyName::
+            
+                   
+            where(
+                function ($query) use ($searchTerm) {
+                    $query->where('product_code', 'like', '%' . $searchTerm . '%')
+                        ->orWhere('item_name', 'like', '%' . $searchTerm . '%')
+                        ->orWhere('company_code', 'like', '%' . $searchTerm . '%');
+                }
+            )
+            ->whereNotNull('product_code')
+            ->latest()
+            ->paginate(5);
+        } else {
+            $productCompanyNames = ProductCompanyName::whereNotNull('product_code')->latest()->paginate();
+        }
+        
 
-        return new ProductCompanyNameCollection($productCompanyNames);
+        return sendResponse(  $productCompanyNames , 'Product Company Names retrieved successfully', 200);
     }
 
     public function importCompanyProducts(Request $request)

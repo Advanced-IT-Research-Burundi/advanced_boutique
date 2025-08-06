@@ -1,17 +1,28 @@
 models:
-  ProductCompanyName:
-    product_code : string null
-    company_code : string null
-    item_name : string null
-    size : string null
-    packing_details : string null
-    mfg_location : string null
-    weight_kg : double null
-    order_qty : double null
-    total_weight : double null
-    pu : string null
-    total_weight_pu : float
+  Commandes:
+    vehicule_id : integer
+    matricule : string nullable
+    commentaire : text nullable
+    poids : float nullable
+    date_livraison : date nullable
+    description: text nullable
+  
+  CommandeDetails:
+    commande_id : integer
+    produit_id : string nullable
+    produit_code : string nullable
+    produit_name : string nullable
+    company_code : integer
+    quantite : double nullable
+    poids : double nullable
+    prix_unitaire : double default 0.0
+    remise: float nullable nullable
+    date_livraison: date nullable
+    statut: string nullable
+
 
 controllers:
-  ProductCompanyName:
+  Commandes:
+    resource: api
+  CommandeDetails:
     resource: api

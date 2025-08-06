@@ -1,13 +1,22 @@
 created:
-    - app/Http/Controllers/ProductCompanyNameController.php
-    - database/factories/ProductCompanyNameFactory.php
-    - database/migrations/2025_08_05_053014_create_product_company_names_table.php
-    - app/Models/ProductCompanyName.php
-    - tests/Feature/Http/Controllers/ProductCompanyNameControllerTest.php
-    - app/Http/Requests/ProductCompanyNameStoreRequest.php
-    - app/Http/Requests/ProductCompanyNameUpdateRequest.php
-    - app/Http/Resources/ProductCompanyNameCollection.php
-    - app/Http/Resources/ProductCompanyNameResource.php
+    - app/Http/Controllers/CommandesController.php
+    - app/Http/Controllers/CommandeDetailsController.php
+    - database/factories/CommandesFactory.php
+    - database/factories/CommandeDetailsFactory.php
+    - database/migrations/2025_08_06_054049_create_commandes_table.php
+    - database/migrations/2025_08_06_054050_create_commande_details_table.php
+    - app/Models/Commandes.php
+    - app/Models/CommandeDetails.php
+    - tests/Feature/Http/Controllers/CommandesControllerTest.php
+    - tests/Feature/Http/Controllers/CommandeDetailsControllerTest.php
+    - app/Http/Requests/CommandeStoreRequest.php
+    - app/Http/Requests/CommandeUpdateRequest.php
+    - app/Http/Requests/CommandeDetailStoreRequest.php
+    - app/Http/Requests/CommandeDetailUpdateRequest.php
+    - app/Http/Resources/CommandeCollection.php
+    - app/Http/Resources/CommandeResource.php
+    - app/Http/Resources/CommandeDetailCollection.php
+    - app/Http/Resources/CommandeDetailResource.php
 updated:
     - routes/api.php
 models:
@@ -35,3 +44,5 @@ models:
     Vehicule: { name: string, model: 'string nullable', brand: 'string nullable', year: 'integer nullable', color: 'string nullable', price: 'decimal nullable', status: 'enum[available,rented,unavailable] default:available', description: 'text nullable', agency_id: 'id foreign:agencies nullable', created_by: 'id foreign:users', timestamps: timestamps, softdeletes: softDeletes, relationships: { belongsTo: 'Agency, User', hasMany: Vehicule } }
     Proforma: { stock_id: 'id foreign:stocks', user_id: 'id foreign:users', total_amount: double, due_amount: double, sale_date: date, note: 'text nullable', invoice_type: 'string nullable', agency_id: 'id foreign:agencies', created_by: 'id foreign:users', proforma_items: 'text nullable', client: 'text nullable', timestamps: timestamps, softdeletes: softDeletes, relationships: { belongsTo: 'Stock, User, Agency' } }
     ProductCompanyName: { product_code: 'string null', company_code: 'string null', item_name: 'string null', size: 'string null', packing_details: 'string null', mfg_location: 'string null', weight_kg: 'double null', order_qty: 'double null', total_weight: 'double null', pu: 'string null', total_weight_pu: float }
+    Commandes: { vehicule_id: integer, matricule: 'string nullable', commentaire: 'text nullable', poids: 'float nullable', date_livraison: 'date nullable', description: 'text nullable' }
+    CommandeDetails: { commande_id: integer, produit_id: 'string nullable', produit_code: 'string nullable', produit_name: 'string nullable', company_code: integer, quantite: 'double nullable', poids: 'double nullable', prix_unitaire: 'double default 0.0', remise: 'float nullable nullable', date_livraison: 'date nullable', statut: 'string nullable' }
