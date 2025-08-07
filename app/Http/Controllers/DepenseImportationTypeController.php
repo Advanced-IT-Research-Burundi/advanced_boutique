@@ -4,11 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\DepenseImportationTypeStoreRequest;
 use App\Http\Requests\DepenseImportationTypeUpdateRequest;
-use App\Http\Resources\DepenseImportationTypeCollection;
 use App\Http\Resources\DepenseImportationTypeResource;
 use App\Models\DepenseImportationType;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 
 class DepenseImportationTypeController extends Controller
 {

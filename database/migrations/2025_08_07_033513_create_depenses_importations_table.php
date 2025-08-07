@@ -15,6 +15,9 @@ return new class extends Migration
 
         Schema::create('depenses_importations', function (Blueprint $table) {
             $table->id();
+            $table->string('commande_id')->nullable();
+            $table->string('vehicule_id')->nullable();
+            $table->string('vehicule_matricule')->nullable();
             $table->string('depense_importation_type')->nullable();
             $table->foreignId('depense_importation_type_id')->constrained();
             $table->string('currency');

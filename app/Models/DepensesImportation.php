@@ -15,17 +15,7 @@ class DepensesImportation extends Model
      *
      * @var array
      */
-    protected $fillable = [
-        'depense_importation_type',
-        'depense_importation_type_id',
-        'currency',
-        'exchange_rate',
-        'amount',
-        'amount_currency',
-        'date',
-        'description',
-        'user_id',
-    ];
+    protected $guarded = [];
 
     /**
      * Get the attributes that should be cast.

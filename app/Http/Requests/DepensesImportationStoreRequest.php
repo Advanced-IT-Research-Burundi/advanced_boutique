@@ -28,7 +28,7 @@ class DepensesImportationStoreRequest extends FormRequest
             'amount_currency' => ['required', 'numeric'],
             'date' => ['required'],
             'description' => ['nullable', 'string'],
-            'user_id' => ['required', 'integer', 'exists:users,id'],
+            'commande_id' => ['nullable', 'integer', 'exists:commandes,id'],
         ];
     }
 }
