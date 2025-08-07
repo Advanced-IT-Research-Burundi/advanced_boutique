@@ -1,22 +1,13 @@
 created:
-    - app/Http/Controllers/CommandesController.php
-    - app/Http/Controllers/CommandeDetailsController.php
-    - database/factories/CommandesFactory.php
-    - database/factories/CommandeDetailsFactory.php
-    - database/migrations/2025_08_06_054049_create_commandes_table.php
-    - database/migrations/2025_08_06_054050_create_commande_details_table.php
-    - app/Models/Commandes.php
-    - app/Models/CommandeDetails.php
-    - tests/Feature/Http/Controllers/CommandesControllerTest.php
-    - tests/Feature/Http/Controllers/CommandeDetailsControllerTest.php
-    - app/Http/Requests/CommandeStoreRequest.php
-    - app/Http/Requests/CommandeUpdateRequest.php
-    - app/Http/Requests/CommandeDetailStoreRequest.php
-    - app/Http/Requests/CommandeDetailUpdateRequest.php
-    - app/Http/Resources/CommandeCollection.php
-    - app/Http/Resources/CommandeResource.php
-    - app/Http/Resources/CommandeDetailCollection.php
-    - app/Http/Resources/CommandeDetailResource.php
+    - app/Http/Controllers/DepensesImportationController.php
+    - database/factories/DepensesImportationFactory.php
+    - database/migrations/2025_08_07_033513_create_depenses_importations_table.php
+    - app/Models/DepensesImportation.php
+    - tests/Feature/Http/Controllers/DepensesImportationControllerTest.php
+    - app/Http/Requests/DepensesImportationStoreRequest.php
+    - app/Http/Requests/DepensesImportationUpdateRequest.php
+    - app/Http/Resources/DepensesImportationCollection.php
+    - app/Http/Resources/DepensesImportationResource.php
 updated:
     - routes/api.php
 models:
@@ -46,3 +37,5 @@ models:
     ProductCompanyName: { product_code: 'string null', company_code: 'string null', item_name: 'string null', size: 'string null', packing_details: 'string null', mfg_location: 'string null', weight_kg: 'double null', order_qty: 'double null', total_weight: 'double null', pu: 'string null', total_weight_pu: float }
     Commandes: { vehicule_id: integer, matricule: 'string nullable', commentaire: 'text nullable', poids: 'float nullable', date_livraison: 'date nullable', description: 'text nullable' }
     CommandeDetails: { commande_id: integer, produit_id: 'string nullable', produit_code: 'string nullable', produit_name: 'string nullable', company_code: integer, quantite: 'double nullable', poids: 'double nullable', prix_unitaire: 'double default 0.0', remise: 'float nullable nullable', date_livraison: 'date nullable', statut: 'string nullable' }
+    DepenseImportationType: { name: 'string nullable', description: 'text nullable' }
+    DepensesImportation: { depense_importation_type: 'string nullable', depense_importation_type_id: 'id foreign:depense_importation_types', currency: string, exchange_rate: double, amount: double, amount_currency: double, date: datetime, description: 'text nullable', user_id: 'id foreign:users' }

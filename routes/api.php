@@ -29,6 +29,8 @@ use App\Http\Controllers\Api\EntreMultipleController;
 use App\Http\Controllers\CommandeDetailsController;
 use App\Http\Controllers\CommandesController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DepenseImportationTypeController;
+use App\Http\Controllers\DepensesImportationController;
 use App\Http\Controllers\ProductCompanyNameController;
 use App\Http\Controllers\ReportsController;
 use Illuminate\Support\Facades\Route;
@@ -161,7 +163,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('imports/company_products', [ProductCompanyNameController::class, 'importCompanyProducts']);
     Route::apiResource('commandes', CommandesController::class);
     Route::apiResource('commande-details', CommandeDetailsController::class);
+    Route::apiResource('depense-importation-types', DepenseImportationTypeController::class);
+
+Route::apiResource('depenses-importations', DepensesImportationController::class);
 });
+
+
+
 
 
 

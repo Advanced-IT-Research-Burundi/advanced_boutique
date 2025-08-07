@@ -15,7 +15,28 @@ class CommandesController extends Controller
 {
     public function index(Request $request)
     {
-        $commandes = Commandes::latest()->paginate(10);
+        $search = $request->get('search', '');
+
+        $commandes = Commandes::with(['details'])
+            ->where(function ($query) use ($search) {
+                if ($search) {
+
+                    if (is_numeric($search)) {
+                        $query->where('id', $search)
+                            ->orWhere('poids', $search)
+                           ;
+                    }else{
+                        $query->where('matricule', 'like', '%' . $search . '%')
+                        ->orWhere('description', 'like', '%' . $search . '%')
+                        ->orWhereHas('details', function ($q) use ($search) {
+                            $q->where('item_name', 'like', '%' . $search . '%');
+                        });
+                    }
+                    
+                }
+            })
+            ->latest()
+            ->paginate(10);
 
         return sendResponse($commandes, 'Commandes retrieved successfully', 200);
     }

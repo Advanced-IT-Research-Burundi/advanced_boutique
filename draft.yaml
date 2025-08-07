@@ -1,28 +1,15 @@
 models:
-  Commandes:
-    vehicule_id : integer
-    matricule : string nullable
-    commentaire : text nullable
-    poids : float nullable
-    date_livraison : date nullable
-    description: text nullable
+  DepensesImportation:
+    depense_importation_type : string nullable
+    depense_importation_type_id : id foreign:depense_importation_types
+    currency : string
+    exchange_rate : double
+    amount : double
+    amount_currency : double
+    date : datetime
+    description : text nullable
+    user_id : id foreign:users
   
-  CommandeDetails:
-    commande_id : integer
-    produit_id : string nullable
-    produit_code : string nullable
-    produit_name : string nullable
-    company_code : integer
-    quantite : double nullable
-    poids : double nullable
-    prix_unitaire : double default 0.0
-    remise: float nullable nullable
-    date_livraison: date nullable
-    statut: string nullable
-
-
 controllers:
-  Commandes:
-    resource: api
-  CommandeDetails:
+  DepensesImportation:
     resource: api
