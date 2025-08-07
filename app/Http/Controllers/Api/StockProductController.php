@@ -77,6 +77,8 @@ class StockProductController extends Controller
                     ->orWhere('description', 'like', "%{$search}%");
                 });
             }
+
+            $query->where('quantity', '>',0);
             // order by product.code
             $stockProducts = $query->paginate($perPage);
              
