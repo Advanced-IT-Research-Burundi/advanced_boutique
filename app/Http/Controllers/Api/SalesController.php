@@ -138,48 +138,41 @@ class SalesController extends Controller
             $perPage = $request->get('per_page', 50);
 
             if (!$stockId) {
-
                 return sendError('Stock ID requis', 400, ['error' => 'Stock ID requis']);
             }
 
-            $query = Product::with(['stockProducts' => function ($query) use ($stockId) {
-                    $query->where('stock_id', $stockId);
-                }])
-                ->select('id', 'name', 'code', 'description', 'sale_price_ttc', 'unit', 'image', 'category_id')
-                ->whereHas('stockProducts', function ($query) use ($stockId) {
-                    $query->where('quantity', '>=', 0)
-                          ->where('stock_id', $stockId);
-                });
+            $products = StockProduct::with('product')
+                ->where('stock_id', $stockId )
+                ->where('quantity', '>', 0)
+                ->when($search, function ($query, $search) {
+                    $query->whereHas('product', function ($q) use ($search) {
+                        $q->where('name', 'like', "%{$search}%")
+                        ->orWhere('description', 'like', "%{$search}%")
+                        ->orWhere('code', 'like', "%{$search}%");
+                        ;
+                    });
+                })
+                ->when($categoryId, function ($query, $categoryId) {
+                    $query->whereHas('product', function ($q) use ($categoryId) {
+                        $q->where('category_id', $categoryId);
+                    });
+                })
+                ->get();
 
-            // Recherche par mot-clé
-            if (!empty($search)) {
-                $query->where(function ($q) use ($search) {
-                    $q->where('name', 'like', "%{$search}%")
-                      ->orWhere('code', 'like', "%{$search}%")
-                      ->orWhere('description', 'like', "%{$search}%");
-                });
-            }
-
-            // Filtrage par catégorie
-            if (!empty($categoryId)) {
-                $query->where('category_id', $categoryId);
-            }
-
-            $products = $query->orderBy('name')
-                            ->limit($perPage)
-                            ->get();
-
-            // Enrichir avec les données de stock
-            $products->each(function ($product) use ($stockId) {
-                $stockProduct = $product->stockProducts->first();
-                $product->quantity_disponible = $stockProduct ? $stockProduct->quantity : 0;
-                $product->stock_id = $stockId;
-
-                // Nettoyer les relations pour réduire la taille de la réponse
-                unset($product->stockProducts);
-            });
-
-
+            // Enrichir les produits avec les données de stock
+            $products = $products->map(fn($p) => ([   
+                    "id"=> $p->id,
+                    "name" => $p->product?->name,
+                    "code" => $p->product?->code,
+                    "description"=> $p->product?->description,
+                    "sale_price_ttc" => $p->sale_price_ttc,
+                    "unit"=> $p->product?->unit ?? 'Piece',
+                    "image" => null,
+                    "category_id" => $p->product?->category_id,
+                    "quantity_disponible" => $p->quantity,
+                    "stock_id" => $p->stock_id,
+                    "sale_price" => $p->sale_price_ttc,
+            ]));
 
             $data = [
                 'products' => $products
