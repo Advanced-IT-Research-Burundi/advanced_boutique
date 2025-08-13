@@ -81,10 +81,10 @@ class ExpenseController extends Controller
         return redirect()->route('expenses.index')->with('success', 'Dépense créée avec succès.');
     }
 
-    public function show(Expense $expense): View
+    public function show($id)
     {
-        $expense->load(['stock', 'user', 'expenseType', 'agency']);
-        return view('expense.show', compact('expense'));
+        $expense = Expense::findOrFail($id);
+        return sendResponse($expense, 'Dépense récupérée avec succès');
     }
 
     public function edit(Expense $expense): View
@@ -97,7 +97,7 @@ class ExpenseController extends Controller
         return view('expense.edit', compact('expense', 'stocks', 'users', 'expenseTypes', 'agencies'));
     }
 
-    public function update(Request $request, Expense $expense): RedirectResponse
+    public function update(Request $request, $id)
     {
         $data = $request->validate([
             'stock_id' => 'required|exists:stocks,id',
@@ -108,9 +108,11 @@ class ExpenseController extends Controller
             'expense_date' => 'required|date',
             'agency_id' => 'nullable|exists:agencies,id',
         ]);
+
+        $expense = Expense::findOrFail($id);
         $expense->update($data);
 
-        return redirect()->route('expenses.index')->with('success', 'Dépense modifiée avec succès.');
+        return sendResponse($expense, 'Dépense mise à jour avec succès');
     }
 
     public function destroy(Expense $expense): RedirectResponse
