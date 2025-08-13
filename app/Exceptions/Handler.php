@@ -162,7 +162,7 @@ class Handler extends ExceptionHandler
                 'error' => $exception->getMessage(),
             ], 404);
         }
-        // message ne francais
+
         if ($exception instanceof NotFoundHttpException) {
             return response()->json([
                 'success' => false,
@@ -175,11 +175,12 @@ class Handler extends ExceptionHandler
         if ($exception instanceof \Illuminate\Auth\AuthenticationException) {
             return response()->json([
                 'success' => false,
-                'message' => 'L\'authentification a echoué.',
+                'message' => 'L\'authentification a échoué.',
                 'data' => null,
                 'error' => $exception->getMessage(),
             ], 401);
         }
+
         if ($exception instanceof \Illuminate\Validation\ValidationException) {
             return response()->json([
                 'success' => false,
@@ -189,6 +190,25 @@ class Handler extends ExceptionHandler
             ], 422);
         }
 
+        if ($exception instanceof \Illuminate\Database\QueryException) {
+            if ($exception->getCode() == 23000 && str_contains($exception->getMessage(), 'Duplicate entry')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Une entrée avec cette valeur existe déjà.',
+                    'data' => null,
+                    'error' => $exception->getMessage(),
+                ], 409);
+            }
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur de base de données.',
+                'data' => null,
+                'error' => $exception->getMessage(),
+            ], 500);
+        }
+
         return parent::render($request, $exception);
     }
+
 }
