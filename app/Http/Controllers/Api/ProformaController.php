@@ -455,12 +455,13 @@ class ProformaController extends Controller
             'stock_id' => 'required|exists:stocks,id',
             'sale_date' => 'required|date',
             'paid_amount' => 'required|numeric|min:0',
+            'total_amount' => 'required|numeric|min:0',
             'invoice_type' => 'required|in:FACTURE,PROFORMA,BON',
             'items' => 'required|array|min:1',
             'items.*.product_id' => 'required|exists:products,id',
             'items.*.quantity' => 'required|numeric|min:0.01',
             'items.*.sale_price' => 'required|numeric|min:0',
-            'items.*.discount' => 'nullable|numeric|min:0|max:100',
+            'items.*.discount' => 'nullable|numeric|min:0',
         ], [
             'client_id.required' => 'Veuillez sélectionner un client.',
             'client_id.exists' => 'Le client sélectionné n\'existe pas.',
@@ -472,7 +473,7 @@ class ProformaController extends Controller
 
         if ($validator->fails()) {
 
-            return sendError('Données invalides', 422, $validator->errors());
+            return sendError('Données invalides'. $validator->errors(), 422, $validator->errors());
         }
 
         try {
@@ -533,7 +534,6 @@ class ProformaController extends Controller
      */
     private function createProforma($request, $totals)
     {
-        $dueAmount = $totals['total_amount'] - $request->paid_amount;
 
         $items = array_map(function ($item) {
             return [
@@ -545,11 +545,15 @@ class ProformaController extends Controller
             ];
         }, $request->items);
 
+
+
+        $dueAmount = $request->total_amount - $request->paid_amount;
+
         $proforma = Proforma::create([
             'client_id' => $request->client_id,
             'stock_id' => $request->stock_id,
             'user_id' => Auth::id(),
-            'total_amount' => $totals['total_amount'],
+            'total_amount' => $request->total_amount ,
             'paid_amount' => $request->paid_amount,
             'due_amount' => $dueAmount,
             'sale_date' => Carbon::parse($request->sale_date),
@@ -564,7 +568,7 @@ class ProformaController extends Controller
         return [
             'type' => 'proforma',
             'id' => $proforma->id,
-            'total_amount' => $totals['total_amount'],
+            'total_amount' => $request->total_amount,
             'paid_amount' => $request->paid_amount,
             'due_amount' => $dueAmount
         ];
