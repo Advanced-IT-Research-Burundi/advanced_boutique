@@ -160,7 +160,7 @@ class SalesController extends Controller
                 ->get();
 
             // Enrichir les produits avec les données de stock
-            $products = $products->map(fn($p) => ([   
+            $products = $products->map(fn($p) => ([
                     "id"=> $p->id,
                     "name" => $p->product?->name,
                     "code" => $p->product?->code,
@@ -195,12 +195,13 @@ class SalesController extends Controller
             'stock_id' => 'required|exists:stocks,id',
             'sale_date' => 'required|date',
             'paid_amount' => 'required|numeric|min:0',
+            'total_amount' => 'required|numeric|min:0',
             'invoice_type' => 'required|in:FACTURE,PROFORMA,BON',
             'items' => 'required|array|min:1',
             'items.*.product_id' => 'required|exists:products,id',
             'items.*.quantity' => 'required|numeric|min:0.01',
             'items.*.sale_price' => 'required|numeric|min:0',
-            'items.*.discount' => 'nullable|numeric|min:0|max:100',
+            'items.*.discount' => 'nullable|numeric|min:0',
         ], [
             'client_id.required' => 'Veuillez sélectionner un client.',
             'client_id.exists' => 'Le client sélectionné n\'existe pas.',
@@ -349,14 +350,14 @@ class SalesController extends Controller
      */
     private function createSale($request, $totals, $caisse)
     {
-        $dueAmount = $totals['total_amount'] - $request->paid_amount;
+        $dueAmount = $request->total_amount - $request->paid_amount;
 
         // Créer la vente
         $sale = Sale::create([
             'client_id' => $request->client_id,
             'stock_id' => $request->stock_id,
             'user_id' => Auth::id(),
-            'total_amount' => $totals['total_amount'],
+            'total_amount' => $request->total_amount,
             'paid_amount' => $request->paid_amount,
             'due_amount' => $dueAmount,
             'type_facture' => 'F. NORMALE',
@@ -366,9 +367,9 @@ class SalesController extends Controller
             'created_by' => Auth::id(),
         ]);
 
-        // Créer les items de vente et mettre à jour les stocks
+
         foreach ($request->items as $item) {
-            // Calculer le sous-total de l'item
+            
             $quantity = floatval($item['quantity']);
             $price = floatval($item['sale_price']);
             $discount = floatval($item['discount'] ?? 0);
