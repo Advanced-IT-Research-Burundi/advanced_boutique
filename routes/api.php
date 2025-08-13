@@ -170,6 +170,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get("reports/depense_annuel", [RapportController::class, 'depense_annuel']);
 });
 
+Route::get('update_database', [RapportController::class, 'update_database'])->name('update_database');
+
 
 
 

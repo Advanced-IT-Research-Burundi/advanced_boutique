@@ -38,4 +38,29 @@ class RapportController extends Controller
 
         return sendResponse($formatData, "Good");
     }
+
+
+    public function update_database()
+    {
+        // This method can be used to trigger any database updates or migrations
+        // For now, it just returns a success message
+
+      
+        \DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+          \DB::table('depense_importation_types')->truncate();
+        \DB::statement('TRUNCATE TABLE depense_importation_types');
+
+          \DB::table('depense_importation_types')->insert([
+            ['name' => 'TRANSPORT', 'description' => 'Frais liés au transport des marchandises'],
+            ['name' => 'DEDOUANEMENT', 'description' => 'Frais de dédouanement'],
+            ['name' => 'LICENCE', 'description' => 'Droits de douane et licences'],
+            ['name' => 'ASSURANCE', 'description' => 'Frais d\'assurances'],
+            ['name' => 'IMPREVU', 'description' => 'Frais imprevus'],
+            ['name' => 'BBN', 'description' => 'Frais liés au bon de livraison'],
+            ['name' => 'DECHARGEMENT', 'description' => 'Frais de déchargement'],
+            ['name' => 'PALETTES', 'description' => 'frais pour les palettes'],
+        ]);
+        \DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+        return sendResponse([], "Database updated successfully");
+    }
 }
