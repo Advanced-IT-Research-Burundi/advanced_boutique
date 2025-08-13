@@ -15,6 +15,7 @@ use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\ProformaController;
 use App\Http\Controllers\Api\PurchaseController;
+use App\Http\Controllers\Api\RapportController;
 use App\Http\Controllers\Api\SaleController;
 use App\Http\Controllers\Api\StockController;
 use App\Http\Controllers\Api\StockTransferController;
@@ -165,6 +166,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('commande-details', CommandeDetailsController::class);
     Route::apiResource('depense-importation-types', DepenseImportationTypeController::class);Route::apiResource('depenses-importations', DepensesImportationController::class);
     Route::get('depenses-importations/commandes/{id}', [DepensesImportationController::class, 'importationCommandes']);
+
+    Route::get("reports/depense_annuel", [RapportController::class, 'depense_annuel']);
 });
 
 
