@@ -48,17 +48,17 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/me', [AuthController::class, 'me']);
     Route::get('/profil',[AuthController::class, 'profil']);
     Route::post('/updatephoto',[AuthController::class, 'updatephoto']);
-    
+
     Route::get('dashboard', [DashboardController::class, 'index']);
-    
+
     Route::get('/reports', [ReportsController::class, 'index']);
     Route::get('/reports/export', [ReportsController::class, 'export']);
-    
+
     Route::apiResource('products', ProductController::class);
-    
+
     Route::post('categories/bulk-delete', [CategoryController::class, 'bulkDelete'])->name('categories.bulk-delete');
     Route::post('categories/{id}/restore', [CategoryController::class, 'restore'])->name('categories.restore');
-    
+
     Route::prefix('sales')->group(function () {
         Route::get('/create-data', [SalesController::class, 'getCreateData']);
         Route::get('/categories/{stockId}', [SalesController::class, 'getCategories']);
@@ -81,7 +81,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/stocks/{id}/categories', [StockTransferController::class, 'getStockCategories']);
         Route::get('/stocks/products', [StockTransferController::class, 'getProducts']);
         Route::post('/stocks/transfer', [StockTransferController::class, 'transfer']);
-        
+
     });
     Route::prefix('stock-products')->group(function () {
         Route::get('/', [StockProductController::class, 'getStockProducts']);
@@ -99,20 +99,20 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('entry-summary', [EntreMultipleController::class, 'getEntrySummary']);
         Route::delete('/users/{userId}', [StockShowController::class, 'detachUser']);
     });
-    
-    
-    
-    
+
+
+
+
     Route::prefix('stock-movements')->group(function () {
         Route::get('/', [StockMovementController::class, 'getMovements']);
         Route::post('/', [StockMovementController::class, 'createMovement']);
         Route::get('stats/{stockProductId}', [StockMovementController::class, 'getMovementStats']);
     });
-    
+
     Route::resource('stocks', StockController::class);
     Route::get('stocks/{id}/export/excel', [StockProductController::class, 'exportToExcel']);
     Route::get('stocks/{id}/export/pdf', [StockProductController::class, 'exportToPdf']);
-    
+
     Route::prefix('users/{user}/stocks')->name('users.stocks.')->group(function () {
         Route::get('/manage', [UserStockController::class, 'manage']);
         Route::post('/attach', [UserStockController::class, 'attach']);
@@ -159,10 +159,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::resource('user-stocks', UserStockController::class);
     Route::resource('vehicules', VehiculeController::class);
     Route::delete('products/mul_destroy', [ProductController::class, 'multDestroy']);
-    
+
     Route::apiResource('product-company-names',ProductCompanyNameController::class);
     Route::post('imports/company_products', [ProductCompanyNameController::class, 'importCompanyProducts']);
     Route::apiResource('commandes', CommandesController::class);
+    Route::post('commande/livraison/valide', [CommandesController::class, 'livraisonValide']);
     Route::apiResource('commande-details', CommandeDetailsController::class);
     Route::apiResource('depense-importation-types', DepenseImportationTypeController::class);Route::apiResource('depenses-importations', DepensesImportationController::class);
     Route::get('depenses-importations/commandes/{id}', [DepensesImportationController::class, 'importationCommandes']);
