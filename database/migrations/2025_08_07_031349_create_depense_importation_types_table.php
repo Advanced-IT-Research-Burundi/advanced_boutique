@@ -30,7 +30,6 @@ return new class extends Migration
             ['name' => 'PALETTES', 'description' => 'frais pour les palettes'],
         ]);
 
-         
     }
 
     /**
