@@ -18,6 +18,7 @@ return new class extends Migration
             $table->text('commentaire')->nullable();
             $table->float('poids')->nullable();
             $table->date('date_livraison')->nullable();
+            $table->string('status')->default('En attente')->nullable();
             $table->text('description')->nullable();
             $table->timestamps();
         });

@@ -11,6 +11,7 @@ use App\Models\Commandes;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use App\Models\StockProduct;
+use App\Models\Stock;
 use App\Models\StockProductMouvement;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -21,27 +22,28 @@ class CommandesController extends Controller
     public function index(Request $request)
     {
         $search = $request->get('search', '');
+        $status = $request->get('status', '');
 
         $commandes = Commandes::with(['details'])
             ->where(function ($query) use ($search) {
-                if ($search) {
-
+                if ($search !== '') {
                     if (is_numeric($search)) {
                         $query->where('id', $search)
-                            ->orWhere('poids', $search)
-                           ;
-                    }else{
+                            ->orWhere('poids', $search);
+                    } else {
                         $query->where('matricule', 'like', '%' . $search . '%')
-                        ->orWhere('description', 'like', '%' . $search . '%')
-                        ->orWhereHas('details', function ($q) use ($search) {
-                            $q->where('item_name', 'like', '%' . $search . '%');
-                        });
+                            ->orWhere('description', 'like', '%' . $search . '%')
+                            ->orWhereHas('details', function ($q) use ($search) {
+                                $q->where('item_name', 'like', '%' . $search . '%');
+                            });
                     }
-
                 }
             })
+            ->when($status !== '', function ($query) use ($status) {
+                $query->where('status', $status);
+            })
             ->latest()
-            ->paginate(10);
+            ->paginate($request->get('per_page', 10));
 
 
         return sendResponse($commandes, 'Commandes retrieved successfully', 200);
@@ -71,7 +73,7 @@ class CommandesController extends Controller
                 'total_weight' => $detail['total_weight'] ?? 0,
                 'pu' => $detail['pu'] ?? 0,
                 'remise' => 0,
-                'statut' => "En attente",
+                'statut' => "pending",
             ]);
         }
         return $request->all();
@@ -99,109 +101,145 @@ class CommandesController extends Controller
 
     public function livraisonValide(Request $request)
     {
+        $validator = Validator::make($request->all(), [
+            'stock_id' => 'required|exists:stocks,id',
+            'commandes' => 'required|array|min:1',
+            'commandes.*.id' => 'required|integer|exists:commandes,id',
+            'commandes.*.matricule' => 'required|string',
+            'commandes.*.poids' => 'required|numeric|min:0',
+            'commandes.*.details' => 'required|array|min:1',
+
+            'commandes.*.details.*.product_code' => 'nullable|string',
+            'commandes.*.details.*.item_name' => 'nullable|string',
+            'commandes.*.details.*.company_code' => 'nullable|string',
+            'commandes.*.details.*.quantity' => 'required|numeric|min:0',
+            'commandes.*.details.*.weight_kg' => 'nullable|numeric|min:0',
+            'commandes.*.details.*.total_weight' => 'nullable|numeric|min:0',
+            'commandes.*.details.*.pu' => 'required|numeric|min:0',
+            'commandes.*.details.*.remise' => 'nullable|numeric|min:0',
+            'commandes.*.details.*.date_livraison' => 'nullable|date',
+            'commandes.*.details.*.statut' => 'nullable|string',
+        ],[
+
+        ]);
+
+        if ($validator->fails()) {
+            return sendError(
+                'Données invalides '.$validator->errors()
+                ,
+                422,
+                $validator->errors()
+            );
+        }
+
         try {
             DB::beginTransaction();
 
-            $commande = Commandes::find($request->commande_id);
-            if (!$commande) {
-                return sendError('Commande non trouvée', 404);
-            }
-
-            if (!$commande->details || $commande->details->isEmpty()) {
-                return sendError('Aucun détail trouvé pour cette commande', 422);
-            }
-
-            $commande->statut = 'Valide';
-            $commande->save();
-
-            // Récupérer le stock principal (ID = 1)
-            $stockPrincipal = Stock::find(1);
+            $stockPrincipal = Stock::find($request->stock_id);
             if (!$stockPrincipal) {
-                \DB::rollBack();
                 return sendError('Stock principal non trouvé (ID: 1)', 404);
             }
 
-            $entriesCount = 0;
-            $totalQuantity = 0;
-            $totalValue = 0;
+            $globalEntriesCount = 0;
+            $globalQuantity = 0;
+            $globalValue = 0;
             $errors = [];
 
-            foreach ($commande->details as $detail) {
-                try {
-                    $stockProduct = StockProduct::where('stock_id', 1)
-                        ->where(function($query) use ($detail) {
-                            $query->where('product_name', $detail->item_name);
-                            // $query->where('product_code', $detail->product_code);
-                                // ->orWhere('company_code', $detail->company_code);
-                        })
-                        ->first();
+            foreach ($request->commandes as $commandeInput) {
+                $commande = Commandes::find($commandeInput['id']);
 
-                    if (!$stockProduct) {
-                        $errors[] = "Produit non trouvé dans le stock: {$detail->product_code} - {$detail->item_name}";
-                        continue;
-                    }
-
-                    $quantity = (float) $detail->quantity;
-                    $price = (float) $detail->pu;
-                    $stockProduct->quantity += $quantity;
-                    $stockProduct->user_id = Auth::id();
-                    $stockProduct->agency_id = Auth::user()->agency_id ?? $stockPrincipal->agency_id;
-                    $stockProduct->purchase_price = $price;
-                    $stockProduct->sale_price_ht = $price;
-                    $stockProduct->sale_price_ttc = $price;
-                    $stockProduct->save();
-
-                    $this->createStockMovement($stockProduct, $quantity, $price, $stockPrincipal);
-
-                    // Mettre à jour le statut du détail de commande
-                    $detail->statut = 'Livré';
-                    $detail->date_livraison = now();
-                    $detail->save();
-
-                    $entriesCount++;
-                    $totalQuantity += $quantity;
-                    $totalValue += ($quantity * $price);
-
-                } catch (\Exception $e) {
-                    $errors[] = "Erreur pour le produit {$detail->product_code}: " . $e->getMessage();
+                if (!$commande) {
+                    $errors[] = "Commande non trouvée: ID {$commandeInput['id']}";
                     continue;
+                }
+                if ($commande->status !== 'pending') {
+                    $errors[] = "Commande non en attente: ID {$commandeInput['id']}";
+                    continue;
+                }
+
+                if (empty($commandeInput['details'])) {
+                    $errors[] = "Aucun détail pour la commande ID {$commande->id}";
+                    continue;
+                }
+
+                $commande->status = 'approved';
+                $commande->save();
+
+                foreach ($commandeInput['details'] as $detailInput) {
+                    try {
+                        $stockProduct = StockProduct::where('stock_id', $stockPrincipal->id)
+                            ->whereHas('product', function ($query) use ($detailInput) {
+                                $query->where('code', $detailInput['product_code']);
+                            })
+                            ->first();
+
+                        if (!$stockProduct) {
+                            $errors[] = "Produit non trouvé: {$detailInput['product_code']} - {$detailInput['item_name']}";
+                            continue;
+                        }
+
+                        $quantity = (float) $detailInput['quantity'];
+                        $price = (float) $detailInput['pu'];
+
+                        $stockProduct->quantity += $quantity;
+                        $stockProduct->user_id = Auth::id();
+                        $stockProduct->agency_id = Auth::user()->agency_id ?? $stockPrincipal->agency_id;
+                        $stockProduct->purchase_price = $price;
+                        $stockProduct->sale_price_ht = $price;
+                        $stockProduct->sale_price_ttc = $price;
+                        $stockProduct->save();
+
+                        $this->createStockMovement($stockProduct, $quantity, $price, $stockPrincipal);
+
+                        // Mise à jour des détails dans la table commande_details
+                        CommandeDetails::where('commande_id', $commande->id)
+                            ->where('product_code', $detailInput['product_code'])
+                            ->update([
+                                'statut' => 'Livré',
+                                'date_livraison' => now(),
+                            ]);
+
+                        $globalEntriesCount++;
+                        $globalQuantity += $quantity;
+                        $globalValue += $quantity * $price;
+
+                    } catch (\Exception $e) {
+                        $errors[] = "Erreur sur produit {$detailInput['product_code']}: " . $e->getMessage();
+                    }
                 }
             }
 
-            \DB::commit();
+            DB::commit();
 
-            // Préparer la réponse
-            $responseData = [
-                'commande' => $commande->fresh(['details']),
+            $response = [
                 'stock_entries' => [
-                    'entries_count' => $entriesCount,
-                    'total_quantity' => $totalQuantity,
-                    'total_value' => $totalValue,
+                    'entries_count' => $globalEntriesCount,
+                    'total_quantity' => $globalQuantity,
+                    'total_value' => $globalValue,
                     'stock_id' => 1
                 ]
             ];
 
-            if (!empty($errors)) {
-                $responseData['warnings'] = $errors;
+            $message = "Livraison validée avec succès. {$globalEntriesCount} produit(s) ajouté(s).";
+           if (!empty($errors)) {
+                $response['warnings'] = $errors;
+                $message .= " " . count($errors) . " erreur(s) détectée(s). [" . implode(", ", $errors) . "]";
+                return sendError($message, 500, ['error' => $errors]);
             }
 
-            $message = "Livraison validée avec succès. {$entriesCount} produit(s) ajouté(s) au stock principal.";
 
-            if (!empty($errors)) {
-                $message .= " " . count($errors) . " erreur(s) détectée(s).";
-            }
-
-            return sendResponse($responseData, $message, 200);
+            return sendResponse($response, $message, 200);
 
         } catch (\Throwable $e) {
             DB::rollBack();
             return sendError(
-                'Erreur lors de la validation de la livraison',
+                'Erreur lors de la validation de la livraison'.$e->getMessage(),
                 500,
                 ['error' => $e->getMessage()]
             );
         }
     }
+
 
     /**
      * Create stock movement record

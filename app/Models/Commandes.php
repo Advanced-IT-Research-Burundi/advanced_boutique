@@ -20,6 +20,7 @@ class Commandes extends Model
         'commentaire',
         'poids',
         'date_livraison',
+        'status',
         'description',
     ];
 
