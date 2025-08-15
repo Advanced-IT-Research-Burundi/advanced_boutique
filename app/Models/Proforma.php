@@ -40,6 +40,7 @@ class Proforma extends Model
         'sale_date'
     ];
 
+    // protected $appends 
 
     public function stock()
     {

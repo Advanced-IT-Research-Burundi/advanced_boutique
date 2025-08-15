@@ -188,4 +188,10 @@ class ProductController extends Controller
             'product' => $product
         ], 'Produit supprimé avec succès', 200);
     }
+
+    public function getProductById($id)
+    {
+        $product = Product::select('id', 'code', 'name', 'category_id', 'description', 'purchase_price', 'sale_price_ht', 'sale_price_ttc', 'unit', 'alert_quantity', 'image')->findOrFail($id);
+        return sendResponse($product, 'Product retrieved successfully', 200);
+    }
 }
