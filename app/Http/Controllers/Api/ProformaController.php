@@ -700,4 +700,5 @@ class ProformaController extends Controller
             return sendError('Erreur lors de la mise à jour: ' . $e->getMessage(), 500, ['error' => $e->getMessage()]);
         }
     }
+    
 }
