@@ -613,4 +613,91 @@ class ProformaController extends Controller
             return sendError('Erreur lors de la récupération du produit: ' . $e->getMessage(), 500);
         }
     }
+
+    /**
+     * Mettre à jour une proforma existante
+     */
+    public function update(Request $request, Proforma $proforma)
+    {
+        $validator = Validator::make($request->all(), [
+            'client_id' => 'required|exists:clients,id',
+            'stock_id' => 'required|exists:stocks,id',
+            'sale_date' => 'required|date',
+            'paid_amount' => 'required|numeric|min:0',
+            'total_amount' => 'required|numeric|min:0',
+            'invoice_type' => 'required|in:FACTURE,PROFORMA,BON',
+            'items' => 'required|array|min:1',
+            'items.*.product_id' => 'required|exists:products,id',
+            'items.*.quantity' => 'required|numeric|min:0.01',
+            'items.*.sale_price' => 'required|numeric|min:0',
+            'items.*.discount' => 'nullable|numeric|min:0',
+        ], [
+            'client_id.required' => 'Veuillez sélectionner un client.',
+            'client_id.exists' => 'Le client sélectionné n\'existe pas.',
+            'sale_date.required' => 'La date de vente est obligatoire.',
+            'paid_amount.required' => 'Le montant payé est obligatoire.',
+            'items.required' => 'Veuillez ajouter au moins un produit.',
+            'items.min' => 'Veuillez ajouter au moins un produit.',
+        ]);
+
+        if ($validator->fails()) {
+            return sendError('Données invalides: ' . $validator->errors(), 422, $validator->errors());
+        }
+
+        try {
+            DB::beginTransaction();
+
+            if ($request->invoice_type !== 'PROFORMA') {
+                return sendError('Seules les proformas peuvent être modifiées', 400, ['error' => 'Type de facture non supporté pour la modification']);
+            }
+
+            if ($proforma->is_valid) {
+                return sendError('Cette proforma a déjà été validée et ne peut plus être modifiée', 400, ['error' => 'Proforma déjà validée']);
+            }
+
+            $totals = $this->calculateTotals($request->items);
+
+            $items = array_map(function ($item) {
+                return [
+                    'product_id' => $item['product_id'],
+                    'quantity' => $item['quantity'],
+                    'sale_price' => $item['sale_price'],
+                    'discount' => $item['discount'] ?? 0,
+                    'subtotal' => $item['quantity'] * $item['sale_price'],
+                ];
+            }, $request->items);
+
+            $dueAmount = $request->total_amount - $request->paid_amount;
+
+            $proforma->update([
+                'client_id' => $request->client_id,
+                'stock_id' => $request->stock_id,
+                'total_amount' => $request->total_amount,
+                'paid_amount' => $request->paid_amount,
+                'due_amount' => $dueAmount,
+                'sale_date' => Carbon::parse($request->sale_date),
+                'note' => $request->note,
+                'invoice_type' => $request->invoice_type,
+                'proforma_items' => json_encode($items),
+                'client' => json_encode(Client::find($request->client_id)),
+                'updated_at' => now(),
+            ]);
+
+            DB::commit();
+
+            $result = [
+                'type' => 'proforma',
+                'id' => $proforma->id,
+                'total_amount' => $request->total_amount,
+                'paid_amount' => $request->paid_amount,
+                'due_amount' => $dueAmount
+            ];
+
+            return sendResponse($result, 'Proforma mise à jour avec succès');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return sendError('Erreur lors de la mise à jour: ' . $e->getMessage(), 500, ['error' => $e->getMessage()]);
+        }
+    }
 }
