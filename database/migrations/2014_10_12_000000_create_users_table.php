@@ -18,7 +18,6 @@ return new class extends Migration
             $table->string('first_name')->nullable();
             $table->string('last_name')->nullable();
             $table->string('email')->unique();
-            $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->string('phone')->nullable();
             $table->text('address')->nullable();
@@ -28,14 +27,15 @@ return new class extends Migration
             $table->string('status')->default('active');
             $table->string('role')->default('salesperson');
             $table->json('permissions')->nullable();
+            $table->foreignId('company_id')->nullable()->constrained();
+            $table->foreignId('agency_id')->nullable()->constrained();
+            $table->foreignId('created_by')->nullable()->constrained('users');
             $table->timestamp('last_login_at')->nullable();
             $table->boolean('must_change_password')->default(false);
             $table->boolean('two_factor_enabled')->default(false);
             $table->string('two_factor_secret')->nullable();
             $table->json('recovery_codes')->nullable();
-            $table->foreignId('company_id')->nullable()->constrained();
-            $table->foreignId('agency_id')->nullable()->constrained();
-            $table->foreignId('created_by')->nullable()->constrained('users');
+            $table->timestamp('email_verified_at')->nullable();
             $table->string('remember_token')->nullable();
             $table->foreignId('user_id')->nullable();
             $table->timestamps();
