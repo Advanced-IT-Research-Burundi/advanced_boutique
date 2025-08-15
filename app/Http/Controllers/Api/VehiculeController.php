@@ -63,10 +63,9 @@ class VehiculeController extends Controller
         $validated['created_by'] = auth()->user()->id;
         $validated['user_id'] = auth()->user()->id;
 
-        Vehicule::create($validated);
+        $vehicule = Vehicule::create($validated);
 
-        return redirect()->route('vehicules.index')
-                        ->with('success', 'Véhicule créé avec succès.');
+        return sendResponse($vehicule, 'Véhicule créé avec succès');
     }
 
     /**
@@ -96,8 +95,7 @@ class VehiculeController extends Controller
 
         $vehicule->update($validated);
 
-        return redirect()->route('vehicules.index')
-                        ->with('success', 'Véhicule mis à jour avec succès');
+        return sendResponse($vehicule, 'Véhicule mis à jour avec succès');
     }
 
     /**
@@ -107,7 +105,6 @@ class VehiculeController extends Controller
     {
         $vehicule->delete();
 
-        return redirect()->route('vehicules.index')
-                        ->with('success', 'Véhicule supprimé avec succès');
+        return sendResponse(null, 'Véhicule supprimé avec succès');
     }
 }
