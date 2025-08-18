@@ -1,13 +1,13 @@
 created:
-    - app/Http/Controllers/DepensesImportationController.php
-    - database/factories/DepensesImportationFactory.php
-    - database/migrations/2025_08_07_033513_create_depenses_importations_table.php
-    - app/Models/DepensesImportation.php
-    - tests/Feature/Http/Controllers/DepensesImportationControllerTest.php
-    - app/Http/Requests/DepensesImportationStoreRequest.php
-    - app/Http/Requests/DepensesImportationUpdateRequest.php
-    - app/Http/Resources/DepensesImportationCollection.php
-    - app/Http/Resources/DepensesImportationResource.php
+    - app/Http/Controllers/VehiculeDepenseController.php
+    - database/factories/VehiculeDepenseFactory.php
+    - database/migrations/2025_08_18_104032_create_vehicule_depenses_table.php
+    - app/Models/VehiculeDepense.php
+    - tests/Feature/Http/Controllers/VehiculeDepenseControllerTest.php
+    - app/Http/Requests/VehiculeDepenseStoreRequest.php
+    - app/Http/Requests/VehiculeDepenseUpdateRequest.php
+    - app/Http/Resources/VehiculeDepenseCollection.php
+    - app/Http/Resources/VehiculeDepenseResource.php
 updated:
     - routes/api.php
 models:
@@ -39,3 +39,4 @@ models:
     CommandeDetails: { commande_id: integer, produit_id: 'string nullable', produit_code: 'string nullable', produit_name: 'string nullable', company_code: integer, quantite: 'double nullable', poids: 'double nullable', prix_unitaire: 'double default 0.0', remise: 'float nullable nullable', date_livraison: 'date nullable', statut: 'string nullable' }
     DepenseImportationType: { name: 'string nullable', description: 'text nullable' }
     DepensesImportation: { depense_importation_type: 'string nullable', depense_importation_type_id: 'id foreign:depense_importation_types', currency: string, exchange_rate: double, amount: double, amount_currency: double, date: datetime, description: 'text nullable', user_id: 'id foreign:users' }
+    VehiculeDepense: { vehicule_id: 'id foreign:vehicules', amount: double, date: datetime, description: 'text nullable', user_id: 'id foreign:users' }

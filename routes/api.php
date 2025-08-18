@@ -181,3 +181,6 @@ Route::get('update_database', [RapportController::class, 'update_database'])->na
 
 
 
+
+
+Route::apiResource('vehicule-depenses', App\Http\Controllers\VehiculeDepenseController::class);
