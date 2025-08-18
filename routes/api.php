@@ -164,6 +164,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('product-company-names',ProductCompanyNameController::class);
     Route::post('imports/company_products', [ProductCompanyNameController::class, 'importCompanyProducts']);
     Route::apiResource('commandes', CommandesController::class);
+    Route::get('commande/livraison', [CommandesController::class, 'livraison']);
     Route::post('commande/livraison/valide', [CommandesController::class, 'livraisonValide']);
     Route::apiResource('commande-details', CommandeDetailsController::class);
     Route::apiResource('depense-importation-types', DepenseImportationTypeController::class);Route::apiResource('depenses-importations', DepensesImportationController::class);

@@ -49,6 +49,36 @@ class CommandesController extends Controller
         return sendResponse($commandes, 'Commandes retrieved successfully', 200);
     }
 
+     public function livraison(Request $request)
+    {
+        $search = $request->get('search', '');
+        $status = $request->get('status', 'pending');
+
+        $commandes = Commandes::with(['details'])
+            ->where(function ($query) use ($search) {
+                if ($search !== '') {
+                    if (is_numeric($search)) {
+                        $query->where('id', $search)
+                            ->orWhere('poids', $search);
+                    } else {
+                        $query->where('matricule', 'like', '%' . $search . '%')
+                            ->orWhere('description', 'like', '%' . $search . '%')
+                            ->orWhereHas('details', function ($q) use ($search) {
+                                $q->where('item_name', 'like', '%' . $search . '%');
+                            });
+                    }
+                }
+            })
+            ->when($status !== '', function ($query) use ($status) {
+                $query->where('status', $status);
+            })
+            ->latest()
+            ->paginate($request->get('per_page', 10));
+
+
+        return sendResponse($commandes, 'Commandes retrieved successfully', 200);
+    }
+
     public function store( Request $request)
     {
 
@@ -76,27 +106,53 @@ class CommandesController extends Controller
                 'statut' => "pending",
             ]);
         }
-        return $request->all();
+        return sendResponse($commande, 'Commande created successfully', 201);
 
-       // return new CommandeResource($commande);
     }
 
     public function show(Request $request, Commandes $commande)
     {
-        return sendResponse($commande->load('details'), 'Commande retrieved successfully', 200);
+        return sendResponse($commande->load(['details','vehicule']), 'Commande retrieved successfully', 200);
     }
 
-    public function update(CommandeUpdateRequest $request, Commande $commande)
-    {
-        $commande->update($request->validated());
 
-        return new CommandeResource($commande);
+    public function update(Request $request, $id)
+    {
+        $commande = Commandes::findOrFail($id);
+
+        $commande->update([
+            'vehicule_id' => $request->vehicule_id,
+            'matricule' => $request->matricule,
+            'commentaire' => $request->commentaire,
+            'poids' => $request->poids,
+            'date_livraison' => $request->date_livraison,
+            'description' => $request->description,
+        ]);
+
+        CommandeDetails::where('commande_id', $commande->id)->delete();
+
+        foreach ($request->details as $detail) {
+            CommandeDetails::create([
+                'commande_id' => $commande->id,
+                'product_code' => $detail['product_code'],
+                'item_name' => $detail['item_name'],
+                'company_code' => $detail['company_code'],
+                'quantity' => $detail['quantity'],
+                'weight_kg' => $detail['weight_kg'] ?? 0,
+                'total_weight' => $detail['total_weight'] ?? 0,
+                'pu' => $detail['pu'] ?? 0,
+                'remise' => 0,
+                'statut' => "pending",
+            ]);
+        }
+
+        return sendResponse($commande->load('details'), 'Commande updated successfully', 200);
     }
 
     public function destroy(Request $request, Commande $commande)
     {
         $commande->delete();
-        return response()->noContent();
+        return sendResponse($commande, 'Commande deleted successfully', 200);
     }
 
     public function livraisonValide(Request $request)

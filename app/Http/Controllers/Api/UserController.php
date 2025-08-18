@@ -73,14 +73,15 @@ class UserController extends \App\Http\Controllers\Controller
             'last_name' => 'nullable|string|max:255',
             'email' => 'required|email|max:255|unique:users',
             'password' => 'required|string|min:8',
+            'password_confirmation'=>'required|string|min:8|same:password',
             'phone' => 'nullable|string|max:20',
             'address' => 'nullable|string',
             'date_of_birth' => 'nullable|date',
             'gender' => 'nullable|in:male,female,other',
-            'profile_photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            // 'profile_photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'status' => 'nullable|in:active,inactive,banned',
             'role' => 'nullable|in:admin,salesperson,manager,viewer',
-            'permissions' => 'nullable|json',
+            'permissions' => 'nullable|string',
             'company_id' => 'nullable|exists:companies,id',
             'agency_id' => 'nullable|exists:agencies,id',
             'created_by' => 'nullable|exists:users,id',
@@ -89,10 +90,11 @@ class UserController extends \App\Http\Controllers\Controller
         ]);
 
         if ($validator->fails()) {
-            return sendError('Erreur de validation', 422, $validator->errors());
+            return sendError('Erreur de validation'.$validator->errors(), 422, $validator->errors());
         }
 
         $data = $validator->validated();
+         $data['permissions'] = json_encode($data['permissions']);
 
         // Gestion de l'image
         if ($request->hasFile('profile_photo')) {
@@ -105,7 +107,7 @@ class UserController extends \App\Http\Controllers\Controller
 
         $user = User::create($data);
 
-        return sendResponse($this->formatUser($user), 'Utilisateur créé avec succès', 201);
+        return sendResponse($user, 'Utilisateur créé avec succès', 201);
     }
 
     /**
@@ -113,7 +115,7 @@ class UserController extends \App\Http\Controllers\Controller
      */
     public function show(User $user)
     {
-        return sendResponse($this->formatUser($user->load(['company', 'agency', 'creator'])), 'Détail de l\'utilisateur récupéré avec succès');
+        return sendResponse($user, 'Détail de l\'utilisateur récupéré avec succès');
     }
 
     /**
@@ -126,14 +128,15 @@ class UserController extends \App\Http\Controllers\Controller
             'last_name' => 'sometimes|nullable|string|max:255',
             'email' => 'sometimes|required|email|max:255|unique:users,email,' . $user->id,
             'password' => 'sometimes|required|string|min:8',
+            'password_confirmation'=>'required|string|min:8|same:password',
             'phone' => 'sometimes|nullable|string|max:20',
             'address' => 'sometimes|nullable|string',
             'date_of_birth' => 'sometimes|nullable|date',
             'gender' => 'sometimes|nullable|in:male,female,other',
-            'profile_photo' => 'sometimes|nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            // 'profile_photo' => 'sometimes|nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'status' => 'sometimes|in:active,inactive,banned',
             'role' => 'sometimes|in:admin,salesperson,manager,viewer',
-            'permissions' => 'sometimes|nullable|json',
+            'permissions' => 'sometimes|nullable|string',
             'company_id' => 'sometimes|nullable|exists:companies,id',
             'agency_id' => 'sometimes|nullable|exists:agencies,id',
             'created_by' => 'sometimes|nullable|exists:users,id',
@@ -147,8 +150,11 @@ class UserController extends \App\Http\Controllers\Controller
             return sendError('Erreur de validation', 422, $validator->errors());
         }
 
+
+
         $data = $validator->validated();
 
+        $data['permissions'] = json_encode($data['permissions']);
         // Gestion de l'image
         if ($request->hasFile('profile_photo')) {
             // Supprimer l'ancienne photo

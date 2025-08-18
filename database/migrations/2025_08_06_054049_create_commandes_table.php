@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('commandes', function (Blueprint $table) {
             $table->id();
-            $table->string('vehicule_id');
+            $table->foreignId('vehicule_id');
             $table->string('matricule')->nullable();
             $table->text('commentaire')->nullable();
             $table->float('poids')->nullable();

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Vehicules;
 
 class Commandes extends Model
 {
@@ -33,10 +34,13 @@ class Commandes extends Model
     {
         return [
             'id' => 'integer',
+            'vehicule_id' => 'integer',
             'poids' => 'float',
             'date_livraison' => 'date',
         ];
     }
+
+    // protected $with = ['details', 'vehicule'];
     /**
      * Get the details associated with the commande.
      */
@@ -44,4 +48,10 @@ class Commandes extends Model
     {
         return $this->hasMany(CommandeDetails::class, 'commande_id', 'id');
     }
+
+    public function vehicule()
+    {
+        return $this->belongsTo(Vehicule::class, 'vehicule_id', 'id');
+    }
+
 }
