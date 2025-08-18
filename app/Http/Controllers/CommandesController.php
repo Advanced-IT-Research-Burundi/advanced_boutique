@@ -24,7 +24,7 @@ class CommandesController extends Controller
         $search = $request->get('search', '');
         $status = $request->get('status', '');
 
-        $commandes = Commandes::with(['details'])
+        $commandes = Commandes::with(['details','vehicule'])
             ->where(function ($query) use ($search) {
                 if ($search !== '') {
                     if (is_numeric($search)) {
@@ -52,7 +52,7 @@ class CommandesController extends Controller
      public function livraison(Request $request)
     {
         $search = $request->get('search', '');
-        $status = $request->get('status', 'pending');
+        $status = $request->get('status', '');
 
         $commandes = Commandes::with(['details'])
             ->where(function ($query) use ($search) {
