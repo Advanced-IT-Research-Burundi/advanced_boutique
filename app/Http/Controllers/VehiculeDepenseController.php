@@ -12,23 +12,42 @@ use Illuminate\Http\Response;
 
 class VehiculeDepenseController extends Controller
 {
-    public function index(Request $request): Response
+    public function index(Request $request)
     {
-        $vehiculeDepenses = VehiculeDepense::all();
+        try {
 
-        return new VehiculeDepenseCollection($vehiculeDepenses);
+            $vehicule_id = $request->input('vehicule_id');
+            $vehiculeDepenses = VehiculeDepense::where('vehicule_id', $vehicule_id)
+                        ->latest()
+                        ->paginate($request->get('per_page', 10));
+
+            return sendResponse($vehiculeDepenses, 'Vehicule depenses retrieved successfully', 200);
+
+        } catch (\Throwable $th) {
+            return sendError('Error loading vehicule depenses',500,['error' => $th->getMessage()]);
+        }
+
     }
 
-    public function store(VehiculeDepenseStoreRequest $request): Response
+    public function store(Request $request)
     {
-        $vehiculeDepense = VehiculeDepense::create($request->validated());
+        $validated = $request->validate([
+            'vehicule_id' => 'required|exists:vehicules,id',
+            'amount' => 'required|numeric',
+            'date' => 'required|date',
+            'description' => 'nullable|string',
+        ]);
 
-        return new VehiculeDepenseResource($vehiculeDepense);
+        $validated['user_id'] = auth()->user()->id;
+
+        $vehiculeDepense = VehiculeDepense::create($validated);
+
+        return sendResponse($vehiculeDepense, 'Vehicule depense created successfully', 201);
     }
 
-    public function show(Request $request, VehiculeDepense $vehiculeDepense): Response
+    public function show(VehiculeDepense $vehiculeDepense)
     {
-        return new VehiculeDepenseResource($vehiculeDepense);
+        return sendResponse($vehiculeDepense, 'Vehicule depense retrieved successfully', 200);
     }
 
     public function update(VehiculeDepenseUpdateRequest $request, VehiculeDepense $vehiculeDepense): Response
