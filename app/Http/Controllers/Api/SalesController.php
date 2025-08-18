@@ -165,13 +165,13 @@ class SalesController extends Controller
                     "name" => $p->product?->name,
                     "code" => $p->product?->code,
                     "description"=> $p->product?->description,
-                    "sale_price_ttc" => $p->sale_price_ttc,
+                    "sale_price_ttc" =>  $p->product?->sale_price_ttc,
                     "unit"=> $p->product?->unit ?? 'Piece',
                     "image" => null,
                     "category_id" => $p->product?->category_id,
                     "quantity_disponible" => $p->quantity,
                     "stock_id" => $p->stock_id,
-                    "sale_price" => $p->sale_price_ttc,
+                    "sale_price" => $p->product?->sale_price_ttc,
             ]));
 
             $data = [
