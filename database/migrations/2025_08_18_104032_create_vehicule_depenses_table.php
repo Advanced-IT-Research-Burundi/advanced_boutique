@@ -16,8 +16,10 @@ return new class extends Migration
         Schema::create('vehicule_depenses', function (Blueprint $table) {
             $table->id();
             $table->foreignId('vehicule_id')->constrained();
-            $table->double('amount');
+            $table->double('amount', 64, 4);
             $table->dateTime('date');
+            $table->string('currency')->nullable(); // USD , EUR, BIF , Tsh , etc.
+            $table->double('exchange_rate', 64,4)->nullable();
             $table->text('description')->nullable();
             $table->foreignId('user_id')->constrained();
             $table->timestamps();
