@@ -139,7 +139,7 @@ class CommandesController extends Controller
                 'company_code' => $detail['company_code'],
                 'quantity' => $detail['quantity'],
                 'weight_kg' => $detail['weight_kg'] ?? 0,
-                'total_weight' => $detail['total_weight'] ?? 0,
+                'total_weight' => ( $detail['quantity'] * $detail['weight_kg']) ?? 0,
                 'pu' => $detail['pu'] ?? 0,
                 'remise' => 0,
                 'statut' => "pending",
