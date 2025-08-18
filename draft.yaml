@@ -1,15 +1,11 @@
 models:
-  DepensesImportation:
-    depense_importation_type : string nullable
-    depense_importation_type_id : id foreign:depense_importation_types
-    currency : string
-    exchange_rate : double
+  VehiculeDepense:
+    vehicule_id : id foreign:vehicules
     amount : double
-    amount_currency : double
     date : datetime
     description : text nullable
     user_id : id foreign:users
   
 controllers:
-  DepensesImportation:
+  VehiculeDepense:
     resource: api

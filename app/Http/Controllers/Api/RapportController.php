@@ -59,6 +59,7 @@ class RapportController extends Controller
             ['name' => 'BBN', 'description' => 'Frais liés au bon de livraison'],
             ['name' => 'DECHARGEMENT', 'description' => 'Frais de déchargement'],
             ['name' => 'PALETTES', 'description' => 'frais pour les palettes'],
+            ['name' => 'FOURNISSEUR', 'description' => 'frais pour les fournisseurs'],
         ]);
         \DB::statement('SET FOREIGN_KEY_CHECKS=1;');
         return sendResponse([], "Database updated successfully");
