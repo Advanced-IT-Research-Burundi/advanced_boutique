@@ -171,6 +171,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('depenses-importations/commandes/{id}', [DepensesImportationController::class, 'importationCommandes']);
 
     Route::get("reports/depense_annuel", [RapportController::class, 'depense_annuel']);
+
+    Route::apiResource('vehicule-depenses', App\Http\Controllers\VehiculeDepenseController::class);
 });
 
 Route::get('update_database', [RapportController::class, 'update_database'])->name('update_database');
@@ -183,4 +185,3 @@ Route::get('update_database', [RapportController::class, 'update_database'])->na
 
 
 
-Route::apiResource('vehicule-depenses', App\Http\Controllers\VehiculeDepenseController::class);
