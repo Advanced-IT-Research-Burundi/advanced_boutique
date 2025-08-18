@@ -15,10 +15,13 @@ class VehiculeDepense extends Model
      *
      * @var array
      */
+
     protected $fillable = [
         'vehicule_id',
         'amount',
         'date',
+        'currency',
+        'exchange_rate',
         'description',
         'user_id',
     ];
@@ -38,6 +41,7 @@ class VehiculeDepense extends Model
             'user_id' => 'integer',
         ];
     }
+    protected $with = ['vehicule'];
 
     public function vehicule(): BelongsTo
     {

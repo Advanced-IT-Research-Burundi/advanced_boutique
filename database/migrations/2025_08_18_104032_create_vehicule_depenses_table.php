@@ -18,7 +18,7 @@ return new class extends Migration
             $table->foreignId('vehicule_id')->constrained();
             $table->double('amount', 64, 4);
             $table->dateTime('date');
-            $table->string('currency')->nullable(); // USD , EUR, BIF , Tsh , etc.
+            $table->string('currency')->nullable(); // USD , EUR, BIF , Tsh
             $table->double('exchange_rate', 64,4)->nullable();
             $table->text('description')->nullable();
             $table->foreignId('user_id')->constrained();
