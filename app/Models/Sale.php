@@ -25,6 +25,8 @@ class Sale extends Model
         'paid_amount',
         'due_amount',
         'sale_date',
+        'status',
+        'description',
         'type_facture',
         'agency_id',
         'created_by',

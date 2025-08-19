@@ -105,7 +105,7 @@ class VehiculeDepenseController extends Controller
             $vehiculeDepense->delete();
             return sendResponse(null, 'Vehicule depense deleted successfully');
         } catch (\Throwable $th) {
-            return sendError('Error loading vehicule depenses'.$th->getMessage(),500,['error' => $th->getMessage()]);
+            return sendError('Error loading vehicule depenses'.$th->getMessage(), 500 ,['error' => $th->getMessage()]);
         }
     }
 }

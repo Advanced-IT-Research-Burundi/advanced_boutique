@@ -66,6 +66,9 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/products/search', [SalesController::class, 'searchProducts']);
         Route::get('/products/{productId}/stock', [SalesController::class, 'getProductStock']);
         Route::post('/store', [SalesController::class, 'store']);
+
+        Route::put('/{sale}/cancel', [SaleController::class, 'cancel']);
+        Route::post('/{sale}/payment', [SaleController::class, 'payment']);
     });
     Route::prefix('proformas')->group(function () {
         Route::get('/create-data', [ProformaController::class, 'getCreateData']);
