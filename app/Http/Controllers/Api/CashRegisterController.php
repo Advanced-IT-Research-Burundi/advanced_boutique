@@ -198,12 +198,32 @@ class CashRegisterController extends Controller
         $cashRegister->update([
             'status' => 'closed',
             'closed_at' => now(),
-            'closing_balance' => $closingBalance
+            'closing_balance' => $closingBalance,
+            'closed_at' => now(),
         ]);
 
         return sendResponse([
             'cashRegister' => $cashRegister,
         ], 'Cash register closed successfully', 200);
+    }
+
+    public function open(CashRegister $cashRegister)
+    {
+        if ($cashRegister->status === 'open') {
+            return sendResponse([
+                'cashRegister' => $cashRegister,
+            ], 'Cash register is already open', 200);
+        }
+
+        $cashRegister->update([
+            'status' => 'open',
+            'opened_at' => now(),
+            'closed_at' => null,
+        ]);
+
+        return sendResponse([
+            'cashRegister' => $cashRegister,
+        ], 'Cash register opened successfully', 200);
     }
 
     public function addTransaction(Request $request, CashRegister $cashRegister)
