@@ -97,7 +97,7 @@ class CashRegisterController extends Controller
         $transactions = CashTransaction::where('cash_register_id', $cashRegister->id)
                                      ->with(['createdBy', 'agency'])
                                      ->orderBy('created_at', 'desc')
-                                     ->paginate(10);
+                                     ->paginate(13  );
 
         // Calculer les totaux
         $totalIn = CashTransaction::where('cash_register_id', $cashRegister->id)
