@@ -115,7 +115,8 @@ class UserController extends \App\Http\Controllers\Controller
      */
     public function show(User $user)
     {
-        return sendResponse($user, 'Détail de l\'utilisateur récupéré avec succès');
+        $data = $user->load('stocks');
+        return sendResponse($data, 'Détail de l\'utilisateur récupéré avec succès');
     }
 
     /**
