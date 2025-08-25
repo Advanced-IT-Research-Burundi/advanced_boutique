@@ -19,6 +19,17 @@ use Illuminate\Support\Facades\Validator;
 
 class CommandesController extends Controller
 {
+
+    public function bonEntre(Request $request)
+    {
+        $search = $request->get('search', '');
+        $status = $request->get('status', '');
+        $commandes = Commandes::with(['vehicule'])
+                            ->where('status', '=','approved')
+                            ->latest()->paginate(10);
+
+        return sendResponse($commandes, 'Commandes retrieved successfully', 200);
+    }
     public function index(Request $request)
     {
         $search = $request->get('search', '');
@@ -164,7 +175,6 @@ class CommandesController extends Controller
             'commandes.*.matricule' => 'required|string',
             'commandes.*.poids' => 'required|numeric|min:0',
             'commandes.*.details' => 'required|array|min:1',
-
             'commandes.*.details.*.product_code' => 'nullable|string',
             'commandes.*.details.*.item_name' => 'nullable|string',
             'commandes.*.details.*.company_code' => 'nullable|string',

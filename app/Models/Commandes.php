@@ -24,6 +24,14 @@ class Commandes extends Model
         'status',
         'description',
     ];
+    public static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($model) {
+            $model->status = 'pending'; // Default status when creating a new commande
+        });
+    }
 
     /**
      * Get the attributes that should be cast.
