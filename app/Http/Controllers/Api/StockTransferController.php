@@ -49,51 +49,85 @@ class StockTransferController extends Controller
     }
 
     public function getProducts(Request $request)
-{
-    try {
-        $stockId = $request->stock_id;
-        $categoryId = $request->category_id;
-        $search = $request->search;
-        $excludeProducts = $request->exclude_products ?? [];
+    {
+        try {
+            $stockId = $request->stock_id;
+            $categoryId = $request->category_id;
+            $search = $request->search;
+            $excludeProducts = $request->exclude_products ?? [];
 
-        // Convertir exclude_products en tableau si c'est une chaîne
-        if (is_string($excludeProducts)) {
-            $excludeProducts = array_filter(explode(',', $excludeProducts));
-        }
+            // Convertir exclude_products en tableau si c'est une chaîne
+            if (is_string($excludeProducts)) {
+                $excludeProducts = array_filter(explode(',', $excludeProducts));
+            }
 
-        $query = Product::with(['stockProducts', 'category'])
-            ->whereHas('stockProducts', function ($query) use ($stockId) {
-                $query->where('stock_id', $stockId);
+            $query = Product::with(['stockProducts', 'category'])
+                ->whereHas('stockProducts', function ($query) use ($stockId) {
+                    $query->where('stock_id', $stockId);
+                });
+
+            if ($categoryId) {
+                $query->where('category_id', $categoryId);
+            }
+
+            if ($search) {
+                $query->where(function($q) use ($search) {
+                    $q->where('name', 'like', '%' . $search . '%')
+                    ->orWhere('code', 'like', '%' . $search . '%')
+                    ->orWhere('description', 'like', '%' . $search . '%');
+                });
+            }
+
+            if (!empty($excludeProducts)) {
+                $query->whereNotIn('id', $excludeProducts);
+            }
+
+            $products = $query->get()->map(function ($product) use ($stockId) {
+                $stockProduct = $product->stockProducts->where('stock_id', $stockId)->first();
+                $product->stock_quantity = $stockProduct ? $stockProduct->quantity : 0;
+                return $product;
             });
 
-        if ($categoryId) {
-            $query->where('category_id', $categoryId);
+            return sendResponse(['products' => $products], 'Produits récupérés avec succès');
+        } catch (\Throwable $e) {
+            return sendError('Erreur lors de la récupération des produits', 500, $e->getMessage());
         }
-
-        if ($search) {
-            $query->where(function($q) use ($search) {
-                $q->where('name', 'like', '%' . $search . '%')
-                  ->orWhere('code', 'like', '%' . $search . '%')
-                  ->orWhere('description', 'like', '%' . $search . '%');
-            });
-        }
-
-        if (!empty($excludeProducts)) {
-            $query->whereNotIn('id', $excludeProducts);
-        }
-
-        $products = $query->get()->map(function ($product) use ($stockId) {
-            $stockProduct = $product->stockProducts->where('stock_id', $stockId)->first();
-            $product->stock_quantity = $stockProduct ? $stockProduct->quantity : 0;
-            return $product;
-        });
-
-        return sendResponse(['products' => $products], 'Produits récupérés avec succès');
-    } catch (\Throwable $e) {
-        return sendError('Erreur lors de la récupération des produits', 500, $e->getMessage());
     }
-}
 
+    public function getProformaProducts(Request $request)
+    {
+        try {
+            $stockId = $request->stock_id;
+            $productIds = $request->product_ids;
+
+            if (!$stockId || !$productIds) {
+                return sendError('Stock ID ou Product IDs sont requis', 400);
+            }
+
+            if (is_string($productIds)) {
+                $productIds = array_filter(explode(',', $productIds));
+            }
+
+            $products = Product::select([
+                    'products.id',
+                    'products.name',
+                    'products.code',
+                    'products.description',
+                    'products.category_id',
+                    'stock_products.quantity as stock_quantity'
+                ])
+                ->join('stock_products', 'products.id', '=', 'stock_products.product_id')
+                ->with('category:id,name')
+                ->where('stock_products.stock_id', $stockId)
+                ->whereIn('products.id', $productIds)
+                ->get();
+
+            return sendResponse(['products' => $products], 'Produits du proforma récupérés avec succès');
+
+        } catch (\Throwable $e) {
+            return sendError('Erreur lors de la récupération des produits du proforma', 500, $e->getMessage());
+        }
+    }
 
     public function transfer(Request $request)
     {
