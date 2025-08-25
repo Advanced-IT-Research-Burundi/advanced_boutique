@@ -34,6 +34,7 @@ use App\Http\Controllers\DepenseImportationTypeController;
 use App\Http\Controllers\DepensesImportationController;
 use App\Http\Controllers\ProductCompanyNameController;
 use App\Http\Controllers\ReportsController;
+use App\Http\Controllers\VehiculeDepenseController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -172,7 +173,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get("reports/depense_annuel", [RapportController::class, 'depense_annuel']);
 
-    Route::apiResource('vehicule-depenses', App\Http\Controllers\VehiculeDepenseController::class);
+    Route::apiResource('vehicule-depenses', VehiculeDepenseController::class);
+    Route::get('bon-entree', [CommandesController::class, 'bonEntre']);
 });
 
 Route::get('update_database', [RapportController::class, 'update_database'])->name('update_database');
