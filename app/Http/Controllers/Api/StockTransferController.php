@@ -105,8 +105,8 @@ class StockTransferController extends Controller
             'products.*.quantity' => 'required|integer|min:1',
         ]);
 
+        DB::beginTransaction();
         try {
-            DB::beginTransaction();
 
             $fromStock = Stock::find($request->from_stock_id);
             $toStock = Stock::find($request->to_stock_id);
@@ -176,9 +176,7 @@ class StockTransferController extends Controller
 
         } catch (\Throwable $e) {
             DB::rollBack();
-            return sendError('Erreur lors du transfert: ' , 500,[
-                'error' => $e->getMessage(),
-            ]);
+            return sendError('Erreur lors du transfert: ' . $e->getMessage(), 500, $e->getMessage());
         }
     }
 
