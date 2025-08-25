@@ -287,13 +287,17 @@ class SaleController extends Controller
 
     public function destroy(Sale $sale)
     {
-        return sendResponse(null,'Vente supprimée avec succès');
+        // return sendResponse(null,'Vente supprimée avec succès');
         DB::beginTransaction();
 
         try {
+            if ($sale->paid_amount > 0) {
+                return sendError('Impossible de supprimer une vente qui a été payée.', 400);
+            }
             // Restore stock quantities
             foreach ($sale->saleItems as $item) {
-                $stock = Stock::where('product_id', $item->product_id)->first();
+                $stock = StockProduct::where('product_id', $item->product_id)
+                ->where('stock_id', $sale->stock_id)->first();
                 if ($stock) {
                     $stock->increment('quantity', $item->quantity);
                 }
@@ -305,11 +309,13 @@ class SaleController extends Controller
 
             DB::commit();
 
+
+
             return sendResponse(null,'Vente supprimée avec succès');
 
         } catch (\Exception $e) {
             DB::rollback();
-            return sendError('Erreur lors de la suppression de la vente: ' ,500,$e->getMessage());
+            return sendError('Erreur lors de la suppression de la vente: '.$e->getMessage() ,500,$e->getMessage());
         }
     }
 
@@ -374,4 +380,88 @@ class SaleController extends Controller
             'todaySales' => Sale::whereDate('sale_date', $today)->count(),
         ];
     }
+    public function cancel($id, Request $request)
+    {
+        DB::beginTransaction();
+        try {
+            $sale = Sale::findOrFail($id);
+
+            foreach ($sale->saleItems as $item) {
+                $stock = StockProduct::where('product_id', $item->product_id)
+                ->where('stock_id', $sale->stock_id)->first();
+                if ($stock) {
+                    $stock->increment('quantity', $item->quantity);
+                }else {
+                    return sendError('Stock not found for product ID: ' . $item->product_id, 404);
+                }
+
+            }
+
+            if ($sale->status === 'cancelled') {
+                return sendError('Cette vente est déjà annulée.', 400);
+            }
+
+            // if ($sale->paid_amount > 0) {
+            //     return sendError('Impossible d\'annuler une vente qui a été payée.', 400);
+            // }
+
+            $sale->status = 'cancelled';
+            $sale->description = $request->input('description', 'Vente annulée');
+            $sale->save();
+            DB::commit();
+            return sendResponse($sale, 'Vente annulée avec succès');
+
+        } catch (\Exception $e) {
+            DB::rollback();
+            return sendError('Erreur lors de l\'annulation: ' . $e->getMessage(), 500, $e->getMessage());
+        }
+    }
+
+    /**
+     * Enregistrer un paiement pour une vente
+     */
+    public function payment($id, Request $request)
+    {
+        $request->validate([
+            'amount' => 'required|numeric|min:0.01',
+            'payment_method' => 'nullable|string',
+        ]);
+
+        try {
+            $sale = Sale::findOrFail($id);
+
+            if ($sale->status === 'cancelled') {
+                return sendError('Impossible d\'ajouter un paiement à une vente annulée.', 400);
+            }
+
+
+            if ($sale->due_amount <= 0) {
+                return sendError('Cette vente est déjà entièrement payée.', 400);
+            }
+
+            $paymentAmount = $request->amount;
+
+            // Vérifier que le montant ne dépasse pas le montant dû
+            if ($paymentAmount > $sale->due_amount) {
+                return sendError('Le montant du paiement ne peut pas dépasser le montant dû (' . number_format($sale->due_amount, 0, ',', ' ') . ' F).', 400);
+            }
+
+            $sale->paid_amount += $paymentAmount;
+            $sale->due_amount -= $paymentAmount;
+
+            if ($sale->due_amount <= 0) {
+                $sale->status = 'paid';
+            } elseif ($sale->paid_amount > 0) {
+                $sale->status = 'partial';
+            }
+
+            $sale->save();
+
+            return sendResponse($sale, 'Paiement enregistré avec succès');
+
+        } catch (\Exception $e) {
+            return sendError('Erreur lors de l\'enregistrement du paiement: ' . $e->getMessage(), 500, $e->getMessage());
+        }
+    }
 }
+

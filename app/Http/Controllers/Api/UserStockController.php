@@ -39,7 +39,7 @@ class UserStockController extends Controller
         $agencies = Agency::select('id', 'name')->get();
 
         // return json if api request
-        
+
             return response()->json([
                 'success' => true,
                 'data' => [
@@ -49,9 +49,9 @@ class UserStockController extends Controller
                     'agencies' => $agencies->toArray()
                 ]
             ]);
-        
 
-        
+
+
     }
 
     /**
@@ -64,7 +64,7 @@ class UserStockController extends Controller
         $agencies = Agency::select('id', 'name')->get();
 
         // return json if api request
-        
+
             return response()->json([
                 'success' => true,
                 'data' => [
@@ -73,9 +73,9 @@ class UserStockController extends Controller
                     'agencies' => $agencies->toArray()
                 ]
             ]);
-        
 
-        
+
+
     }
 
     /**
@@ -106,12 +106,12 @@ class UserStockController extends Controller
         ]);
 
         // return json if api request
-        
+
             return response()->json([
                 'success' => true,
                 'message' => 'Association créée avec succès.'
             ]);
-        
+
 
         return redirect()->route('user-stocks.index')
             ->with('success', 'Association créée avec succès.');
@@ -125,12 +125,12 @@ class UserStockController extends Controller
         $userStock->load(['user', 'stock', 'agency', 'createdBy']);
 
         // return json if api request
-        
+
             return response()->json([
                 'success' => true,
                 'data' => $userStock
             ]);
-        
+
 
         return view('userStock.show', compact('userStock'));
     }
@@ -185,12 +185,12 @@ class UserStockController extends Controller
         }
 
         // return json if api request
-        
+
             return response()->json([
                 'success' => true,
                 'message' => $message
             ]);
-        
+
 
         return back()->with('success', $message);
     }
@@ -208,12 +208,12 @@ class UserStockController extends Controller
         UserStock::where('user_id', $request->user_id)->delete();
 
         // return json if api request
-        
+
             return response()->json([
                 'success' => true,
                 'message' => "$count associations supprimées."
             ]);
-        
+
 
         return  back()->with('success', "$count associations supprimées.");
     }
@@ -233,7 +233,7 @@ class UserStockController extends Controller
         // return json if api request
 
             return response()->json($stockUsers);
-        
+
 
         //return view('userStock.index', compact('stockUsers'));
     }
@@ -243,26 +243,19 @@ class UserStockController extends Controller
      */
     public function manage(User $user)
     {
-        // Vérifier les autorisations
-        // $this->authorize('manage-user-stocks');
-
-        // Récupérer les stocks assignés à l'utilisateur
         $assignedStocks = $user->stocks()->withPivot('created_at')->get();
 
-        // Récupérer les stocks disponibles (non assignés à cet utilisateur)
         $assignedStockIds = $assignedStocks->pluck('id')->toArray();
         $availableStocks = Stock::whereNotIn('id', $assignedStockIds)
             ->get();
-            return response()->json([
-                'success' => true,
-                'data' => [
-                    'user' => $user,
-                    'assignedStocks' => $assignedStocks,
-                    'availableStocks' => $availableStocks
-                ]
-            ]);
 
-        
+            $data = [
+                'user' => $user,
+                'assignedStocks' => $assignedStocks,
+                'availableStocks' => $availableStocks
+            ];
+            return sendResponse($data, 'Stocks de l\'utilisateur récupérés avec succès', 200);
+
     }
 
     /**
@@ -319,13 +312,13 @@ class UserStockController extends Controller
             if (!empty($alreadyAssigned)) {
                 $message .= " Attention: " . implode(', ', $alreadyAssigned) . " étai(en)t déjà assigné(s).";
             }
-            
+
             return response()->json([
                 'success' => true,
                 'message' => $message
-            ]); 
+            ]);
 
-            
+
 
         } catch (\Exception $e) {
             \DB::rollBack();
@@ -392,19 +385,58 @@ class UserStockController extends Controller
     /**
      * Afficher l'historique des assignations de stocks pour un utilisateur
      */
-    public function history(User $user)
+   public function history(Request $request, User $user)
     {
-        $stockHistory = UserStock::withTrashed()
-            ->where('user_id', $user->id)
-            ->with(['stock', 'agency', 'createdBy'])
-            ->orderBy('created_at', 'desc')
-            ->paginate(15);
+        $dateFrom = $request->input('date_from');
+        $dateTo = $request->input('date_to');
+        $status = $request->input('status');
 
-        return response()->json([
-            'success' => true,
-            'data' => $stockHistory
-        ]);
+        $query = UserStock::withTrashed()
+            ->where('user_id', $user->id)
+            ->with(['stock', 'agency', 'createdBy']);
+
+
+        if ($dateFrom) {
+            $query->whereDate('created_at', '>=', $dateFrom);
+        }
+
+        if ($dateTo) {
+            $query->whereDate('created_at', '<=', $dateTo);
+        }
+
+
+        if ($status === 'active') {
+            $query->whereNull('deleted_at');
+        } elseif ($status === 'deleted') {
+            $query->whereNotNull('deleted_at');
+        }
+
+
+        $data = $query->orderBy('created_at', 'desc')->paginate(15);
+
+        $statistics = [
+            'total' => UserStock::withTrashed()->where('user_id', $user->id)->count(),
+            'active' => UserStock::where('user_id', $user->id)->count(),
+            'deleted' => UserStock::onlyTrashed()->where('user_id', $user->id)->count(),
+            'lastAction' => UserStock::withTrashed()
+                ->where('user_id', $user->id)
+                ->latest('created_at')
+                ->value('created_at'),
+        ];
+
+        return sendResponse([
+            'user' => $user,
+            'data' => $data->items(),
+            'current_page' => $data->currentPage(),
+            'last_page' => $data->lastPage(),
+            'total' => $data->total(),
+            'from' => $data->firstItem(),
+            'to' => $data->lastItem(),
+            'statistics' => $statistics,
+        ], 'Historique des assignations de stocks récupéré avec succès', 200);
     }
+
+
 
     /**
      * API: Obtenir les stocks d'un utilisateur en JSON

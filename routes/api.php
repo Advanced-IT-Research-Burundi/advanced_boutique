@@ -67,6 +67,9 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/products/search', [SalesController::class, 'searchProducts']);
         Route::get('/products/{productId}/stock', [SalesController::class, 'getProductStock']);
         Route::post('/store', [SalesController::class, 'store']);
+
+        Route::put('/{sale}/cancel', [SaleController::class, 'cancel']);
+        Route::post('/{sale}/payment', [SaleController::class, 'payment']);
     });
     Route::prefix('proformas')->group(function () {
         Route::get('/create-data', [ProformaController::class, 'getCreateData']);
@@ -151,6 +154,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/sales/{sale}/pdf', [SaleController::class, 'downloadPDF'])->name('sales.pdf');
     Route::resource('cash-registers', CashRegisterController::class);
     Route::post('cash-register/{cashRegister}/close', [CashRegisterController::class, 'close'])->name('cash-register.close');
+    Route::post('cash-register/{cashRegister}/open', [CashRegisterController::class, 'open'])->name('cash-register.open');
     Route::resource('cash-transactions', CashTransactionController::class);
     Route::get('cash-transactions/{cashRegister}/export', [CashTransactionController::class, 'export'])->name('cash-transactions.export');
     Route::post('cash-transactions/{transaction}/cancel', [CashTransactionController::class, 'cancel'])->name('cash-transactions.cancel');

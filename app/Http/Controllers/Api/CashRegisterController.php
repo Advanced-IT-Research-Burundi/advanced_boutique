@@ -67,18 +67,6 @@ class CashRegisterController extends Controller
         return sendResponse($data, 'Liste des caisses récupérée avec succès', 200);
     }
 
-    public function create()
-    {
-        $users = User::all();
-        $stocks = Stock::all();
-        $agencies = Agency::all();
-
-        return sendResponse([
-            'users' => $users,
-            'stocks' => $stocks,
-            'agencies' => $agencies
-        ], 'Cash register created successfully', 200);
-    }
 
     public function store(Request $request)
     {
@@ -109,7 +97,7 @@ class CashRegisterController extends Controller
         $transactions = CashTransaction::where('cash_register_id', $cashRegister->id)
                                      ->with(['createdBy', 'agency'])
                                      ->orderBy('created_at', 'desc')
-                                     ->paginate(10);
+                                     ->paginate(13);
 
         // Calculer les totaux
         $totalIn = CashTransaction::where('cash_register_id', $cashRegister->id)
@@ -120,26 +108,34 @@ class CashRegisterController extends Controller
                                  ->where('type', 'out')
                                  ->sum('amount');
 
+
         $currentBalance = $cashRegister->opening_balance + $totalIn - $totalOut;
+
+        $statistics = [
+            'totalIn' => $totalIn,
+            'totalOut' => $totalOut,
+            'currentBalance' => $currentBalance,
+            'transactionCounts' => [
+                'in' => CashTransaction::where('cash_register_id', $cashRegister->id)
+                                        ->where('type', 'in')
+                                        ->count(),
+                'out' => CashTransaction::where('cash_register_id', $cashRegister->id)
+                                        ->where('type', 'out')
+                                        ->count(),
+                'total' => CashTransaction::where('cash_register_id', $cashRegister->id)
+                                        ->count(),
+            ]
+        ];
 
         return sendResponse([
             'cashRegister' => $cashRegister,
             'transactions' => $transactions,
-            'totalIn' => $totalIn,
-            'totalOut' => $totalOut,
-            'currentBalance' => $currentBalance
+            'statistics' => $statistics,
         ])
         ;
     }
 
-    public function edit(CashRegister $cashRegister)
-    {
-        $users = User::all();
-        $stocks = Stock::all();
-        $agencies = Agency::all();
 
-        return view('cashRegister.edit', compact('cashRegister', 'users', 'stocks', 'agencies'));
-    }
 
     public function update(Request $request, CashRegister $cashRegister)
     {
@@ -198,12 +194,32 @@ class CashRegisterController extends Controller
         $cashRegister->update([
             'status' => 'closed',
             'closed_at' => now(),
-            'closing_balance' => $closingBalance
+            'closing_balance' => $closingBalance,
+            'closed_at' => now(),
         ]);
 
         return sendResponse([
             'cashRegister' => $cashRegister,
         ], 'Cash register closed successfully', 200);
+    }
+
+    public function open(CashRegister $cashRegister)
+    {
+        if ($cashRegister->status === 'open') {
+            return sendResponse([
+                'cashRegister' => $cashRegister,
+            ], 'Cash register is already open', 200);
+        }
+
+        $cashRegister->update([
+            'status' => 'open',
+            'opened_at' => now(),
+            'closed_at' => null,
+        ]);
+
+        return sendResponse([
+            'cashRegister' => $cashRegister,
+        ], 'Cash register opened successfully', 200);
     }
 
     public function addTransaction(Request $request, CashRegister $cashRegister)
