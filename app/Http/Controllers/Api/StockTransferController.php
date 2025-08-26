@@ -1,3 +1,4 @@
+
 <?php
 
 namespace App\Http\Controllers\Api;
@@ -107,33 +108,26 @@ class StockTransferController extends Controller
 
         try {
             DB::beginTransaction();
-
             $fromStock = Stock::find($request->from_stock_id);
             $toStock = Stock::find($request->to_stock_id);
             $transferCode = time();
-
             foreach ($request->products as $productData) {
                 $product = Product::find($productData['product_id']);
                 $quantity = $productData['quantity'];
-
                 // Vérifier le stock source
                 $sourceStockProduct = $product->stockProducts()
                     ->where('stock_id', $request->from_stock_id)
                     ->first();
-
                 if (!$sourceStockProduct || $sourceStockProduct->quantity < $quantity) {
                     throw new \Exception("Quantité insuffisante pour le produit {$product->name}");
                 }
-
                 // Mettre à jour le stock source
                 $sourceStockProduct->quantity -= $quantity;
                 $sourceStockProduct->save();
-
                 // Mettre à jour ou créer le stock destination
                 $destStockProduct = $product->stockProducts()
                     ->where('stock_id', $request->to_stock_id)
                     ->first();
-
                 if (!$destStockProduct) {
                     $destStockProduct = StockProduct::create([
                         'stock_id' => $request->to_stock_id,
@@ -166,12 +160,12 @@ class StockTransferController extends Controller
                 $this->createStockMovements($fromStock, $toStock, $product, $quantity, $transferCode, $sourceStockProduct, $destStockProduct);
             }
 
-            DB::commit();
-
-
             $data =[
                 'transfer_code' => $transferCode,
             ];
+
+            DB::commit();
+
             return sendResponse($data, 'Transfert effectué avec succès');
 
         } catch (\Throwable $e) {
