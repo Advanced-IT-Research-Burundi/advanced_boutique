@@ -85,6 +85,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/stocks/{id}/proformas', [StockTransferController::class, 'getStockProformas']);
         Route::get('/stocks/{id}/categories', [StockTransferController::class, 'getStockCategories']);
         Route::get('/stocks/products', [StockTransferController::class, 'getProducts']);
+        Route::get('/stocks/products/proforma', [StockTransferController::class, 'getProformaProducts']);
         Route::post('/stocks/transfer', [StockTransferController::class, 'transfer']);
 
     });
@@ -104,16 +105,11 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('entry-summary', [EntreMultipleController::class, 'getEntrySummary']);
         Route::delete('/users/{userId}', [StockShowController::class, 'detachUser']);
     });
-
-
-
-
     Route::prefix('stock-movements')->group(function () {
         Route::get('/', [StockMovementController::class, 'getMovements']);
         Route::post('/', [StockMovementController::class, 'createMovement']);
         Route::get('stats/{stockProductId}', [StockMovementController::class, 'getMovementStats']);
     });
-
     Route::resource('stocks', StockController::class);
     Route::get('stocks/{id}/export/excel', [StockProductController::class, 'exportToExcel']);
     Route::get('stocks/{id}/export/pdf', [StockProductController::class, 'exportToPdf']);

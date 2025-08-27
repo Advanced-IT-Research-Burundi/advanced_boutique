@@ -1,9 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\Api;
-
-use App\Http\Requests\ProformaStoreRequest;
-use App\Http\Requests\ProformaUpdateRequest;
+use App\Http\Controllers\Controller;
 use App\Models\Company;
 use App\Models\Proforma;
 use App\Models\Sale;
