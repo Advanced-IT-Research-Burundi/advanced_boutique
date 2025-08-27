@@ -85,7 +85,6 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/stocks/{id}/proformas', [StockTransferController::class, 'getStockProformas']);
         Route::get('/stocks/{id}/categories', [StockTransferController::class, 'getStockCategories']);
         Route::get('/stocks/products', [StockTransferController::class, 'getProducts']);
-        Route::get('/stocks/products/proforma', [StockTransferController::class, 'getProformaProducts']);
         Route::post('/stocks/transfer', [StockTransferController::class, 'transfer']);
 
     });

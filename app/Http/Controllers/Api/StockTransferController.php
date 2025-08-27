@@ -1,3 +1,4 @@
+
 <?php
 
 namespace App\Http\Controllers\Api;
@@ -49,85 +50,51 @@ class StockTransferController extends Controller
     }
 
     public function getProducts(Request $request)
-    {
-        try {
-            $stockId = $request->stock_id;
-            $categoryId = $request->category_id;
-            $search = $request->search;
-            $excludeProducts = $request->exclude_products ?? [];
+{
+    try {
+        $stockId = $request->stock_id;
+        $categoryId = $request->category_id;
+        $search = $request->search;
+        $excludeProducts = $request->exclude_products ?? [];
 
-            // Convertir exclude_products en tableau si c'est une chaîne
-            if (is_string($excludeProducts)) {
-                $excludeProducts = array_filter(explode(',', $excludeProducts));
-            }
+        // Convertir exclude_products en tableau si c'est une chaîne
+        if (is_string($excludeProducts)) {
+            $excludeProducts = array_filter(explode(',', $excludeProducts));
+        }
 
-            $query = Product::with(['stockProducts', 'category'])
-                ->whereHas('stockProducts', function ($query) use ($stockId) {
-                    $query->where('stock_id', $stockId);
-                });
-
-            if ($categoryId) {
-                $query->where('category_id', $categoryId);
-            }
-
-            if ($search) {
-                $query->where(function($q) use ($search) {
-                    $q->where('name', 'like', '%' . $search . '%')
-                    ->orWhere('code', 'like', '%' . $search . '%')
-                    ->orWhere('description', 'like', '%' . $search . '%');
-                });
-            }
-
-            if (!empty($excludeProducts)) {
-                $query->whereNotIn('id', $excludeProducts);
-            }
-
-            $products = $query->get()->map(function ($product) use ($stockId) {
-                $stockProduct = $product->stockProducts->where('stock_id', $stockId)->first();
-                $product->stock_quantity = $stockProduct ? $stockProduct->quantity : 0;
-                return $product;
+        $query = Product::with(['stockProducts', 'category'])
+            ->whereHas('stockProducts', function ($query) use ($stockId) {
+                $query->where('stock_id', $stockId);
             });
 
-            return sendResponse(['products' => $products], 'Produits récupérés avec succès');
-        } catch (\Throwable $e) {
-            return sendError('Erreur lors de la récupération des produits', 500, $e->getMessage());
+        if ($categoryId) {
+            $query->where('category_id', $categoryId);
         }
-    }
 
-    public function getProformaProducts(Request $request)
-    {
-        try {
-            $stockId = $request->stock_id;
-            $productIds = $request->product_ids;
-
-            if (!$stockId || !$productIds) {
-                return sendError('Stock ID ou Product IDs sont requis', 400);
-            }
-
-            if (is_string($productIds)) {
-                $productIds = array_filter(explode(',', $productIds));
-            }
-
-            $products = Product::select([
-                    'products.id',
-                    'products.name',
-                    'products.code',
-                    'products.description',
-                    'products.category_id',
-                    'stock_products.quantity as stock_quantity'
-                ])
-                ->join('stock_products', 'products.id', '=', 'stock_products.product_id')
-                ->with('category:id,name')
-                ->where('stock_products.stock_id', $stockId)
-                ->whereIn('products.id', $productIds)
-                ->get();
-
-            return sendResponse(['products' => $products], 'Produits du proforma récupérés avec succès');
-
-        } catch (\Throwable $e) {
-            return sendError('Erreur lors de la récupération des produits du proforma', 500, $e->getMessage());
+        if ($search) {
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', '%' . $search . '%')
+                  ->orWhere('code', 'like', '%' . $search . '%')
+                  ->orWhere('description', 'like', '%' . $search . '%');
+            });
         }
+
+        if (!empty($excludeProducts)) {
+            $query->whereNotIn('id', $excludeProducts);
+        }
+
+        $products = $query->get()->map(function ($product) use ($stockId) {
+            $stockProduct = $product->stockProducts->where('stock_id', $stockId)->first();
+            $product->stock_quantity = $stockProduct ? $stockProduct->quantity : 0;
+            return $product;
+        });
+
+        return sendResponse(['products' => $products], 'Produits récupérés avec succès');
+    } catch (\Throwable $e) {
+        return sendError('Erreur lors de la récupération des produits', 500, $e->getMessage());
     }
+}
+
 
     public function transfer(Request $request)
     {
@@ -139,35 +106,28 @@ class StockTransferController extends Controller
             'products.*.quantity' => 'required|integer|min:1',
         ]);
 
-        DB::beginTransaction();
         try {
-
+            DB::beginTransaction();
             $fromStock = Stock::find($request->from_stock_id);
             $toStock = Stock::find($request->to_stock_id);
             $transferCode = time();
-
             foreach ($request->products as $productData) {
                 $product = Product::find($productData['product_id']);
                 $quantity = $productData['quantity'];
-
                 // Vérifier le stock source
                 $sourceStockProduct = $product->stockProducts()
                     ->where('stock_id', $request->from_stock_id)
                     ->first();
-
                 if (!$sourceStockProduct || $sourceStockProduct->quantity < $quantity) {
                     throw new \Exception("Quantité insuffisante pour le produit {$product->name}");
                 }
-
                 // Mettre à jour le stock source
                 $sourceStockProduct->quantity -= $quantity;
                 $sourceStockProduct->save();
-
                 // Mettre à jour ou créer le stock destination
                 $destStockProduct = $product->stockProducts()
                     ->where('stock_id', $request->to_stock_id)
                     ->first();
-
                 if (!$destStockProduct) {
                     $destStockProduct = StockProduct::create([
                         'stock_id' => $request->to_stock_id,
@@ -200,17 +160,19 @@ class StockTransferController extends Controller
                 $this->createStockMovements($fromStock, $toStock, $product, $quantity, $transferCode, $sourceStockProduct, $destStockProduct);
             }
 
-            DB::commit();
-
-
             $data =[
                 'transfer_code' => $transferCode,
             ];
+
+            DB::commit();
+
             return sendResponse($data, 'Transfert effectué avec succès');
 
         } catch (\Throwable $e) {
             DB::rollBack();
-            return sendError('Erreur lors du transfert: ' . $e->getMessage(), 500, $e->getMessage());
+            return sendError('Erreur lors du transfert: ' , 500,[
+                'error' => $e->getMessage(),
+            ]);
         }
     }
 
