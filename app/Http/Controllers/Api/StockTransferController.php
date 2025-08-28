@@ -101,6 +101,7 @@ class StockTransferController extends Controller
             $stockId = $request->stock_id;
             $productIds = $request->product_ids;
 
+
             if (!$stockId || !$productIds) {
                 return sendError('Stock ID ou Product IDs sont requis', 400);
             }
@@ -111,9 +112,10 @@ class StockTransferController extends Controller
 
             $products = StockProduct::with('product', 'product.category')
                 ->where('stock_id', $stockId)
-                ->whereIn('product_id', $productIds)
+                ->whereIn('id', $productIds)
                 ->get()
             ;
+
             $products = $products->map(function ($stockProduct) {
                 return [
                     "id" => $stockProduct->id,
@@ -143,7 +145,7 @@ class StockTransferController extends Controller
             'from_stock_id' => 'required|exists:stocks,id',
             'to_stock_id' => 'required|exists:stocks,id|different:from_stock_id',
             'products' => 'required|array|min:1',
-            'products.*.product_id' => 'required|exists:products,id',
+            'products.*.product_id' => 'required|exists:stock_products,id',
             'products.*.quantity' => 'required|integer|min:1',
             "proforma_id" => "nullable|exists:proformas,id",
         ]);
@@ -153,7 +155,9 @@ class StockTransferController extends Controller
             $toStock = Stock::find($request->to_stock_id);
             $transferCode = time();
             $proforma = null;
+             
             if($request->proforma_id){
+                
                     $proforma = Proforma::findOrFail($request->proforma_id);
                     if($proforma->transfer_code != null){
                         throw new \Exception("Le proforma a déjà été utilisé pour un transfert.");
@@ -166,10 +170,10 @@ class StockTransferController extends Controller
                     $errors = [];
                     foreach( $request->products as $item){
                         $stockProduct = StockProduct::where('stock_id', $request->from_stock_id)
-                        ->where('product_id', $item['product_id'])
+                        ->where('id', $item['product_id'])
                         ->where('quantity', '>=', $item['quantity'])
                         ->first();
-
+                       
                         if(!$stockProduct){
                             $product = Product::find($item['product_id']);
                             $errors[] = "Quantité insuffisante pour le produit {$product->name} # {$product->code}. Stock disponible: {$stockProduct['quantity']}, Demandé: {$item['quantity']}";
@@ -185,8 +189,10 @@ class StockTransferController extends Controller
                     $proforma->save();
             }
 
+            
+           
             foreach ($request->products as $productData) {
-                $product = Product::find($productData['product_id']);
+                $product =StockProduct::find($productData['product_id'])->product;
                 $quantity = $productData['quantity'];
                 // Vérifier le stock source
                 $sourceStockProduct = $product->stockProducts()
@@ -243,7 +249,7 @@ class StockTransferController extends Controller
 
         } catch (\Throwable $e) {
             DB::rollBack();
-            return sendError('Erreur lors du transfert: ' . $e->getMessage(), 500, $e->getMessage());
+            return sendError('Erreur lors du transfert: ' . $e->getMessage(), 500, $e);
         }
     }
 

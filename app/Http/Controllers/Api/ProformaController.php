@@ -284,19 +284,6 @@ class ProformaController extends Controller
             // Récupérer les stocks de l'utilisateur
             $stocks = auth()->user()->stocks()
                 ->get();
-            // $stocks = $user->stocks()
-            //     ->withCount('products')
-            //     ->select('id', 'name', 'agency_id')
-            //     ->get()
-            //     ->map(function ($stock) {
-            //         return [
-            //             'id' => $stock->id,
-            //             'name' => $stock->name,
-            //             'products_count' => $stock->products_count
-            //         ];
-            //     });
-
-
 
             $data = [
                 'stocks' => $stocks,
@@ -425,7 +412,10 @@ class ProformaController extends Controller
                 $stockProduct = $product->stockProducts->first();
                 $product->quantity_disponible = $stockProduct ? $stockProduct->quantity : 0;
                 $product->stock_id = $stockId;
-
+               // $product->id = $stockProduct->id;
+                $product->product_id = $product->id;
+                unset($product->id);
+                $product->id =$stockProduct->id;
                 // Nettoyer les relations pour réduire la taille de la réponse
                 unset($product->stockProducts);
             });
@@ -456,7 +446,7 @@ class ProformaController extends Controller
             'total_amount' => 'required|numeric|min:0',
             'invoice_type' => 'required|in:FACTURE,PROFORMA,BON',
             'items' => 'required|array|min:1',
-            'items.*.product_id' => 'required|exists:products,id',
+            'items.*.product_id' => 'required|exists:stock_products,id',
             'items.*.quantity' => 'required|numeric|min:0.01',
             'items.*.sale_price' => 'required|numeric|min:0',
             'items.*.discount' => 'nullable|numeric|min:0',
@@ -533,9 +523,12 @@ class ProformaController extends Controller
     private function createProforma($request, $totals)
     {
 
+        // Get Stock , product ID for stock product ID
+
         $items = array_map(function ($item) {
             return [
                 'product_id' => $item['product_id'],
+                'stock_product_id' => $item['product_id'],
                 'quantity' => $item['quantity'],
                 'sale_price' => $item['sale_price'],
                 'discount' => $item['discount'] ?? 0,
