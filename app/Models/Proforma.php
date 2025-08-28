@@ -9,7 +9,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Proforma extends Model
 {
     use HasFactory, SoftDeletes;
-
     protected $fillable = [
         'stock_id',
         'user_id',

@@ -16,6 +16,7 @@ return new class extends Migration
         Schema::create('proformas', function (Blueprint $table) {
             $table->id();
             $table->foreignId('stock_id')->constrained();
+          
             $table->foreignId('user_id')->constrained();
             $table->double('total_amount');
             $table->double('due_amount');
@@ -26,6 +27,9 @@ return new class extends Migration
             $table->foreignId('created_by')->nullable()->constrained('users');
             $table->text('proforma_items')->nullable();
             $table->text('client')->nullable();
+            $table->string('transfer_code')->nullable();
+            $table->string('status')->nullable(); /// e.g., accepted, completed, cancelled,
+            $table->foreignId('stock_recevant_id')->nullable(); 
             $table->boolean('is_valid')->default(false);
             $table->timestamps();
             $table->softDeletes();

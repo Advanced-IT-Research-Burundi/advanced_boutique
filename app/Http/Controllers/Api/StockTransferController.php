@@ -152,6 +152,36 @@ class StockTransferController extends Controller
             $fromStock = Stock::find($request->from_stock_id);
             $toStock = Stock::find($request->to_stock_id);
             $transferCode = time();
+            $proforma = null;
+            if($request->proforma_id){
+                    $proforma = Proforma::findOrFail($request->proforma_id);
+                    $proforma->transfer_code = $transferCode;
+                    $proforma->stock_recevant_id = $request->to_stock_id;
+                    $proforma->status = 'ACCEPTED';
+
+                    $listeValidate = [];
+                    $errors = [];
+                    foreach( $request->products as $item){
+                        $stockProduct = StockProduct::where('stock_id', $request->from_stock_id)
+                        ->where('product_id', $item['product_id'])
+                        ->where('quantity', '>=', $item['quantity'])
+                        ->first();
+
+                        if(!$stockProduct){
+                            $product = Product::find($item['product_id']);
+                            $errors[] = "Quantité insuffisante pour le produit {$product->name} # {$product->code}. Stock disponible: {$stockProduct['quantity']}, Demandé: {$item['quantity']}";
+                        }else{
+                            $listeValidate[] = $stockProduct;
+                        }
+                    }
+                    if(count($errors) > 0){
+                        return sendError('Erreur de validation', 500, $errors);
+                    }
+                    $proforma->is_valid = true;
+                    $proforma->status = 'ACCEPTED';
+                    $proforma->save();
+            }
+
             foreach ($request->products as $productData) {
                 $product = Product::find($productData['product_id']);
                 $quantity = $productData['quantity'];
@@ -162,11 +192,9 @@ class StockTransferController extends Controller
                 if (!$sourceStockProduct || $sourceStockProduct->quantity < $quantity) {
                     throw new \Exception("Quantité insuffisante pour le produit {$product->name}");
                 }
-
                 // Mettre à jour le stock source
                 $sourceStockProduct->quantity -= $quantity;
                 $sourceStockProduct->save();
-
                 // Mettre à jour ou créer le stock destination
                 $destStockProduct = $product->stockProducts()
                     ->where('stock_id', $request->to_stock_id)
@@ -194,24 +222,17 @@ class StockTransferController extends Controller
                     'user_id' => auth()->id(),
                     'transfer_date' => now(),
                     'note' => $transferCode,
+                    'transfer_code' => $transferCode,
                     'product_code' => $product->code,
                     'product_name' => $product->name,
                     'agency_id' => auth()->user()->agency_id,
                     'created_by' => auth()->id(),
                 ]);
-
-                // Enregistrer les mouvements de stock
-                $validation = new ProformaController();
-
-                $proforma = Proforma::findOrFail($request->proforma_id);
-                $validation->validateProforma($proforma);
-                // Créer les mouvements de stock
                 $this->createStockMovements($fromStock, $toStock, $product, $quantity, $transferCode, $sourceStockProduct, $destStockProduct);
             }
 
-            DB::commit();
 
-
+            DB::commit();         
             $data =[
                 'transfer_code' => $transferCode,
             ];

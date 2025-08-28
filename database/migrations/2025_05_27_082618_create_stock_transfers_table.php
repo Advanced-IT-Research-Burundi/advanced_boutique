@@ -25,6 +25,7 @@ return new class extends Migration
             $table->double('price')->default(0);
             $table->foreignId('user_id')->constrained();
             $table->dateTime('transfer_date');
+            $table->text('transfer_code')->nullable();
             $table->text('note')->nullable();
             $table->text('product_code')->nullable();
             $table->foreignId('agency_id')->nullable()->constrained();
