@@ -155,6 +155,9 @@ class StockTransferController extends Controller
             $proforma = null;
             if($request->proforma_id){
                     $proforma = Proforma::findOrFail($request->proforma_id);
+                    if($proforma->transfer_code != null){
+                        throw new \Exception("Le proforma a déjà été utilisé pour un transfert.");
+                    }
                     $proforma->transfer_code = $transferCode;
                     $proforma->stock_recevant_id = $request->to_stock_id;
                     $proforma->status = 'ACCEPTED';
