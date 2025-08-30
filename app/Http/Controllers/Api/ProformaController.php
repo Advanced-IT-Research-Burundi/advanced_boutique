@@ -91,6 +91,16 @@ class ProformaController extends Controller
         // Decode proforma items
         $items = json_decode($proforma->proforma_items, true) ?? [];
 
+        // Get Product with Name
+
+        $items = array_map(function ($item) {
+            $product = StockProduct::find($item['product_id']);
+            return array_merge($item, [
+                'product_name' => $product->product_name ?? '-',
+              //  'product_code' => $product 
+            ]);
+        }, $items);
+
         // Decode client data
         $client = json_decode($proforma->client, true) ?? [];
 

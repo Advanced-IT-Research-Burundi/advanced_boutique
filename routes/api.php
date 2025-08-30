@@ -178,12 +178,3 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 Route::get('update_database', [RapportController::class, 'update_database'])->name('update_database');
-
-
-
-
-
-
-
-
-
