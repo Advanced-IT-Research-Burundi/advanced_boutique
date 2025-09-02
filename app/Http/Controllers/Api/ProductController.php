@@ -34,7 +34,7 @@ class ProductController extends Controller
         if ($request->filled('agency_id')) {
             $query->where('agency_id', $request->agency_id);
         }
-        $products = $query->paginate(10);
+        $products = $query->latest()->paginate(10);
         $categories = Category::whereIn('id', Product::select('category_id')->distinct()->pluck('category_id'))->get();
         $agencies = Agency::whereIn('id', Product::select('agency_id')->distinct()->pluck('agency_id'))->get();
         $data = [
