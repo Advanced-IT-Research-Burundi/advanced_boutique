@@ -29,6 +29,7 @@ class Product extends Model
         'sale_price_ht',
         'sale_price_ttc',
         'unit',
+        'unit_id',
         'image',
         'alert_quantity',
         'agency_id',

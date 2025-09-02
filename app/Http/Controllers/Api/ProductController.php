@@ -70,6 +70,7 @@ class ProductController extends Controller
                 'sale_price_ht' => 'nullable|numeric|min:0',
                 'sale_price_ttc' => 'required|numeric|min:0',
                 'unit' => 'required|string|max:50',
+                'unit' => 'required|exists:units,id',
                 'alert_quantity' => 'required|numeric|min:0',
                 // 'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             ]);
@@ -89,6 +90,7 @@ class ProductController extends Controller
             $product->sale_price_ht = $validated['sale_price_ht'] ?? null;
             $product->sale_price_ttc = $validated['sale_price_ttc'];
             $product->unit = $validated['unit'];
+            $product->unit_id = $validated['unit'];
             $product->alert_quantity = $validated['alert_quantity'];
             $product->image = $imagePath;
             $product->created_by = Auth::id();
@@ -129,6 +131,7 @@ class ProductController extends Controller
             'sale_price_ht' => 'nullable|numeric|min:0',
             'sale_price_ttc' => 'required|numeric|min:0',
             'unit' => 'required|string|max:50',
+            'unit' => 'required|exists:units,id',
             'alert_quantity' => 'required|numeric|min:0',
             // 'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
@@ -151,6 +154,7 @@ class ProductController extends Controller
                 'sale_price_ht' => $validated['sale_price_ht'] ?? null,
                 'sale_price_ttc' => $validated['sale_price_ttc'],
                 'unit' => $validated['unit'],
+                'unit_id' => $validated['unit'],
                 'alert_quantity' => $validated['alert_quantity'],
                 'image' => $imagePath,
             ]);

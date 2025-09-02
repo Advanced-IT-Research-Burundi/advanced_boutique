@@ -23,6 +23,7 @@ return new class extends Migration
             $table->double('sale_price_ht')->nullable();
             $table->double('sale_price_ttc');
             $table->string('unit');
+            $table->foreignId('unit_id')->nullable()->constrained();
             $table->float('alert_quantity');
             $table->string('image')->nullable();
             $table->foreignId('agency_id')->nullable()->constrained();

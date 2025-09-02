@@ -34,6 +34,7 @@ use App\Http\Controllers\DepenseImportationTypeController;
 use App\Http\Controllers\DepensesImportationController;
 use App\Http\Controllers\ProductCompanyNameController;
 use App\Http\Controllers\ReportsController;
+use App\Http\Controllers\UnitController;
 use App\Http\Controllers\VehiculeDepenseController;
 use Illuminate\Support\Facades\Route;
 
@@ -56,6 +57,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/reports/export', [ReportsController::class, 'export']);
 
     Route::apiResource('products', ProductController::class);
+    Route::apiResource('units', UnitController::class);
 
     Route::post('categories/bulk-delete', [CategoryController::class, 'bulkDelete'])->name('categories.bulk-delete');
     Route::post('categories/{id}/restore', [CategoryController::class, 'restore'])->name('categories.restore');
