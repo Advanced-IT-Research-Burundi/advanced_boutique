@@ -131,7 +131,7 @@ class ProductController extends Controller
             'sale_price_ht' => 'nullable|numeric|min:0',
             'sale_price_ttc' => 'required|numeric|min:0',
             'unit' => 'required|string|max:50',
-            'unit' => 'required|exists:units,id',
+       //     'unit' => 'required|exists:units,id',
             'alert_quantity' => 'required|numeric|min:0',
             // 'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
@@ -145,6 +145,8 @@ class ProductController extends Controller
                 $imagePath = $request->file('image')->store('products', 'public');
             }
 
+    
+
             $product->update([
                 'code' => $validated['code'],
                 'name' => $validated['name'],
@@ -153,11 +155,22 @@ class ProductController extends Controller
                 'purchase_price' => $validated['purchase_price'],
                 'sale_price_ht' => $validated['sale_price_ht'] ?? null,
                 'sale_price_ttc' => $validated['sale_price_ttc'],
-                'unit' => $validated['unit'],
+                'unit' => $validated['unit']  ?? 0,
                 'unit_id' => $validated['unit'],
                 'alert_quantity' => $validated['alert_quantity'],
                 'image' => $imagePath,
             ]);
+
+            // Update All price for this product in stocks
+             $stocks = $product->stocks;
+
+            foreach ($stocks as $stock) {
+                $stock->update([
+                    'purchase_price' => $validated['purchase_price'],
+                    'sale_price_ht' => $validated['sale_price_ht'] ?? null,
+                    'sale_price_ttc' => $validated['sale_price_ttc'],
+                ]);
+            }
 
             // $product->stocks()->wherePivot('agency_id', Auth::user()->agency_id)->detach();
             // $product->stocks()->attach($validated['stock_id'], [
