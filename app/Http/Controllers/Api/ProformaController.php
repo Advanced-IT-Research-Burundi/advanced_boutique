@@ -587,22 +587,20 @@ class ProformaController extends Controller
                 return sendError('Stock ID requis', 400, ['error' => 'Stock ID requis']);
             }
 
-            $product = Product::with(['stockProducts' => function ($query) use ($stockId) {
-                    $query->where('stock_id', $stockId);
-                }])
-                ->find($productId);
+            // $product = Product::with(['stockProducts' => function ($query) use ($stockId) {
+            //         $query->where('stock_id', $stockId);
+            //     }])
+            //     ->find($productId);
 
-            if (!$product) {
+            // if (!$product) {
 
-                return sendError('Produit non trouvé', 404, ['error' => 'Produit non trouvé']);
-            }
+            //     return sendError('Produit non trouvé', 404, ['error' => 'Produit non trouvé']);
+            // }
 
-            $stockProduct = $product->stockProducts->first();
+            $stockProduct = StockProduct::with('product')->find($productId);
             $availableStock = $stockProduct ? $stockProduct->quantity : 0;
-
-
             $data = [
-                'product' => $product,
+                'product' => $stockProduct,
                 'available_stock' => $availableStock,
                 'stock_id' => $stockId
             ];
