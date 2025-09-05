@@ -6,9 +6,7 @@ use App\Models\Company;
 use App\Models\Proforma;
 use App\Models\Sale;
 use App\Models\SaleItem;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\View\View;
 use App\Models\Client;
 use App\Models\Product;
 use App\Models\Stock;
@@ -33,8 +31,8 @@ class ProformaController extends Controller
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('id', 'like', "%{$search}%")
-                  ->orWhere('client', 'like', "%{$search}%")
-                  ->orWhere('note', 'like', "%{$search}%");
+                ->orWhere('client', 'like', "%{$search}%")
+                ->orWhere('note', 'like', "%{$search}%");
             });
         }
 
@@ -53,7 +51,7 @@ class ProformaController extends Controller
                     break;
                 case 'partial':
                     $query->where('due_amount', '>', 0)
-                          ->whereRaw('due_amount < total_amount');
+                        ->whereRaw('due_amount < total_amount');
                     break;
                 case 'unpaid':
                     $query->whereRaw('due_amount = total_amount');
@@ -628,7 +626,7 @@ class ProformaController extends Controller
             'total_amount' => 'required|numeric|min:0',
             'invoice_type' => 'required|in:FACTURE,PROFORMA,BON',
             'items' => 'required|array|min:1',
-            'items.*.product_id' => 'required|exists:products,id',
+            'items.*.product_id' => 'required|exists:stock_products,id',
             'items.*.quantity' => 'required|numeric|min:0.01',
             'items.*.sale_price' => 'required|numeric|min:0',
             'items.*.discount' => 'nullable|numeric|min:0',
@@ -651,6 +649,8 @@ class ProformaController extends Controller
             if ($request->invoice_type !== 'PROFORMA') {
                 return sendError('Seules les proformas peuvent être modifiées', 400, ['error' => 'Type de facture non supporté pour la modification']);
             }
+
+           // return $proforma;
 
             if ($proforma->is_valid) {
                 return sendError('Cette proforma a déjà été validée et ne peut plus être modifiée', 400, ['error' => 'Proforma déjà validée']);
