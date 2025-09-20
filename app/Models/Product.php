@@ -145,4 +145,9 @@ class Product extends Model
     {
         return $value ? URL::to('/') .Storage::url($value) : null;
     }
+
+    public function unit(): BelongsTo
+    {
+        return $this->belongsTo(Unit::class);
+    }
 }

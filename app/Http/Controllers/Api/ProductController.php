@@ -16,7 +16,7 @@ class ProductController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Product::with(['category', 'agency']);
+         $query = Product::with(['category', 'agency','unit']);
 
         // Filtres de recherche
         if ($request->filled('search')) {
@@ -145,7 +145,7 @@ class ProductController extends Controller
                 $imagePath = $request->file('image')->store('products', 'public');
             }
 
-    
+
 
             $product->update([
                 'code' => $validated['code'],
