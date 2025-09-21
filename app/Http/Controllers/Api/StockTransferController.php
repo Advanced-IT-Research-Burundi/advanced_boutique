@@ -264,7 +264,7 @@ class StockTransferController extends Controller
             'item_designation' => $product->name,
             'item_quantity' => $quantity,
             'item_measurement_unit' => $product->unit ?? 'Piece',
-            'item_purchase_or_sale_price' => $product->sale_price_ht,
+            'item_purchase_or_sale_price' => $product->sale_price_ttc ?? 0,
             'item_purchase_or_sale_currency' => $product->sale_price_currency ?? 'BIF',
             'item_movement_type' => 'ST',
             'item_movement_invoice_ref' => '',
@@ -275,6 +275,7 @@ class StockTransferController extends Controller
             'item_movement_note' => 'Transfert de stock',
         ]);
 
+       
         // Mouvement d'entrée (stock destination)
         StockProductMouvement::create([
             'agency_id' => auth()->user()->agency_id,
@@ -284,7 +285,7 @@ class StockTransferController extends Controller
             'item_designation' => $product->name,
             'item_quantity' => $quantity,
             'item_measurement_unit' => $product->unit ?? 'Piece',
-            'item_purchase_or_sale_price' => $product->sale_price_ht,
+            'item_purchase_or_sale_price' => $product->sale_price_ht ?? 0,
             'item_purchase_or_sale_currency' => $product->sale_price_currency ?? 'BIF',
             'item_movement_type' => 'ET',
             'item_movement_invoice_ref' => $transferCode,
