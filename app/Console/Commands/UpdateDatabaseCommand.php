@@ -36,7 +36,7 @@ class UpdateDatabaseCommand extends Command
 
         // Update Proforma 
 
-        $listes = [16,18,17,20,21];
+        $listes = [16,18,17,20,19,21];
 
         foreach ($listes as $liste) {
 
