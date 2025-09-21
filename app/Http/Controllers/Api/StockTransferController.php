@@ -97,15 +97,13 @@ class StockTransferController extends Controller
 
     public function getProformaProducts(Request $request)
     {
+
         try {
             $stockId = $request->stock_id;
             $productIds = $request->product_ids;
-
-
             if (!$stockId || !$productIds) {
                 return sendError('Stock ID ou Product IDs sont requis', 400);
             }
-
             if (is_string($productIds)) {
                 $productIds = array_filter(explode(',', $productIds));
             }
@@ -116,6 +114,14 @@ class StockTransferController extends Controller
                 ->get()
             ;
 
+            if ($products->isEmpty()) {
+                $products = StockProduct::with('product', 'product.category')
+                ->where('stock_id', $stockId)
+                ->whereIn('product_id', $productIds)
+                ->get()
+            ;
+            }
+
             $products = $products->map(function ($stockProduct) {
                 return [
                     "id" => $stockProduct->id,
@@ -124,7 +130,7 @@ class StockTransferController extends Controller
                     "description" => $stockProduct?->product?->name,
                     "category_id" => $stockProduct?->product?->category_id,
                     "stock_quantity" => $stockProduct->quantity,
-                    "sale_price" =>  $stockProduct?->product?->name,
+                    "sale_price" =>  $stockProduct?->product?->sale_price_ht ?? 0,
                     "category" => [
                         "id" => $stockProduct?->product?->category?->id,
                         "name" => $stockProduct?->product?->category?->name,
@@ -146,7 +152,7 @@ class StockTransferController extends Controller
             'to_stock_id' => 'required|exists:stocks,id|different:from_stock_id',
             'products' => 'required|array|min:1',
             'products.*.product_id' => 'required|exists:stock_products,id',
-            'products.*.quantity' => 'required|integer|min:1',
+            'products.*.quantity' => 'required|numeric|min:1',
             "proforma_id" => "nullable|exists:proformas,id",
         ]);
         DB::beginTransaction();

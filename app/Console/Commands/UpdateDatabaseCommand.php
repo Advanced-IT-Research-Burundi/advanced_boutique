@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Models\Client;
 use App\Models\Product;
+use App\Models\Proforma;
 use App\Models\Stock;
 use App\Models\StockProduct;
 use Illuminate\Console\Command;
@@ -31,9 +32,34 @@ class UpdateDatabaseCommand extends Command
     public function handle()
     {
 
-        $faker = Faker::create();
+        //$faker = Faker::create();
 
-        // add progress indicator
+        // Update Proforma 
+
+        $listes = [16,18,17,20,21];
+
+        foreach ($listes as $liste) {
+
+             $proforma = Proforma::find( $liste);
+        $items = [];
+        foreach (json_decode($proforma->proforma_items) as $item) {
+            $stockProduct = StockProduct::where('product_id', $item->product_id)
+                ->where('stock_id', $proforma->stock_id)
+            ->first();
+            if ($stockProduct) {
+                 $item->product_id =  $stockProduct->id;
+            }
+             $items[] = $item;
+        }
+
+        $proforma->proforma_items = json_encode($items);
+        $proforma->save();
+            
+        }
+
+    var_dump("Done");
+       
+        /* // add progress indicator
         $products = Product::all();
         $stocks = Stock::all();
         $this->output->progressStart(count($products) * count($stocks));
@@ -59,7 +85,7 @@ class UpdateDatabaseCommand extends Command
                 $this->output->progressAdvance();
             }
         }
-
-        $this->output->progressFinish();
+ */
+      //  $this->output->progressFinish();
     }
 }
