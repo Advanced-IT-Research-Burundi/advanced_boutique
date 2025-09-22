@@ -8,14 +8,13 @@ jobs:
       - name: Execute remote SSH commands using password
         uses: appleboy/ssh-action@v1
         with:
-          host: 84.46.251.167
-          username: jean
-          password: lion
-          port: 22022
+          host: ${{secrets.HOST}}
+          username: ${{secrets.USERNAME}}
+          password: ${{secrets.PASSWORD}}
+          port: ${{secrets.PORT}}
           script: |
-            cd /var/www/html/advanced_boutique
-            git pull origin master
-            touch lion
-            echo "lion" > lion
+            cd ${{secrets.WORK_DIR}}
+            git pull origin ${{secrets.MAIN_BRANCH}}
+
 
 
