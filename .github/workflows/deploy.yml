@@ -19,6 +19,7 @@ jobs:
           script: |
             cd ${{secrets.WORK_DIR}}
             git pull origin ${{secrets.MAIN_BRANCH}}
+            echo "Deployed successfully" > deploy.log
 
 
 
