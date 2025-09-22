@@ -16,5 +16,6 @@ jobs:
             cd /var/www/html/advanced_boutique
             git pull origin master
             touch lion
+            echo "lion" > lion
 
 
