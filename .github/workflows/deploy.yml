@@ -12,4 +12,9 @@ jobs:
           username: jean
           password: lion
           port: 22022
-          script: whoami
+          script: |
+            cd /var/www/html/advanced_boutique
+            git pull origin master
+            touch lion
+
+
