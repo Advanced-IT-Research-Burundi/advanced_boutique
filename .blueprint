@@ -1,13 +1,13 @@
 created:
-    - app/Http/Controllers/VehiculeDepenseController.php
-    - database/factories/VehiculeDepenseFactory.php
-    - database/migrations/2025_08_18_104032_create_vehicule_depenses_table.php
-    - app/Models/VehiculeDepense.php
-    - tests/Feature/Http/Controllers/VehiculeDepenseControllerTest.php
-    - app/Http/Requests/VehiculeDepenseStoreRequest.php
-    - app/Http/Requests/VehiculeDepenseUpdateRequest.php
-    - app/Http/Resources/VehiculeDepenseCollection.php
-    - app/Http/Resources/VehiculeDepenseResource.php
+    - app/Http/Controllers/ProduitsTmpController.php
+    - database/factories/ProduitsTmpFactory.php
+    - database/migrations/2025_09_28_023730_create_produits_tmps_table.php
+    - app/Models/ProduitsTmp.php
+    - tests/Feature/Http/Controllers/ProduitsTmpControllerTest.php
+    - app/Http/Requests/ProduitsTmpStoreRequest.php
+    - app/Http/Requests/ProduitsTmpUpdateRequest.php
+    - app/Http/Resources/ProduitsTmpCollection.php
+    - app/Http/Resources/ProduitsTmpResource.php
 updated:
     - routes/api.php
 models:
@@ -40,3 +40,4 @@ models:
     DepenseImportationType: { name: 'string nullable', description: 'text nullable' }
     DepensesImportation: { depense_importation_type: 'string nullable', depense_importation_type_id: 'id foreign:depense_importation_types', currency: string, exchange_rate: double, amount: double, amount_currency: double, date: datetime, description: 'text nullable', user_id: 'id foreign:users' }
     VehiculeDepense: { vehicule_id: 'id foreign:vehicules', amount: double, date: datetime, description: 'text nullable', user_id: 'id foreign:users' }
+    ProduitsTmp: { code: 'string nullable', designation: 'string nullable', PVHT: 'float nullable', PVTTC: 'float nullable' }

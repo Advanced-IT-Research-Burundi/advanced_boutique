@@ -40,7 +40,7 @@ class UpdateDatabaseCommand extends Command
 
         foreach ($listes as $liste) {
 
-             $proforma = Proforma::find( $liste);
+        $proforma = Proforma::find( $liste);
         $items = [];
         foreach (json_decode($proforma->proforma_items) as $item) {
             $stockProduct = StockProduct::where('product_id', $item->product_id)

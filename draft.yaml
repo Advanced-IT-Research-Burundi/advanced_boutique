@@ -1,11 +1,10 @@
 models:
-  VehiculeDepense:
-    vehicule_id : id foreign:vehicules
-    amount : double
-    date : datetime
-    description : text nullable
-    user_id : id foreign:users
+  ProduitsTmp:
+    code : string nullable
+    designation : string nullable
+    PVHT : float nullable
+    PVTTC : float nullable
   
 controllers:
-  VehiculeDepense:
+  ProduitsTmp:
     resource: api
