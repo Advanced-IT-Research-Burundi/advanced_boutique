@@ -15,8 +15,8 @@ return new class extends Migration
             $table->id();
             $table->string('code')->nullable();
             $table->string('designation')->nullable();
-            $table->float('PVHT')->nullable();
-            $table->float('PVTTC')->nullable();
+            $table->string('PVHT')->nullable();
+            $table->string('PVTTC')->nullable();
             $table->timestamps();
         });
     }
