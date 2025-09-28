@@ -16,9 +16,10 @@ return new class extends Migration
         Schema::create('sale_items', function (Blueprint $table) {
             $table->id();
             $table->foreignId('sale_id')->constrained();
-            $table->foreignId('product_id')->constrained();
+            $table->foreignId('product_id');
             $table->integer('quantity');
             $table->double('sale_price');
+            $table->double('product_name')->nullable();
             $table->double('discount');
             $table->double('subtotal');
             $table->foreignId('agency_id')->nullable()->constrained();

@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Api;
 use App\Models\Sale;
 use App\Models\SaleItem;
 use App\Models\Product;
-use App\Models\Client;
 use App\Models\Stock;
 use App\Models\StockProduct;
 use App\Models\Company;
@@ -75,14 +74,37 @@ class SaleController extends Controller
 
 
 
+       public function show(Sale $sale)
+    {
+        try {
+            $sale->load(['client', 'saleItems.product', 'user']);
+            $company = Company::where('is_actif', true)->first();
+
+            $data = [
+                'sale' => $sale,
+                'company' => $company
+            ];
+
+            return sendResponse( $data ,'Vente récupérée avec succès', 200);
+
+        } catch (\Exception $e) {
+            return sendError('Erreur lors de la récupération de la vente: ' . $e->getMessage());
+        }
+    }
+
+
+
     public function store(Request $request)
     {
+
+      
+        
         $request->validate([
             'client_id' => 'required|exists:clients,id',
             'sale_date' => 'required|date',
             'type_facture' => 'required|string',
             'items' => 'required|array|min:1',
-            'items.*.product_id' => 'required|exists:products,id',
+            'items.*.product_id' => 'required|exists:stock_products,id',
             'items.*.quantity' => 'required|numeric|min:0.01',
             'items.*.sale_price' => 'required|numeric|min:0',
             'items.*.discount' => 'nullable|numeric|min:0|max:100',
@@ -167,23 +189,7 @@ class SaleController extends Controller
         }
     }
 
-    public function show(Sale $sale)
-    {
-        try {
-            $sale->load(['client', 'saleItems.product', 'user']);
-            $company = Company::where('is_actif', true)->first();
-
-            $data = [
-                'sale' => $sale,
-                'company' => $company
-            ];
-
-            return sendResponse( $data ,'Vente récupérée avec succès', 200);
-
-        } catch (\Exception $e) {
-            return sendError('Erreur lors de la récupération de la vente: ' . $e->getMessage());
-        }
-    }
+  
 
     public function update(Request $request, Sale $sale)
     {
@@ -192,7 +198,7 @@ class SaleController extends Controller
             'sale_date' => 'required|date',
             'type_facture' => 'required|string',
             'items' => 'required|array|min:1',
-            'items.*.product_id' => 'required|exists:products,id',
+            'items.*.product_id' => 'required|exists:stock_products,id',
             'items.*.quantity' => 'required|numeric|min:0.01',
             'items.*.sale_price' => 'required|numeric|min:0',
             'items.*.discount' => 'nullable|numeric|min:0|max:100',

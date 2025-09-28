@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Client;
+use App\Models\Company;
 use App\Models\Product;
 use App\Models\Sale;
 use App\Models\SaleItem;
@@ -198,7 +199,7 @@ class SalesController extends Controller
             'total_amount' => 'required|numeric|min:0',
             'invoice_type' => 'required|in:FACTURE,PROFORMA,BON',
             'items' => 'required|array|min:1',
-            'items.*.product_id' => 'required|exists:products,id',
+            'items.*.product_id' => 'required|exists:stock_products,id',
             'items.*.quantity' => 'required|numeric|min:0.01',
             'items.*.sale_price' => 'required|numeric|min:0',
             'items.*.discount' => 'nullable|numeric|min:0',
@@ -267,14 +268,16 @@ class SalesController extends Controller
         $productIds = collect($items)->pluck('product_id')->toArray();
 
         // Récupérer tous les stocks en une requête
-        $stockProducts = StockProduct::whereIn('product_id', $productIds)
+        $stockProducts = StockProduct::whereIn('id', $productIds)
             ->where('stock_id', $stockId)
             ->with('product:id,name')
             ->get()
             ->keyBy('product_id');
 
         foreach ($items as $item) {
-            $stockProduct = $stockProducts->get($item['product_id']);
+            $stockProduct = StockProduct::where('id', $item['product_id'])
+                ->where('stock_id', $stockId)
+                ->first();
             $availableStock = $stockProduct ? $stockProduct->quantity : 0;
 
             if ($item['quantity'] > $availableStock) {
@@ -378,10 +381,19 @@ class SalesController extends Controller
             $finalSubtotal = $itemSubtotal - $itemDiscountAmount;
 
             // Créer l'item de vente
+            
+
+            // Mettre à jour le stock
+            $stockProduct = StockProduct::where('id', $item['product_id'])
+                ->where('stock_id', $request->stock_id)
+                ->first();
+
+
             SaleItem::create([
                 'sale_id' => $sale->id,
                 'product_id' => $item['product_id'],
                 'quantity' => $quantity,
+                'product_name' =>  $stockProduct->product_name ?? null,
                 'sale_price' => $price,
                 'discount' => $discount,
                 'subtotal' => $finalSubtotal,
@@ -389,11 +401,6 @@ class SalesController extends Controller
                 'created_by' => Auth::id(),
                 'user_id' => Auth::id(),
             ]);
-
-            // Mettre à jour le stock
-            $stockProduct = StockProduct::where('product_id', $item['product_id'])
-                ->where('stock_id', $request->stock_id)
-                ->first();
 
             if (!$stockProduct || $stockProduct->quantity < $quantity) {
                 throw new \Exception("Stock insuffisant pour le produit {$item['product_id']}");
@@ -481,4 +488,6 @@ class SalesController extends Controller
             return sendError('Erreur lors de la récupération du produit: ' . $e->getMessage(), 500);
         }
     }
+
+   
 }
