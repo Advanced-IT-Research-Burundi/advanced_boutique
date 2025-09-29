@@ -3,9 +3,9 @@ import pandas as pd
 
 mydb = mysql.connector.connect(
   host="localhost",
-  user="root",
-  password="",
-  database="ubwiza_burundi_db_prod"
+  user="jean",
+  password="lion",
+  database="advanced_boutique_test"
 )
 
 all_sheets_data = pd.read_excel('prod.xlsx', sheet_name=None)
