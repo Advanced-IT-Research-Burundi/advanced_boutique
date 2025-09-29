@@ -15,11 +15,18 @@ class StockController extends Controller
     public function index(Request $request)
     {
         try{
-            $query = Stock::with(['agency', 'createdBy', 'user'])
-            ->whereHas('userStocks', function($q) {
-                $q->where('user_id', Auth::id());
-            })
+            $query = Stock::with(['agency', 'createdBy', 'user']);
+
+            if (!Auth::user()->isAdmin()) {
+                // Si l'utilisateur n'est pas admin, on limite aux stocks associés à l'utilisateur
+                $query
+                    ->whereHas('userStocks', function($q) {
+                        $q->where('user_id', Auth::id());
+                    })
             ;
+            }
+
+          
 
             // Filtres de recherche
             if ($request->filled('search')) {
