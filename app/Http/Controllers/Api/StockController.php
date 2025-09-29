@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Api;
 use App\Models\Stock;
 use App\Models\Agency;
 use App\Models\User;
-use App\Models\StockProduct;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -16,7 +15,11 @@ class StockController extends Controller
     public function index(Request $request)
     {
         try{
-            $query = Stock::where('agency_id',auth()->user()->agency_id)->with(['agency', 'createdBy', 'user']);
+            $query = Stock::with(['agency', 'createdBy', 'user'])
+            ->whereHas('userStocks', function($q) {
+                $q->where('user_id', Auth::id());
+            })
+            ;
 
             // Filtres de recherche
             if ($request->filled('search')) {

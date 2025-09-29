@@ -86,6 +86,11 @@ class User extends Authenticatable
         'full_name',
     ];
 
+    public function allowed_stocks()
+    {
+        return $this->stocks()->pluck('stocks.id')->toArray();
+    }
+
     public function getNameAttribute(): string
     {
         return "{$this->first_name} {$this->last_name}";
@@ -208,6 +213,11 @@ class User extends Authenticatable
     public function userStocks()
     {
         return $this->hasMany(UserStock::class);
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
     }
 
 }

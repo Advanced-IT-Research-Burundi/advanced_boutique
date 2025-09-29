@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Resources\ProductCollection;
 use App\Models\Product;
 use App\Models\Category;
 use App\Models\Agency;
@@ -16,7 +17,15 @@ class ProductController extends Controller
 {
     public function index(Request $request)
     {
-         $query = Product::with(['category', 'agency','unit']);
+        $allowedStock = User::find(Auth::id())->allowed_stocks();
+    
+         $query = Product::with(['category', 'agency','unit'])
+         ->whereHas('stocks', function ($q) use( $allowedStock) {
+            if(!Auth::user()->isAdmin()){
+             $q->whereIN('id',  $allowedStock ?? []);
+            }
+         })
+         ;
 
         // Filtres de recherche
         if ($request->filled('search')) {
@@ -34,11 +43,12 @@ class ProductController extends Controller
         if ($request->filled('agency_id')) {
             $query->where('agency_id', $request->agency_id);
         }
-        $products = $query->latest()->paginate(10);
+        $products = $query->latest()->paginate(1000);
+
         $categories = Category::whereIn('id', Product::select('category_id')->distinct()->pluck('category_id'))->get();
         $agencies = Agency::whereIn('id', Product::select('agency_id')->distinct()->pluck('agency_id'))->get();
         $data = [
-            'products' => $products,
+            'products' => new ProductCollection($products), 
             'categories' => $categories,
             'agencies' => $agencies
         ];
