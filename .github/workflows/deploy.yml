@@ -18,6 +18,11 @@ jobs:
           port: ${{secrets.SSH_PORT}}
           script: |
             cd ${{secrets.WORK_DIR}}
+            git config pull.rebase true
+            # Mettre à jour la branche distante avec rebase en utilisant le token GitHub
+            git reset --hard HEAD
+            git clean -f -d
+            git checkout ${{secrets.MAIN_BRANCH}}
             git pull origin ${{secrets.MAIN_BRANCH}}
             echo "Deployed successfully" >> deploy.log
             echo date() >> deploy.log
