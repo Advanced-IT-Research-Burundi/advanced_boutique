@@ -125,6 +125,7 @@ class CategoryController extends Controller
 
     public function bulkDelete(Request $request)
     {
+            $this->authorize('isAdmin');
         try {
             $validator = Validator::make($request->all(), [
                 'ids' => 'required|array',

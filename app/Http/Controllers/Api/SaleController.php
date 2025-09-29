@@ -17,6 +17,7 @@ class SaleController extends Controller
 {
     public function index(Request $request)
     {
+      
         try {
             $query = Sale::with(['client', 'saleItems.product', 'user'])
                         ->orderBy('created_at', 'desc');
@@ -54,6 +55,16 @@ class SaleController extends Controller
                         $query->where('paid_amount', 0);
                         break;
                 }
+            }
+
+            // Check if user is not admin, then restrict to their agency
+            if (!Auth::user()->isAdmin()) {
+
+                // get autorized stock 
+                $stocks = Auth::user()->stocks->pluck('id')->toArray();
+                $query->whereIn('stock_id', $stocks);
+                $query->where('agency_id', Auth::user()->agency_id)
+                ;
             }
 
             $sales = $query->paginate(10);

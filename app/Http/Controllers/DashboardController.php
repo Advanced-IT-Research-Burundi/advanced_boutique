@@ -9,8 +9,14 @@ use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
+    
     public function index(Request $request)
     {
+
+        if ( !auth()->check() || !auth()->user()->isAdmin()) {
+            return sendError('Accès interdit', 403);
+        }
+
         try {
             $user = auth()->user();
             $agency_id = $request->get('agency_id') ?? $user->agency_id;
