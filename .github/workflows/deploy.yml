@@ -25,7 +25,6 @@ jobs:
             git checkout ${{secrets.MAIN_BRANCH}}
             git pull origin ${{secrets.MAIN_BRANCH}}
             echo "Deployed successfully" >> deploy.log
-            echo date() >> deploy.log
 
 
 
