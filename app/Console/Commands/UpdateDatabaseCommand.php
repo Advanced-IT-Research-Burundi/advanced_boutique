@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\Client;
+use App\Models\CommandeDetails;
 use App\Models\Product;
 use App\Models\Proforma;
 use App\Models\Stock;
@@ -36,27 +37,13 @@ class UpdateDatabaseCommand extends Command
 
         // Update Proforma 
 
-        $listes = [16,18,17,20,19,21];
-
-        foreach ($listes as $liste) {
-
-        $proforma = Proforma::find( $liste);
-        $items = [];
-        foreach (json_decode($proforma->proforma_items) as $item) {
-            $stockProduct = StockProduct::where('product_id', $item->product_id)
-                ->where('stock_id', $proforma->stock_id)
-            ->first();
-            if ($stockProduct) {
-                 $item->product_id =  $stockProduct->id;
-            }
-             $items[] = $item;
+        $detailsCommande = CommandeDetails::all();
+        foreach ($detailsCommande as $detail) {
+            $detail->total_weight = $detail->quantity * $detail->weight_kg;
+            $detail->save();
         }
 
-        $proforma->proforma_items = json_encode($items);
-        $proforma->save();
-            
-        }
-
+       
     var_dump("Done");
        
         /* // add progress indicator
