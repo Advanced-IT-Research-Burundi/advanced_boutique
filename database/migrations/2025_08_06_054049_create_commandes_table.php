@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('vehicule_id');
             $table->string('matricule')->nullable();
             $table->text('commentaire')->nullable();
+            $table->float('currency')->nullable();
             $table->float('poids')->nullable();
             $table->date('date_livraison')->nullable();
             $table->string('status')->default('pending')->nullable();

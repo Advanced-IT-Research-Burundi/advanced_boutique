@@ -21,6 +21,7 @@ class Commandes extends Model
         'commentaire',
         'poids',
         'date_livraison',
+        'currency',
         'status',
         'description',
     ];

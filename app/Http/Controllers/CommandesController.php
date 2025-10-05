@@ -98,6 +98,7 @@ class CommandesController extends Controller
             'matricule' => $request->matricule,
             'commentaire' => $request->commentaire,
             'poids' => $request->poids,
+            'currency' => $request->currency,
             'date_livraison' => $request->date_livraison,
             'description' => $request->description,
         ]);
