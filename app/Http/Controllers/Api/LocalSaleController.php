@@ -2,17 +2,17 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Models\Sale;
-use App\Models\SaleItem;
+use App\Models\LocalSale;
+use App\Models\LocalSaleItem;
 use App\Models\Product;
 use App\Models\Stock;
 use App\Models\StockProduct;
 use App\Models\Company;
 use App\Models\Client;
 use App\Models\Category;
-use App\Models\CashRegister;
-use App\Models\CashTransaction;
-use App\Models\StockProductMouvement;
+use App\Models\LocalCashRegister;
+use App\Models\LocalCashTransaction;
+use App\Models\LocalStockProductMouvement;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
@@ -20,7 +20,7 @@ use Illuminate\Support\Facades\Validator;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 
-class SaleController extends Controller
+class LocalSaleController extends Controller
 {
     /**
      * Liste des ventes avec filtres
@@ -28,7 +28,7 @@ class SaleController extends Controller
     public function index(Request $request)
     {
         try {
-            $query = Sale::with(['client', 'saleItems.product', 'user'])
+            $query = LocalSale::with(['client', 'saleItems.product', 'user'])
                         ->orderBy('created_at', 'desc');
 
             // Filtres
@@ -326,7 +326,7 @@ class SaleController extends Controller
         DB::beginTransaction();
 
         try {
-            $sale = Sale::findOrFail($id);
+            $sale = LocalSale::findOrFail($id);
 
             if ($sale->status === 'cancelled') {
                 return sendError('Cette vente est déjà annulée.', 400);
@@ -370,7 +370,7 @@ class SaleController extends Controller
         ]);
 
         try {
-            $sale = Sale::findOrFail($id);
+            $sale = LocalSale::findOrFail($id);
 
             if ($sale->status === 'cancelled') {
                 return sendError('Impossible d\'ajouter un paiement à une vente annulée.', 400);
@@ -407,7 +407,7 @@ class SaleController extends Controller
     /**
      * Télécharger le PDF d'une vente
      */
-    public function downloadPDF(Sale $sale)
+    public function downloadPDF(LocalSale $sale)
     {
         try {
             $sale->load(['client', 'saleItems.product']);
@@ -467,7 +467,7 @@ class SaleController extends Controller
     {
         $dueAmount = $request->total_amount - $request->paid_amount;
 
-        $sale = Sale::create([
+        $sale = LocalSale::create([
             'client_id' => $request->client_id,
             'stock_id' => $request->stock_id,
             'user_id' => Auth::id(),
@@ -498,7 +498,7 @@ class SaleController extends Controller
             }
 
             // Créer l'item de vente
-            SaleItem::create([
+            LocalSaleItem::create([
                 'sale_id' => $sale->id,
                 'product_id' => $item['product_id'],
                 'quantity' => $quantity,
@@ -514,7 +514,7 @@ class SaleController extends Controller
             $stockProduct->decrement('quantity', $quantity);
 
             // Créer le mouvement de stock
-            StockProductMouvement::create([
+            LocalStockProductMouvement::create([
                 'agency_id' => Auth::user()->agency_id,
                 'stock_id' => $stockProduct->stock_id,
                 'stock_product_id' => $stockProduct->id,
@@ -535,7 +535,7 @@ class SaleController extends Controller
         }
 
         // Créer la transaction de caisse
-        CashTransaction::create([
+        LocalCashTransaction::create([
             'cash_register_id' => $caisse->id,
             'type' => 'in',
             'reference_id' => 'Ref ' . $sale->id,
@@ -563,10 +563,10 @@ class SaleController extends Controller
         $today = now()->startOfDay();
 
         return [
-            'totalRevenue' => Sale::sum('total_amount'),
-            'paidSales' => Sale::where('due_amount', 0)->count(),
-            'totalDue' => Sale::sum('due_amount'),
-            'todaySales' => Sale::whereDate('sale_date', $today)->count(),
+            'totalRevenue' => LocalSale::sum('total_amount'),
+            'paidSales' => LocalSale::where('due_amount', 0)->count(),
+            'totalDue' => LocalSale::sum('due_amount'),
+            'todaySales' => LocalSale::whereDate('sale_date', $today)->count(),
         ];
     }
 }

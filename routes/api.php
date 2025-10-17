@@ -17,13 +17,13 @@ use App\Http\Controllers\Api\ProformaController;
 use App\Http\Controllers\Api\PurchaseController;
 use App\Http\Controllers\Api\RapportController;
 use App\Http\Controllers\Api\SaleController;
+use App\Http\Controllers\Api\LocalSaleController;
 use App\Http\Controllers\Api\StockController;
 use App\Http\Controllers\Api\StockTransferController;
 use App\Http\Controllers\Api\SupplierController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\UserStockController;
 use App\Http\Controllers\Api\VehiculeController;
-use App\Http\Controllers\Api\SalesController;
 use App\Http\Controllers\Api\StockProductController;
 use App\Http\Controllers\Api\StockMovementController;
 use App\Http\Controllers\Api\EntreMultipleController;
@@ -63,16 +63,33 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('categories/{id}/restore', [CategoryController::class, 'restore'])->name('categories.restore');
 
     Route::prefix('sales')->group(function () {
-        Route::get('/create-data', [SalesController::class, 'getCreateData']);
-        Route::get('/categories/{stockId}', [SalesController::class, 'getCategories']);
-        Route::get('/clients/search', [SalesController::class, 'searchClients']);
-        Route::get('/products/search', [SalesController::class, 'searchProducts']);
-        Route::get('/products/{productId}/stock', [SalesController::class, 'getProductStock']);
-        Route::post('/store', [SalesController::class, 'store']);
-
+        Route::get('/', [SaleController::class, 'index']);
+        Route::get('/create-data', [SaleController::class, 'getCreateData']);
+        Route::get('/categories/{stockId}', [SaleController::class, 'getCategories']);
+        Route::get('/clients/search', [SaleController::class, 'searchClients']);
+        Route::get('/products/search', [SaleController::class, 'searchProducts']);
+        Route::get('/products/{productId}/stock', [SaleController::class, 'getProductStock']);
+        Route::post('/store', [SaleController::class, 'store']);
+        Route::get('/{sale}', [SaleController::class, 'show']);
         Route::put('/{sale}/cancel', [SaleController::class, 'cancel']);
         Route::post('/{sale}/payment', [SaleController::class, 'payment']);
+        Route::get('/{sale}/pdf', [SaleController::class, 'downloadPDF'])->name('sales.pdf');
     });
+
+    Route::prefix('local-sales')->group(function () {
+        Route::get('/', [LocalSaleController::class, 'index']);
+        Route::get('/create-data', [SaleController::class, 'getCreateData']);
+        Route::get('/categories/{stockId}', [SaleController::class, 'getCategories']);
+        Route::get('/clients/search', [SaleController::class, 'searchClients']);
+        Route::get('/products/search', [SaleController::class, 'searchProducts']);
+        Route::get('/products/{productId}/stock', [SaleController::class, 'getProductStock']);
+        Route::post('/store', [SaleController::class, 'store']);
+        Route::get('/{sale}', [SaleController::class, 'show']);
+        Route::put('/{sale}/cancel', [SaleController::class, 'cancel']);
+        Route::post('/{sale}/payment', [SaleController::class, 'payment']);
+        Route::get('/{sale}/pdf', [SaleController::class, 'downloadPDF'])->name('sales.pdf');
+    });
+
     Route::prefix('proformas')->group(function () {
         Route::get('/create-data', [ProformaController::class, 'getCreateData']);
         Route::get('/categories/{stockId}', [ProformaController::class, 'getCategories']);
@@ -148,8 +165,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::resource('suppliers', SupplierController::class);
     Route::resource('purchases', PurchaseController::class);
     Route::get('/purchases/{purchase}/print', [PurchaseController::class, 'print'])->name('purchases.print');
-    Route::resource('sales', SaleController::class);
-    Route::get('/sales/{sale}/pdf', [SaleController::class, 'downloadPDF'])->name('sales.pdf');
     Route::resource('cash-registers', CashRegisterController::class);
     Route::post('cash-register/{cashRegister}/close', [CashRegisterController::class, 'close'])->name('cash-register.close');
     Route::post('cash-register/{cashRegister}/open', [CashRegisterController::class, 'open'])->name('cash-register.open');
