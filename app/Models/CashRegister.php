@@ -82,4 +82,9 @@ class CashRegister extends Model
     {
         return $this->hasMany(CashTransaction::class);
     }
+
+    public function localCashTransactions(): HasMany
+    {
+        return $this->hasMany(LocalCashTransaction::class);
+    }
 }

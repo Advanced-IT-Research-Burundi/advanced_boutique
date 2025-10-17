@@ -62,7 +62,7 @@ class LocalSale extends Model
 
     public function saleItems(): HasMany
     {
-        return $this->hasMany(SaleItem::class);
+        return $this->hasMany(LocalSaleItem::class);
     }
 
     public function payments(): HasMany

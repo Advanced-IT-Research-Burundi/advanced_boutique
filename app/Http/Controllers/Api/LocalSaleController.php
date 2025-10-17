@@ -10,7 +10,7 @@ use App\Models\StockProduct;
 use App\Models\Company;
 use App\Models\Client;
 use App\Models\Category;
-use App\Models\LocalCashRegister;
+use App\Models\CashRegister;
 use App\Models\LocalCashTransaction;
 use App\Models\LocalStockProductMouvement;
 use Illuminate\Http\Request;
@@ -28,8 +28,7 @@ class LocalSaleController extends Controller
     public function index(Request $request)
     {
         try {
-            $query = LocalSale::with(['client', 'saleItems.product', 'user'])
-                        ->orderBy('created_at', 'desc');
+            $query = LocalSale::orderBy('created_at', 'desc');
 
             // Filtres
             if ($request->filled('search')) {
@@ -90,7 +89,7 @@ class LocalSaleController extends Controller
     /**
      * Détails d'une vente
      */
-    public function show(Sale $sale)
+    public function show(LocalSale $sale)
     {
         try {
             $sale->load(['client', 'saleItems.product', 'user']);
@@ -499,7 +498,7 @@ class LocalSaleController extends Controller
 
             // Créer l'item de vente
             LocalSaleItem::create([
-                'sale_id' => $sale->id,
+                'local_sale_id' => $sale->id,
                 'product_id' => $item['product_id'],
                 'quantity' => $quantity,
                 'sale_price' => $price,

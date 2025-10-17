@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('local_sale_items', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('sale_id')->constrained();
+            $table->foreignId('local_sale_id')->constrained();
             $table->foreignId('product_id');
             $table->integer('quantity');
             $table->double('sale_price');

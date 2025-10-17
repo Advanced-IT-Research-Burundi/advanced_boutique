@@ -78,16 +78,16 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::prefix('local-sales')->group(function () {
         Route::get('/', [LocalSaleController::class, 'index']);
-        Route::get('/create-data', [SaleController::class, 'getCreateData']);
-        Route::get('/categories/{stockId}', [SaleController::class, 'getCategories']);
-        Route::get('/clients/search', [SaleController::class, 'searchClients']);
-        Route::get('/products/search', [SaleController::class, 'searchProducts']);
-        Route::get('/products/{productId}/stock', [SaleController::class, 'getProductStock']);
-        Route::post('/store', [SaleController::class, 'store']);
-        Route::get('/{sale}', [SaleController::class, 'show']);
-        Route::put('/{sale}/cancel', [SaleController::class, 'cancel']);
-        Route::post('/{sale}/payment', [SaleController::class, 'payment']);
-        Route::get('/{sale}/pdf', [SaleController::class, 'downloadPDF'])->name('sales.pdf');
+        Route::get('/create-data', [LocalSaleController::class, 'getCreateData']);
+        Route::get('/categories/{stockId}', [LocalSaleController::class, 'getCategories']);
+        Route::get('/clients/search', [LocalSaleController::class, 'searchClients']);
+        Route::get('/products/search', [LocalSaleController::class, 'searchProducts']);
+        Route::get('/products/{productId}/stock', [LocalSaleController::class, 'getProductStock']);
+        Route::post('/store', [LocalSaleController::class, 'store']);
+        Route::get('/{sale}', [LocalSaleController::class, 'show']);
+        Route::put('/{sale}/cancel', [LocalSaleController::class, 'cancel']);
+        Route::post('/{sale}/payment', [LocalSaleController::class, 'payment']);
+        Route::get('/{sale}/pdf', [LocalSaleController::class, 'downloadPDF'])->name('sales.pdf');
     });
 
     Route::prefix('proformas')->group(function () {

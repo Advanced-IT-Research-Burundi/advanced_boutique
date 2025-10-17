@@ -25,6 +25,7 @@ return new class extends Migration
             $table->string('type_facture')->nullable();
             $table->string('status')->nullable();
             $table->text('description')->nullable();
+            $table->string('note')->nullable();
             $table->foreignId('agency_id')->nullable()->constrained();
             $table->foreignId('created_by')->constrained('users');
             $table->timestamps();
