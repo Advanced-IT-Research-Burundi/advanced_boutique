@@ -7,7 +7,6 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
@@ -34,7 +33,7 @@ class AuthController extends Controller
         ]);
 
         $token = $user->createToken('auth_token')->plainTextToken;
-
+      
         return response()->json([
             'success' => true,
             'message' => 'Utilisateur créé avec succès',
@@ -70,7 +69,17 @@ class AuthController extends Controller
             ], 401);
         }
 
-        $token = $user->createToken('auth_token')->plainTextToken;
+        /* $token = $user->createToken('auth_token')->plainTextToken;
+
+        $user->tokens()->latest()->first()->update([
+            'expires_at' => now()->addHours(1/30) // expire après 2 heures
+        ]); */
+         $token = $user->createToken(
+            'auth_token',
+            ['*'], // Abilities/permissions
+            now()->addHours(1) // Expire dans 24h
+        )->plainTextToken;
+
 
         return response()->json([
             'success' => true,
@@ -78,7 +87,8 @@ class AuthController extends Controller
             'data' => [
                 'user' => $user,
                 'token' => $token,
-                'token_type' => 'Bearer'
+                'token_type' => 'Bearer',
+                'token_expires_at' => now()->addHours(1)
             ]
         ]);
     }
