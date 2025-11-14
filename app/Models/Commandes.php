@@ -4,11 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Vehicules;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Commandes extends Model
 {
-    use HasFactory;
+    use HasFactory,SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -21,6 +21,8 @@ class Commandes extends Model
         'commentaire',
         'poids',
         'date_livraison',
+        'exchange_rate',
+        'user_id',
         'currency',
         'status',
         'description',
@@ -61,6 +63,11 @@ class Commandes extends Model
     public function vehicule()
     {
         return $this->belongsTo(Vehicule::class, 'vehicule_id', 'id');
+    }
+
+    public function depenses()
+    {
+        return $this->hasMany(DepensesImportation::class, 'commande_id', 'id');
     }
 
 }

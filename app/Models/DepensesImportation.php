@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+
 class DepensesImportation extends Model
 {
     use HasFactory;
@@ -16,6 +17,7 @@ class DepensesImportation extends Model
      * @var array
      */
     protected $guarded = [];
+    protected $appends = ['name_depense_importation_type'];
 
     /**
      * Get the attributes that should be cast.
@@ -43,5 +45,10 @@ class DepensesImportation extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function getNameDepenseImportationTypeAttribute()
+    {
+        return $this->depenseImportationType ? $this->depenseImportationType->name : null;
     }
 }

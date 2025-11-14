@@ -97,6 +97,9 @@ class CommandesController extends Controller
             'vehicule_id' => $request->vehicule_id,
             'matricule' => $request->matricule,
             'commentaire' => $request->commentaire,
+            'status' => 'pending',
+            'user_id' => Auth::user()->id,
+            'exchange_rate' => $request->exchange_rate,
             'poids' => $request->poids,
             'currency' => $request->currency,
             'date_livraison' => $request->date_livraison,
@@ -116,6 +119,8 @@ class CommandesController extends Controller
                 'pu' => $detail['pu'] ?? 0,
                 'remise' => 0,
                 'statut' => "pending",
+                'total_price' => $detail['quantity'] * $detail['pu'] *  $request->exchange_rate ?? 0,
+                'total_price_v' => 0 ,
             ]);
         }
         return sendResponse($commande, 'Commande created successfully', 201);
@@ -124,7 +129,7 @@ class CommandesController extends Controller
 
     public function show(Request $request, Commandes $commande)
     {
-        return sendResponse($commande->load(['details','vehicule']), 'Commande retrieved successfully', 200);
+        return sendResponse($commande->load(['details','vehicule','depenses']), 'Commande retrieved successfully', 200);
     }
 
 
@@ -136,6 +141,9 @@ class CommandesController extends Controller
             'vehicule_id' => $request->vehicule_id,
             'matricule' => $request->matricule,
             'commentaire' => $request->commentaire,
+            'status' => $request->status,
+            'user_id' => Auth::user()->id,
+            'exchange_rate' => $request->exchange_rate,
             'poids' => $request->poids,
             'date_livraison' => $request->date_livraison,
             'description' => $request->description,
@@ -155,6 +163,8 @@ class CommandesController extends Controller
                 'pu' => $detail['pu'] ?? 0,
                 'remise' => 0,
                 'statut' => "pending",
+                'total_price' => $detail['quantity'] * $detail['pu'] *  $request->exchange_rate ?? 0,
+                'total_price_v' => 0 ,
             ]);
         }
 

@@ -2,12 +2,8 @@
 
 namespace App\Console\Commands;
 
-use App\Models\Client;
-use App\Models\CommandeDetails;
-use App\Models\Product;
-use App\Models\Proforma;
-use App\Models\Stock;
-use App\Models\StockProduct;
+
+use DB;
 use Illuminate\Console\Command;
 use Faker\Factory as Faker;
 
@@ -37,11 +33,16 @@ class UpdateDatabaseCommand extends Command
 
         // Update Proforma 
 
-        $detailsCommande = CommandeDetails::all();
-        foreach ($detailsCommande as $detail) {
-            $detail->total_weight = $detail->quantity * $detail->weight_kg;
-            $detail->save();
-        }
+        // command for adding column  exchange_rate and deleted_at, user_id  on table commandes if it does not exist
+
+        DB::statement('ALTER TABLE commandes ADD COLUMN IF NOT EXISTS exchange_rate DECIMAL(15, 2) DEFAULT 1.00');
+        DB::statement('ALTER TABLE commandes ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMP NULL DEFAULT NULL');
+        DB::statement('ALTER TABLE commandes ADD COLUMN IF NOT EXISTS user_id BIGINT UNSIGNED NULL DEFAULT NULL');
+
+        // add total_price,  total_price_v to commande_details table if not exists
+        DB::statement('ALTER TABLE commande_details ADD COLUMN IF NOT EXISTS total_price DECIMAL(20, 2) DEFAULT 0.00');
+        DB::statement('ALTER TABLE commande_details ADD COLUMN IF NOT EXISTS total_price_v DECIMAL(20, 2) DEFAULT 0.00');
+    
 
        
     var_dump("Done");

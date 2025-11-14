@@ -4,11 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\DepensesImportationStoreRequest;
 use App\Http\Requests\DepensesImportationUpdateRequest;
-use App\Http\Resources\DepensesImportationCollection;
 use App\Http\Resources\DepensesImportationResource;
 use App\Models\DepensesImportation;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 
 class DepensesImportationController extends Controller
 {

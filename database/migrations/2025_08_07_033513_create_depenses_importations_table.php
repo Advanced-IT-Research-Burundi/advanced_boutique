@@ -28,6 +28,7 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->foreignId('user_id')->constrained();
             $table->timestamps();
+            $table->softDeletes();
         });
 
         Schema::enableForeignKeyConstraints();

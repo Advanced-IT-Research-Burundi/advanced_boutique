@@ -17,10 +17,12 @@ return new class extends Migration
             $table->string('matricule')->nullable();
             $table->text('commentaire')->nullable();
             $table->float('currency')->nullable();
+            $table->float('exchange_rate')->nullable();
             $table->float('poids')->nullable();
             $table->date('date_livraison')->nullable();
             $table->string('status')->default('pending')->nullable();
             $table->text('description')->nullable();
+            $table->foreignId('user_id')->nullable();
             $table->timestamps();
         });
     }
