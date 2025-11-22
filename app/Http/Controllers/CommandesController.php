@@ -201,9 +201,19 @@ class CommandesController extends Controller
         ]);
 
         if ($validator->fails()) {
+
+            $allMessages = [];
+
+            foreach ($validator->errors()->toArray() as $field => $messages) {
+                foreach ($messages as $msg) {
+                    $allMessages[] = $msg;
+                }
+            }
+            
+            $message = "Données invalides : " . implode(', ', $allMessages);
+
             return sendError(
-                'Données invalides '.$validator->errors()
-                ,
+                $message,
                 422,
                 $validator->errors()
             );
@@ -281,12 +291,13 @@ class CommandesController extends Controller
                         $globalValue += $quantity * $price;
 
                     } catch (\Exception $e) {
+                        DB::rollBack();
                         $errors[] = "Erreur sur produit {$detailInput['product_code']}: " . $e->getMessage();
                     }
                 }
             }
 
-            DB::commit();
+
 
             $response = [
                 'stock_entries' => [
@@ -297,14 +308,16 @@ class CommandesController extends Controller
                 ]
             ];
 
-            $message = "Livraison validée avec succès. {$globalEntriesCount} produit(s) ajouté(s).";
-           if (!empty($errors)) {
+            if (!empty($errors)) {
+                DB::rollBack();
                 $response['warnings'] = $errors;
-                $message .= " " . count($errors) . " erreur(s) détectée(s). [" . implode(", ", $errors) . "]";
+                $message = "Livraison non validée " . count($errors) . " erreur(s) détectée(s). [" . implode(", ", $errors) . "]";
                 return sendError($message, 500, ['error' => $errors]);
             }
 
+            DB::commit();
 
+            $message = "Livraison validée avec succès. {$globalEntriesCount} produit(s) ajouté(s).";
             return sendResponse($response, $message, 200);
 
         } catch (\Throwable $e) {
