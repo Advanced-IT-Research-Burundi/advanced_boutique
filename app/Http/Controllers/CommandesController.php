@@ -13,6 +13,7 @@ use Illuminate\Http\Response;
 use App\Models\StockProduct;
 use App\Models\Stock;
 use App\Models\StockProductMouvement;
+use App\Models\Product;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -65,24 +66,24 @@ class CommandesController extends Controller
         $search = $request->get('search', '');
         $status = $request->get('status', '');
 
-        $commandes = Commandes::with(['details'])
-            ->where(function ($query) use ($search) {
-                if ($search !== '') {
-                    if (is_numeric($search)) {
-                        $query->where('id', $search)
-                            ->orWhere('poids', $search);
-                    } else {
-                        $query->where('matricule', 'like', '%' . $search . '%')
-                            ->orWhere('description', 'like', '%' . $search . '%')
-                            ->orWhereHas('details', function ($q) use ($search) {
-                                $q->where('item_name', 'like', '%' . $search . '%');
-                            });
-                    }
-                }
-            })
-            ->when($status !== '', function ($query) use ($status) {
-                $query->where('status', $status);
-            })
+        $commandes = Commandes::with(['details','vehicule'])
+            // ->where(function ($query) use ($search) {
+            //     if ($search !== '') {
+            //         if (is_numeric($search)) {
+            //             $query->where('id', $search)
+            //                 ->orWhere('poids', $search);
+            //         } else {
+            //             $query->where('matricule', 'like', '%' . $search . '%')
+            //                 ->orWhere('description', 'like', '%' . $search . '%')
+            //                 ->orWhereHas('details', function ($q) use ($search) {
+            //                     $q->where('item_name', 'like', '%' . $search . '%');
+            //                 });
+            //         }
+            //     }
+            // })
+            // ->when($status !== '', function ($query) use ($status) {
+            //     $query->where('status', $status);
+            // })
             ->latest()
             ->paginate($request->get('per_page', 10));
 
@@ -209,7 +210,7 @@ class CommandesController extends Controller
                     $allMessages[] = $msg;
                 }
             }
-            
+
             $message = "Données invalides : " . implode(', ', $allMessages);
 
             return sendError(
@@ -239,7 +240,7 @@ class CommandesController extends Controller
                     $errors[] = "Commande non trouvée: ID {$commandeInput['id']}";
                     continue;
                 }
-                if ($commande->status !== 'pending') {
+                if ($commande->status == 'approved') {
                     $errors[] = "Commande non en attente: ID {$commandeInput['id']}";
                     continue;
                 }
@@ -260,9 +261,44 @@ class CommandesController extends Controller
                             })
                             ->first();
 
+
                         if (!$stockProduct) {
-                            $errors[] = "Produit non trouvé: {$detailInput['product_code']} - {$detailInput['item_name']}";
-                            continue;
+                            //  create the product in stock if not exists
+                            $product = Product::where('code', $detailInput['product_code'])->first();
+                            if ($product) {
+                                $stockProduct = new StockProduct();
+                                $stockProduct->stock_id = $stockPrincipal->id;
+                                $stockProduct->product_id = $product->id;
+                                $stockProduct->product_name = $product->name;
+                            }else{
+                                $productcompany = \App\Models\ProductCompanyName::where('product_code', $detailInput['product_code'])->where('item_name', $detailInput['item_name'])->first();
+                                if ($productcompany) {
+                                    // create product
+                                    $product = new Product();
+                                    $product->code = $productcompany->product_code;
+                                    $product->name = $productcompany->item_name ?? 'Produit sans nom';
+                                    $product->description = $productcompany->packing_details ?? 'Aucune description';
+                                    $product->category_id = $categoryId ?? 1;
+                                    $product->purchase_price = $productcompany->pu ?? 0;
+                                    $product->sale_price_ht = $productcompany->pu ?? 0;
+                                    $product->sale_price_ttc = $productcompany->total_weight_pu ?? 0;
+                                    $product->unit = $productcompany->size ?? 'pcs';
+                                    $product->alert_quantity = $productcompany->order_qty ?? 1;
+                                    $product->agency_id = auth()->user()->agency_id ?? null;
+                                    $product->created_by = auth()->id();
+                                    $product->user_id = auth()->id();
+                                    $product->save();
+
+                                    // create stock product
+                                    $stockProduct = new StockProduct();
+                                    $stockProduct->stock_id = $stockPrincipal->id;
+                                    $stockProduct->product_id = $product->id;
+                                    $stockProduct->product_name = $product->name;
+                                }else{
+                                    $errors[] = "Produit non trouvé: {$detailInput['product_code']} - {$detailInput['item_name']}";
+                                    continue;
+                                }
+                            }
                         }
 
                         $quantity = (float) $detailInput['quantity'];
