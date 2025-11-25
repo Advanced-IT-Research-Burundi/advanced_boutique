@@ -18,7 +18,7 @@ class ProductController extends Controller
     public function index(Request $request)
     {
         $allowedStock = User::find(Auth::id())->allowed_stocks();
-    
+
          $query = Product::with(['category', 'agency','unit'])
          ->whereHas('stocks', function ($q) use( $allowedStock) {
             if(!Auth::user()->isAdmin()){
@@ -43,14 +43,23 @@ class ProductController extends Controller
         if ($request->filled('agency_id')) {
             $query->where('agency_id', $request->agency_id);
         }
-        $products = $query->latest()->paginate(1000);
+        $products = $query->latest()->paginate(20);
 
         $categories = Category::whereIn('id', Product::select('category_id')->distinct()->pluck('category_id'))->get();
         $agencies = Agency::whereIn('id', Product::select('agency_id')->distinct()->pluck('agency_id'))->get();
         $data = [
-            'products' => new ProductCollection($products), 
+            'products' => new ProductCollection($products),
             'categories' => $categories,
             'agencies' => $agencies
+            // pagination informations
+            ,'pagination' => [
+                'total' => $products->total(),
+                'per_page' => $products->perPage(),
+                'current_page' => $products->currentPage(),
+                'last_page' => $products->lastPage(),
+                'from' => $products->firstItem(),
+                'to' => $products->lastItem(),
+            ],
         ];
 
         return sendResponse($data, 'Produits récupérés avec succès');
