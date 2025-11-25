@@ -192,7 +192,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::apiResource('vehicule-depenses', VehiculeDepenseController::class);
     Route::get('bon-entree', [CommandesController::class, 'bonEntre']);
+
 });
+Route::get('/product/pdf', [ProductController::class, 'download'])->name('product.pdf');
 
 Route::get('update_database', [RapportController::class, 'update_database'])->name('update_database');
 

@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class ProductController extends Controller
 {
@@ -230,4 +231,19 @@ class ProductController extends Controller
         $product = Product::select('id', 'code', 'name', 'category_id', 'description', 'purchase_price', 'sale_price_ht', 'sale_price_ttc', 'unit', 'alert_quantity', 'image')->findOrFail($id);
         return sendResponse($product, 'Product retrieved successfully', 200);
     }
+
+    public function download()
+    {
+        $products = Product::with('category')
+            ->orderBy('category_id')
+            ->orderBy('code')
+            ->get()
+            ->groupBy('category_id');
+
+        $pdf = Pdf::loadView('product.pdf', compact('products'));
+        $pdf->setPaper('a4', 'portrait');
+
+        return $pdf->download('product.pdf');
+    }
+
 }
