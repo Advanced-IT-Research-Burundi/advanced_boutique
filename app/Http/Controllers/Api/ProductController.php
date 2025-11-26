@@ -237,13 +237,29 @@ class ProductController extends Controller
         $products = Product::with('category')
             ->orderBy('category_id')
             ->orderBy('code')
+          
             ->get()
+            ->map(function ($product) {
+                return [
+                    'code' => $product->code,
+                    'name' => $product->name,
+                    'category_id' => $product->category->name,
+                    'category' => $product->category ? $product->category->name : 'N/A',
+                    'purchase_price' => number_format($product->purchase_price, 2),
+                    'sale_price_ht' => number_format($product->sale_price_ht, 2),
+                    'sale_price_ttc' => number_format($product->sale_price_ttc, 2),
+                    'alert_quantity' => $product->alert_quantity,
+                ];
+            })
+            
             ->groupBy('category_id');
 
-        $pdf = Pdf::loadView('product.pdf', compact('products'));
-        $pdf->setPaper('a4', 'portrait');
+        return sendResponse($products, 'Produits récupérés avec succès');
 
-        return $pdf->download('product.pdf');
+        // $pdf = Pdf::loadView('product.pdf', compact('products'));
+        // $pdf->setPaper('a4', 'portrait');
+
+        // return $pdf->download('product.pdf');
     }
 
 }
