@@ -16,6 +16,7 @@ class ReportsController extends Controller
      */
     public function index(Request $request)
     {
+
         try {
             $reportType = $request->get('report_type', 'overview');
             $startDate = $request->get('start_date', Carbon::now()->startOfMonth());
@@ -56,6 +57,7 @@ class ReportsController extends Controller
 
             return sendResponse($data, 'Données de rapport générées avec succès');
         } catch (\Exception $e) {
+            return $e;
             return sendError('Erreur lors de la génération du rapport: ' . $e->getMessage(), 500);
         }
     }
@@ -168,10 +170,10 @@ class ReportsController extends Controller
             ->get()
             ->map(function ($stockProduct) {
                 return [
-                    'product_name' => $stockProduct->product->name,
-                    'stock_name' => $stockProduct->stock->name,
-                    'quantity' => $stockProduct->quantity,
-                    'alert_threshold' => $stockProduct->alert_quantity
+                    'product_name' => $stockProduct?->product?->name ?? $stockProduct->product_name,
+                    'stock_name' => $stockProduct?->stock?->name ?? $stockProduct->stock_id . ' inconnu',
+                    'quantity' => $stockProduct?->quantity ?? 0,
+                    'alert_threshold' => $stockProduct?->alert_quantity ?? 0
                 ];
             });
 
