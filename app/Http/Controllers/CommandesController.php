@@ -109,6 +109,9 @@ class CommandesController extends Controller
 
         // Assuming you have a CommandeResource to format the response
         foreach ($request->products as $detail) {
+            // Search for the product by code
+            $product = Product::where('code', $detail['product_code'])->first();
+            if($product){
             CommandeDetails::create([
                 'commande_id' => $commande->id,
                 'product_code' => $detail['product_code'],
@@ -119,10 +122,13 @@ class CommandesController extends Controller
                 'total_weight' => $detail['quantity'] * $detail['weight_kg'] ?? 0,
                 'pu' => $detail['pu'] ?? 0,
                 'remise' => 0,
+                'prix_vente' => $product->sale_price_ttc ?? 0,
+                'prix_achat' => $detail['pu'] ?? 0,
                 'statut' => "pending",
-                'total_price' => $detail['quantity'] * $detail['pu'] *  $request->exchange_rate ?? 0,
-                'total_price_v' => 0 ,
+                'total_price' => $detail['quantity'] * $detail['pu'] * ( $request->exchange_rate ?? 1),
+                'total_price_v' => $product->sale_price_ttc * $detail['quantity'],
             ]);
+            }
         }
         return sendResponse($commande, 'Commande created successfully', 201);
 
@@ -155,6 +161,8 @@ class CommandesController extends Controller
         CommandeDetails::where('commande_id', $commande->id)->delete();
 
         foreach ($request->details as $detail) {
+            $product = Product::where('code', $detail['product_code'])->first();
+            if($product){
             CommandeDetails::create([
                 'commande_id' => $commande->id,
                 'product_code' => $detail['product_code'],
@@ -165,10 +173,13 @@ class CommandesController extends Controller
                 'total_weight' => ( $detail['quantity'] * $detail['weight_kg']) ?? 0,
                 'pu' => $detail['pu'] ?? 0,
                 'remise' => 0,
+                'prix_vente' => $product->sale_price_ttc ?? 0,
+                'prix_achat' => $detail['pu'] ?? 0,
                 'statut' => "pending",
-                'total_price' => $detail['quantity'] * $detail['pu'] *  $request->exchange_rate ?? 0,
-                'total_price_v' => 0 ,
+                'total_price' => $detail['quantity'] * $detail['pu'] * ( $request->exchange_rate ?? 1),
+                'total_price_v' => $product->sale_price_ttc * $detail['quantity'],
             ]);
+            }
         }
 
         return sendResponse($commande->load('details'), 'Commande updated successfully', 200);

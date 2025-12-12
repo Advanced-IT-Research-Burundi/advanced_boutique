@@ -33,6 +33,11 @@ class CommandeDetails extends Model
         ];
     }
 
+    public function commande()
+    {
+        return $this->belongsTo(Commandes::class, 'commande_id', 'id');
+    }
+
     public function details()
     {
         return $this->hasMany(CommandeDetails::class, 'commande_id', 'id');

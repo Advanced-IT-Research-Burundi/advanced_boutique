@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\CommandeDetails;
 use App\Models\DepenseImportationType;
 use App\Models\DepensesImportation;
+use App\Models\Product;
 use App\Models\Proforma;
 use App\Models\StockProduct;
 use Illuminate\Http\Request;
@@ -88,46 +90,22 @@ class RapportController extends Controller
 
     public function update_database()
     {
-        // This method can be used to trigger any database updates or migrations
-        // For now, it just returns a success message
+        // Add commandes details
 
-        $proformas = Proforma::whereNull('status')->get();
+        $commandesDetails = CommandeDetails::all();
 
-        $item_list = [];
-        $profomas_list = [];
-        foreach ($proformas as $proforma) {
-            $listeProduit = [];
-            foreach (json_decode($proforma->proforma_items) as $item) {
-                // Assuming each item has 'product_id' and 'quantity'
-                $stock = StockProduct::where('stock_id', $proforma->stock_id)
-                ->where('product_id', $item->product_id)
-                ->first();
-                $listeProduit[] = array_merge((array) $item, ['product_id' => $stock ? $stock->id : null]);
+        foreach ($commandesDetails as $commandesDetail) {
+
+            $product = Product::where('code', $commandesDetail->product_code)->first();
+            if (!$product) {
+                continue;
             }
-            $proforma->proforma_items = json_encode($listeProduit);
-            //   $profomas_list[] = $proforma;
-            $proforma->save();
+            $commandesDetail->prix_vente = $product->sale_price_ttc ?? 0;
+            $commandesDetail->prix_achat = $commandesDetail->pu ?? 0;
+            $commandesDetail->total_price = $commandesDetail->quantity * $commandesDetail->pu * ( $commandesDetail->commande->exchange_rate ?? 1);
+            $commandesDetail->total_price_v = $product->sale_price_ttc * $commandesDetail->quantity;
+            $commandesDetail->save();
         }
-
-        // return $profomas_list;
-
-
-        // \DB::statement('SET FOREIGN_KEY_CHECKS=0;');
-        //   \DB::table('depense_importation_types')->truncate();
-        // \DB::statement('TRUNCATE TABLE depense_importation_types');
-
-        //   \DB::table('depense_importation_types')->insert([
-        //     ['name' => 'TRANSPORT', 'description' => 'Frais liés au transport des marchandises'],
-        //     ['name' => 'DEDOUANEMENT', 'description' => 'Frais de dédouanement'],
-        //     ['name' => 'LICENCE', 'description' => 'Droits de douane et licences'],
-        //     ['name' => 'ASSURANCE', 'description' => 'Frais d\'assurances'],
-        //     ['name' => 'IMPREVU', 'description' => 'Frais imprevus'],
-        //     ['name' => 'BBN', 'description' => 'Frais liés au bon de livraison'],
-        //     ['name' => 'DECHARGEMENT', 'description' => 'Frais de déchargement'],
-        //     ['name' => 'PALETTES', 'description' => 'frais pour les palettes'],
-        //     ['name' => 'FOURNISSEUR', 'description' => 'frais pour les fournisseurs'],
-        // ]);
-        // \DB::statement('SET FOREIGN_KEY_CHECKS=1;');
         return sendResponse([], "Database updated successfully");
     }
 }
