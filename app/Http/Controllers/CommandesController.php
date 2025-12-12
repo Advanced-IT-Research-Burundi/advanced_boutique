@@ -130,7 +130,9 @@ class CommandesController extends Controller
 
     public function show(Request $request, Commandes $commande)
     {
-        return sendResponse($commande->load(['details','vehicule','depenses']), 'Commande retrieved successfully', 200);
+       $cm = $commande->load(['details','vehicule','depenses']);
+
+        return sendResponse($cm, 'Commande retrieved successfully', 200);
     }
 
 
