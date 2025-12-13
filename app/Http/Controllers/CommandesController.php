@@ -135,12 +135,42 @@ class CommandesController extends Controller
     }
 
     public function show(Request $request, Commandes $commande)
-    {
-       $cm = $commande->load(['details','vehicule','depenses']);
+{
 
-        return sendResponse($cm, 'Commande retrieved successfully', 200);
-    }
+    $details = $commande->details()
+        ->select('id', 'commande_id', 'product_code', 'item_name', 'pu', 'prix_vente', 'prix_achat', 'quantity')
+        ->get()
+        ->map(function ($d) use ($commande) {
+            return [
+                'code'      => $d->product_code,
+                'libelle'   => $d->item_name,
+                'pu'        => $d->pu,
+                'cours'     => $commande->exchange_rate ?? 1,
+                'qte'       => $d->quantity,
+                'prix_vente' => $d->prix_vente,
+                'total_pa'  => round(($d->pu ?? 0) * ($d->quantity ?? 0) * ($commande->exchange_rate ?? 1)),
+                'total_pv'  => ($d->prix_vente ?? 0) * ($d->quantity ?? 0),
+            ];
+        });
 
+    $depenses = $commande->depenses()
+        ->with("depenseImportationType")
+
+        ->get()
+        ->map(function ($d) {
+        return [
+            'id' => $d->id,
+            'libelle' => $d->depenseImportationType->name ?? '-',
+            // SI le montant n'est pas en BIF
+            'amount' => $d->amount ?? ($d->amount_currency * ($commande->exchange_rate ?? 1)),
+        ];
+    });
+
+    $commande->setRelation('details', $details);
+    $commande->setRelation('depenses', $depenses);
+
+    return sendResponse($commande, 'Commande retrieved successfully', 200);
+}
 
     public function update(Request $request, $id)
     {
