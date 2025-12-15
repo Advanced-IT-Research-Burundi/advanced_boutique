@@ -142,6 +142,7 @@ class CommandesController extends Controller
         ->map(function ($d) use ($commande) {
             return [
                 ... $commande->toArray(),
+                'id'      => $d->id,
                 'code'      => $d->product_code,
                 'libelle'   => $d->item_name,
                 'pu'        => $d->pu,
