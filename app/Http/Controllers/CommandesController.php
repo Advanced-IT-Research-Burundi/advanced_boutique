@@ -138,16 +138,20 @@ class CommandesController extends Controller
 {
 
     $details = $commande->details()
-        ->select('id', 'commande_id', 'product_code', 'item_name', 'pu', 'prix_vente', 'prix_achat', 'quantity')
         ->get()
         ->map(function ($d) use ($commande) {
             return [
+                ... $commande->toArray(),
                 'code'      => $d->product_code,
                 'libelle'   => $d->item_name,
                 'pu'        => $d->pu,
                 'cours'     => $commande->exchange_rate ?? 1,
                 'qte'       => $d->quantity,
+                'quantity'       => $d->quantity,
                 'prix_vente' => $d->prix_vente,
+                'weight_kg' => $d->weight_kg,
+                'total_weight' => $d->total_weight,
+                'company_code' => $d->company_code,
                 'total_pa'  => round(($d->pu ?? 0) * ($d->quantity ?? 0) * ($commande->exchange_rate ?? 1)),
                 'total_pv'  => ($d->prix_vente ?? 0) * ($d->quantity ?? 0),
             ];
