@@ -70,4 +70,19 @@ class Commandes extends Model
         return $this->hasMany(DepensesImportation::class, 'commande_id', 'id');
     }
 
+    /**
+     * Get the total depenses for this commande.
+     */
+    public function getRepportCommande()
+    {
+        // Prix total du details commande
+
+        $totalAchat = $this->details->sum(function ($detail) {
+            return round($detail->total_price);
+        });
+        return [
+            'fournisseur' => $totalAchat,
+        ];
+    }
+
 }

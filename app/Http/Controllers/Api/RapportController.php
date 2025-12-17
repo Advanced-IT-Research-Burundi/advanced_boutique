@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\CommandeDetails;
+use App\Models\Commandes;
 use App\Models\DepenseImportationType;
 use App\Models\DepensesImportation;
 use App\Models\Product;
@@ -49,17 +50,25 @@ class RapportController extends Controller
             $first = $group->sortBy('date')->first();
             $dateObj = $first && $first->date ? new Carbon($first->date) : null;
 
+            $commande = Commandes::find($commandeId);
+            $repport = $commande ? $commande->getRepportCommande() : null;
+
             $row = [
                 'date' => $dateObj ? $dateObj->format('d/m/Y') : null,
                 'numero' => $dateObj
                 ? str_pad((string)$commandeId, 5, '0', STR_PAD_LEFT) . '/' . $dateObj->format('Y')
                 : (string)$commandeId,
+
             ];
+
 
             // Initialize all columns to 0
             foreach ($columns as $colKey) {
                 $row[$colKey] = 0;
             }
+
+            $row["fournisseur"] = $repport["fournisseur"] ?? 0;
+
 
             // Sum per type
             foreach ($group as $d) {
