@@ -50,7 +50,7 @@ class LocalSale extends Model
             CreditTvaDetail::create([
                 'montant' => $localSale->total_tva,
                 'sale_id' => $localSale->id,
-                'description' => 'Vente locale N°'.$localSale->id,
+                'description' => 'Vente local A N° #'.$localSale->id,
                 'date' => now(),
                 'type' => 'ADD',
             ]);

@@ -53,6 +53,26 @@ class Sale extends Model
         ];
     }
 
+    public static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($localSale) {
+            // Set default values or perform actions before creating a LocalSale
+            CreditTvaDetail::create([
+                'montant' => $localSale->total_tva,
+                'sale_id' => $localSale->id,
+                'description' => 'Vente  B N° #' . $localSale->id,
+                'date' => now(),
+                'type' => 'ADD',
+            ]);
+        });
+        static::deleting(function ($localSale) {
+            // Delete related sale items
+
+        });
+    }
+
     public function client(): BelongsTo
     {
         return $this->belongsTo(Client::class);
