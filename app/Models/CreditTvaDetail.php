@@ -43,6 +43,13 @@ class CreditTvaDetail extends Model
         parent::boot();
         static::creating(function ($model) {
             // Custom logic before creating a CreditTvaDetail
+            if (!isset($model->type)) {
+               throw new \Exception('The type field is required and must be either ADD or SUB.');
+            }
+
+            if (!isset($model->date)) {
+                $model->date = now();
+            }
             
             $creditTva = CreditTva::firstOrCreate(
                 [
@@ -50,6 +57,7 @@ class CreditTvaDetail extends Model
                     'montant' => 0,
                     'description' => 'Montant Total de TVA',
                     'is_actif' => true,
+                    'user_id' => auth()->id(),
                     ]
                 );
                 if ($model->type === 'ADD') {

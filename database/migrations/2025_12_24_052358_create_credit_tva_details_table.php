@@ -19,6 +19,7 @@ return new class extends Migration
             $table->integer('sale_id')->nullable();
             $table->string('description')->nullable();
             $table->date('date')->nullable();
+            $table->foreignId('user_id')->constrained();
             $table->timestamps();
             $table->softDeletes();
         });

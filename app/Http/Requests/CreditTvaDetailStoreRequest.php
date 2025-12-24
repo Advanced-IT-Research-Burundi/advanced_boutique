@@ -21,11 +21,19 @@ class CreditTvaDetailStoreRequest extends FormRequest
     {
         return [
             'credit_tva_id' => ['nullable', 'integer'],
-            'type' => ['nullable', 'string'],
             'montant' => ['nullable', 'numeric'],
             'sale_id' => ['nullable', 'integer'],
             'description' => ['nullable', 'string'],
             'date' => ['nullable', 'date'],
+            'type' => ['required', 'in:ADD,SUB'  ],
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'type.required' => 'The type field is required.',
+            'type.in' => 'The type must be either ADD or SUB.',
         ];
     }
 }

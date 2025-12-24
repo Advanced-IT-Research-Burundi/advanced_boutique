@@ -19,6 +19,7 @@ class CreditTva extends Model
         'montant',
         'description',
         'is_actif',
+        'user_id',
     ];
 
     /**
