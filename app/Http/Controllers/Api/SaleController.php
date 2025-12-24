@@ -180,6 +180,7 @@ class SaleController extends Controller
      */
     public function searchProducts(Request $request)
     {
+
         try {
             $stockId = $request->get('stock_id');
             $search = $request->get('search', '');
@@ -210,6 +211,8 @@ class SaleController extends Controller
                         'id' => $p->id,
                         'name' => $p->product?->name,
                         'code' => $p->product?->code,
+                        'tva' => $p->product?->tva ?? 0,
+                        'sale_price_ht' => $p->product?->sale_price_ht,
                         'description' => $p->product?->description,
                         'sale_price_ttc' => $p->product?->sale_price_ttc,
                         'unit' => $p->product?->unit ?? 'Piece',

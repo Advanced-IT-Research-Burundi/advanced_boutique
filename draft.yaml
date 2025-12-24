@@ -1,10 +1,22 @@
 models:
-  ProduitsTmp:
-    code : string nullable
-    designation : string nullable
-    PVHT : float nullable
-    PVTTC : float nullable
+  CreditTva:
+    date : date nullable
+    montant : string nullable
+    description : float nullable
+    is_actif : boolean 
   
+
+  CreditTvaDetail:
+    credit_tva_id : integer nullable
+    type : string nullable
+    montant : float nullable
+    sale_id : integer nullable
+    description : string nullable
+    date : date nullable
+
 controllers:
-  ProduitsTmp:
+  CreditTva:
+    resource: api
+
+  CreditTvaDetail:
     resource: api

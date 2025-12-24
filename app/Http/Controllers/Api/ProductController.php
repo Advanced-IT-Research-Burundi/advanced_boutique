@@ -89,6 +89,7 @@ class ProductController extends Controller
                 'purchase_price' => 'required|numeric|min:0',
                 'sale_price_ht' => 'nullable|numeric|min:0',
                 'sale_price_ttc' => 'required|numeric|min:0',
+                'tva' => 'nullable|numeric|min:0',
                 'unit' => 'required|string|max:50',
                 'unit' => 'required|exists:units,id',
                 'alert_quantity' => 'required|numeric|min:0',
@@ -109,6 +110,7 @@ class ProductController extends Controller
             $product->purchase_price = $validated['purchase_price'];
             $product->sale_price_ht = $validated['sale_price_ht'] ?? null;
             $product->sale_price_ttc = $validated['sale_price_ttc'];
+            $product->tva = $validated['tva'] ?? null;
             $product->unit = $validated['unit'];
             $product->unit_id = $validated['unit'];
             $product->alert_quantity = $validated['alert_quantity'];
@@ -151,6 +153,7 @@ class ProductController extends Controller
             'sale_price_ht' => 'nullable|numeric|min:0',
             'sale_price_ttc' => 'required|numeric|min:0',
             'unit' => 'required|string|max:50',
+            'tva' => 'nullable|string|max:50',
        //     'unit' => 'required|exists:units,id',
             'alert_quantity' => 'required|numeric|min:0',
             // 'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
@@ -176,6 +179,7 @@ class ProductController extends Controller
                 'sale_price_ht' => $validated['sale_price_ht'] ?? null,
                 'sale_price_ttc' => $validated['sale_price_ttc'],
                 'unit' => $validated['unit']  ?? 0,
+                'tva' => $validated['tva'] ?? null,
                 'unit_id' => $validated['unit'],
                 'alert_quantity' => $validated['alert_quantity'],
                 'image' => $imagePath,
@@ -237,7 +241,7 @@ class ProductController extends Controller
         $products = Product::with('category')
             ->orderBy('category_id')
             ->orderBy('code')
-          
+
             ->get()
             ->map(function ($product) {
                 return [
@@ -251,7 +255,7 @@ class ProductController extends Controller
                     'alert_quantity' => $product->alert_quantity,
                 ];
             })
-            
+
             ->groupBy('category_id');
 
         return sendResponse($products, 'Produits récupérés avec succès');

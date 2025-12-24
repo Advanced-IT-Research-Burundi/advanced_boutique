@@ -51,4 +51,9 @@ class DepensesImportation extends Model
     {
         return $this->depenseImportationType ? $this->depenseImportationType->name : null;
     }
+
+    public function commande(): BelongsTo
+    {
+        return $this->belongsTo(Commandes::class, 'commande_id', 'id');
+    }
 }

@@ -1,13 +1,22 @@
 created:
-    - app/Http/Controllers/ProduitsTmpController.php
-    - database/factories/ProduitsTmpFactory.php
-    - database/migrations/2025_09_28_023730_create_produits_tmps_table.php
-    - app/Models/ProduitsTmp.php
-    - tests/Feature/Http/Controllers/ProduitsTmpControllerTest.php
-    - app/Http/Requests/ProduitsTmpStoreRequest.php
-    - app/Http/Requests/ProduitsTmpUpdateRequest.php
-    - app/Http/Resources/ProduitsTmpCollection.php
-    - app/Http/Resources/ProduitsTmpResource.php
+    - app/Http/Controllers/CreditTvaController.php
+    - app/Http/Controllers/CreditTvaDetailController.php
+    - database/factories/CreditTvaFactory.php
+    - database/factories/CreditTvaDetailFactory.php
+    - database/migrations/2025_12_24_052357_create_credit_tvas_table.php
+    - database/migrations/2025_12_24_052358_create_credit_tva_details_table.php
+    - app/Models/CreditTva.php
+    - app/Models/CreditTvaDetail.php
+    - tests/Feature/Http/Controllers/CreditTvaControllerTest.php
+    - tests/Feature/Http/Controllers/CreditTvaDetailControllerTest.php
+    - app/Http/Requests/CreditTvaStoreRequest.php
+    - app/Http/Requests/CreditTvaUpdateRequest.php
+    - app/Http/Requests/CreditTvaDetailStoreRequest.php
+    - app/Http/Requests/CreditTvaDetailUpdateRequest.php
+    - app/Http/Resources/CreditTvaCollection.php
+    - app/Http/Resources/CreditTvaResource.php
+    - app/Http/Resources/CreditTvaDetailCollection.php
+    - app/Http/Resources/CreditTvaDetailResource.php
 updated:
     - routes/api.php
 models:
@@ -41,3 +50,5 @@ models:
     DepensesImportation: { depense_importation_type: 'string nullable', depense_importation_type_id: 'id foreign:depense_importation_types', currency: string, exchange_rate: double, amount: double, amount_currency: double, date: datetime, description: 'text nullable', user_id: 'id foreign:users' }
     VehiculeDepense: { vehicule_id: 'id foreign:vehicules', amount: double, date: datetime, description: 'text nullable', user_id: 'id foreign:users' }
     ProduitsTmp: { code: 'string nullable', designation: 'string nullable', PVHT: 'float nullable', PVTTC: 'float nullable' }
+    CreditTva: { date: 'date nullable', montant: 'string nullable', description: 'float nullable', is_actif: boolean }
+    CreditTvaDetail: { credit_tva_id: 'integer nullable', type: 'string nullable', montant: 'float nullable', sale_id: 'integer nullable', description: 'string nullable', date: 'date nullable' }

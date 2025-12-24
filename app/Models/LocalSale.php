@@ -35,9 +35,33 @@ class LocalSale extends Model
         ];
     }
 
+    protected $appends = ['numero'];
+
     public function client(): BelongsTo
     {
         return $this->belongsTo(Client::class);
+    }
+
+
+    public static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($localSale) {
+            // Set default values or perform actions before creating a LocalSale
+            CreditTvaDetail::create([
+                'montant' => $localSale->total_tva,
+                'sale_id' => $localSale->id,
+                'description' => 'Vente local A N° #'.$localSale->id,
+                'date' => now(),
+                'type' => 'SUB',
+            ]);
+        });
+
+        static::deleting(function ($localSale) {
+            // Delete related sale items
+
+        });
     }
 
     public function stock(): BelongsTo
@@ -68,5 +92,9 @@ class LocalSale extends Model
     public function payments(): HasMany
     {
         return $this->hasMany(Payment::class);
+    }
+    public function getNumeroAttribute()
+    {
+        return substr($this->stock->name, 0, 2) . '/' . str_pad($this->id, 4, '0', STR_PAD_LEFT);
     }
 }
