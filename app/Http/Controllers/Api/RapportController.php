@@ -102,7 +102,6 @@ class RapportController extends Controller
         $commandesDetails = CommandeDetails::all();
 
         foreach ($commandesDetails as $commandesDetail) {
-
             $product = Product::where('code', $commandesDetail->product_code)->first();
             if (!$product) {
                 continue;

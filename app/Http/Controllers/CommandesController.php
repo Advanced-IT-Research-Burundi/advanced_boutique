@@ -2,14 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\CommandeStoreRequest;
-use App\Http\Requests\CommandeUpdateRequest;
-use App\Http\Resources\CommandeCollection;
 use App\Http\Resources\CommandeResource;
 use App\Models\CommandeDetails;
 use App\Models\Commandes;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use App\Models\StockProduct;
 use App\Models\Stock;
 use App\Models\StockProductMouvement;

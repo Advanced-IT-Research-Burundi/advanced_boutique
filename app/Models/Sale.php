@@ -62,6 +62,17 @@ class Sale extends Model
 
         static::creating(function ($localSale) {
             // Set default values or perform actions before creating a LocalSale
+            $lastNumber = self::where('stock_id', $localSale->stock_id)
+            ->max('stock_sequence');
+            $localSale->stock_sequence = ($lastNumber ?? 0) + 1;
+        });
+        static::deleting(function ($localSale) {
+            // Delete related sale items
+
+        });
+
+        static::created(function ($localSale) {
+            // Actions after creating a LocalSale
             CreditTvaDetail::create([
                 'montant' => $localSale->total_tva,
                 'sale_id' => $localSale->id,
@@ -69,14 +80,6 @@ class Sale extends Model
                 'date' => now(),
                 'type' => 'SUB',
             ]);
-
-            $lastNumber = self::where('stock_id', $localSale->stock_id)
-            ->max('stock_sequence');
-
-            $localSale->stock_sequence = ($lastNumber ?? 0) + 1;
-        });
-        static::deleting(function ($localSale) {
-            // Delete related sale items
 
         });
     }

@@ -49,6 +49,16 @@ class LocalSale extends Model
 
         static::creating(function ($localSale) {
             // Set default values or perform actions before creating a LocalSale
+            
+        });
+
+        static::deleting(function ($localSale) {
+            // Delete related sale items
+
+        });
+
+        static::created(function ($localSale) {
+            // Actions after creating a LocalSale
             CreditTvaDetail::create([
                 'montant' => $localSale->total_tva,
                 'sale_id' => $localSale->id,
@@ -56,11 +66,6 @@ class LocalSale extends Model
                 'date' => now(),
                 'type' => 'SUB',
             ]);
-        });
-
-        static::deleting(function ($localSale) {
-            // Delete related sale items
-
         });
     }
 
