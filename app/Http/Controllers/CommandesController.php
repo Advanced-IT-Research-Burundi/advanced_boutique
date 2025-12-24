@@ -26,6 +26,7 @@ class CommandesController extends Controller
         $search = $request->get('search', '');
         $status = $request->get('status', '');
         $commandes = Commandes::with(['vehicule'])
+                            ->whereHas('vehicule')
                             ->where('status', '=','approved')
                             ->latest()->paginate(10);
 
@@ -220,7 +221,7 @@ class CommandesController extends Controller
         return sendResponse($commande->load('details'), 'Commande updated successfully', 200);
     }
 
-    public function destroy(Request $request, Commande $commande)
+    public function destroy(Request $request, Commandes $commande)
     {
         $commande->delete();
         return sendResponse($commande, 'Commande deleted successfully', 200);

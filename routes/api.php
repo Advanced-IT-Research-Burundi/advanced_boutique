@@ -29,10 +29,13 @@ use App\Http\Controllers\Api\StockMovementController;
 use App\Http\Controllers\Api\EntreMultipleController;
 use App\Http\Controllers\CommandeDetailsController;
 use App\Http\Controllers\CommandesController;
+use App\Http\Controllers\CreditTvaController;
+use App\Http\Controllers\CreditTvaDetailController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DepenseImportationTypeController;
 use App\Http\Controllers\DepensesImportationController;
 use App\Http\Controllers\ProductCompanyNameController;
+use App\Http\Controllers\ProduitsTmpController;
 use App\Http\Controllers\ReportsController;
 use App\Http\Controllers\UnitController;
 use App\Http\Controllers\VehiculeDepenseController;
@@ -192,10 +195,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::apiResource('vehicule-depenses', VehiculeDepenseController::class);
     Route::get('bon-entree', [CommandesController::class, 'bonEntre']);
-
+    Route::get('/product/pdf', [ProductController::class, 'download'])->name('product.pdf');
+    Route::get('update_database', [RapportController::class, 'update_database'])->name('update_database');
+    Route::apiResource('produits-tmps', ProduitsTmpController::class);
+    Route::apiResource('credit-tvas', CreditTvaController::class);
+    Route::apiResource('credit-tva-details', CreditTvaDetailController::class);
 });
-Route::get('/product/pdf', [ProductController::class, 'download'])->name('product.pdf');
-
-Route::get('update_database', [RapportController::class, 'update_database'])->name('update_database');
-
-Route::apiResource('produits-tmps', App\Http\Controllers\ProduitsTmpController::class);

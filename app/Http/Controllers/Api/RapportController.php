@@ -23,9 +23,10 @@ class RapportController extends Controller
         $end_date = request()->end_date ? Carbon::parse(request()->end_date) : Carbon::now()->endOfYear();
 
         $items = DepensesImportation::with('depenseImportationType')
-        ->whereBetween('date', [$start_date, $end_date])
-        ->orderBy('date')
-        ->get();
+                ->whereHas('commande')
+                ->whereBetween('date', [$start_date, $end_date])
+                ->orderBy('date')
+                ->get();
 
         // Map DB type names to the desired columns
         // Build columns from DB types
