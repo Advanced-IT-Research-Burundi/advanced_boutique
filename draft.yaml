@@ -1,22 +1,10 @@
 models:
-  CreditTva:
-    date : date nullable
-    montant : string nullable
-    description : float nullable
-    is_actif : boolean 
-  
+  InvoincePointer:
+    stock_id : integer nullable
+    invoince_number : integer nullable
+    description : text nullable
 
-  CreditTvaDetail:
-    credit_tva_id : integer nullable
-    type : string nullable
-    montant : float nullable
-    sale_id : integer nullable
-    description : string nullable
-    date : date nullable
 
 controllers:
-  CreditTva:
-    resource: api
-
-  CreditTvaDetail:
+  InvoincePointer:
     resource: api

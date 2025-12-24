@@ -115,4 +115,6 @@ class Sale extends Model
     {
         return substr($this->stock->name, 0, 2) . '/' . str_pad($this->id, 4, '0', STR_PAD_LEFT);
     }
+
+     
 }
