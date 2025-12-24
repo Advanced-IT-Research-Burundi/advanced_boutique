@@ -51,7 +51,7 @@ class CreditTvaDetail extends Model
                 $model->date = now();
             }
             
-            $creditTva = CreditTva::firstOrCreate(
+            $creditTva = CreditTva::latest()->first() ?? CreditTva::create(
                 [
                     'date' => now()->toDateString(),
                     'montant' => 0,
@@ -70,6 +70,7 @@ class CreditTvaDetail extends Model
                     $creditTva->save();
                 }
                 $model->user_id = auth()->id();
+                $model->credit_tva_id = $creditTva->id;
             });
             
             static::updating(function ($model) {

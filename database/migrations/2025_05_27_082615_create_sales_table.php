@@ -21,6 +21,7 @@ return new class extends Migration
             $table->double('total_amount');
             $table->double('paid_amount');
             $table->double('due_amount');
+            $table->double('total_tva', 64,4)->default(0);
             $table->dateTime('sale_date');
             $table->string('type_facture')->nullable();
             $table->string('status')->nullable();

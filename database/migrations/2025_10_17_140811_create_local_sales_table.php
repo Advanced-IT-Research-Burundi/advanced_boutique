@@ -16,9 +16,10 @@ return new class extends Migration
             $table->foreignId('client_id')->constrained();
             $table->foreignId('stock_id')->constrained();
             $table->foreignId('user_id')->constrained();
-            $table->double('total_amount');
-            $table->double('paid_amount');
-            $table->double('due_amount');
+            $table->double('total_amount', 64,4);
+            $table->double('paid_amount', 64,4);
+            $table->double('due_amount', 64,4);
+            $table->double('total_tva', 64,4)->default(0);
             $table->dateTime('sale_date');
             $table->string('type_facture')->nullable();
             $table->string('status')->nullable();
