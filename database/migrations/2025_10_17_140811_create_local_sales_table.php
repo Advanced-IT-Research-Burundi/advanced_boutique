@@ -27,6 +27,7 @@ return new class extends Migration
              $table->string('note')->nullable();
             $table->foreignId('agency_id')->nullable()->constrained();
             $table->foreignId('created_by')->constrained('users');
+            $table->unsignedInteger('stock_sequence')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });
