@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\CreditTvaDetailStoreRequest;
 use App\Http\Requests\CreditTvaDetailUpdateRequest;
-use App\Http\Resources\CreditTvaDetailCollection;
 use App\Http\Resources\CreditTvaDetailResource;
 use App\Models\CreditTva;
 use App\Models\CreditTvaDetail;
@@ -14,7 +13,7 @@ class CreditTvaDetailController extends Controller
 {
     public function index(Request $request)
     {
-        $creditTvaDetails = CreditTvaDetail::latest()->paginate();
+        $creditTvaDetails = CreditTvaDetail::where('type', 'ADD')->latest()->paginate();
         $creditTva = CreditTva::latest()->get()->first();
 
         return sendResponse([
