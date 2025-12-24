@@ -52,13 +52,13 @@ class LocalSale extends Model
                 'sale_id' => $localSale->id,
                 'description' => 'Vente local A N° #'.$localSale->id,
                 'date' => now(),
-                'type' => 'ADD',
+                'type' => 'SUB',
             ]);
         });
 
         static::deleting(function ($localSale) {
             // Delete related sale items
-            
+
         });
     }
 

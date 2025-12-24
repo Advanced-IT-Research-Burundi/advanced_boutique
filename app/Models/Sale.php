@@ -64,7 +64,7 @@ class Sale extends Model
                 'sale_id' => $localSale->id,
                 'description' => 'Vente  B N° #' . $localSale->id,
                 'date' => now(),
-                'type' => 'ADD',
+                'type' => 'SUB',
             ]);
         });
         static::deleting(function ($localSale) {
