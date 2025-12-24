@@ -198,7 +198,7 @@ class CommandesController extends Controller
             CommandeDetails::create([
                 'commande_id' => $commande->id,
                 'product_code' => $detail['product_code'],
-                'item_name' => $detail['item_name'],
+                'item_name' => $detail['item_name'] ?? $product->name ?? '-',
                 'company_code' => $detail['company_code'],
                 'quantity' => $detail['quantity'],
                 'weight_kg' => $detail['weight_kg'] ?? 0,
