@@ -1,7 +1,4 @@
 <?php
-
-
-
 function sendResponse($data, $message = 'Success', $code = 200) {
     return response()->json([
         'success' => true,

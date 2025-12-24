@@ -201,3 +201,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('credit-tvas', CreditTvaController::class);
     Route::apiResource('credit-tva-details', CreditTvaDetailController::class);
 });
+
+Route::apiResource('invoince-pointers', App\Http\Controllers\InvoincePointerController::class);
