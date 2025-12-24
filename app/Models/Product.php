@@ -28,6 +28,7 @@ class Product extends Model
         'purchase_price',
         'sale_price_ht',
         'sale_price_ttc',
+        'tva',
         'unit',
         'unit_id',
         'image',
