@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\CreditTvaDetailStoreRequest;
 use App\Http\Requests\CreditTvaDetailUpdateRequest;
+use App\Http\Resources\CreditTvaDetailCollection;
 use App\Http\Resources\CreditTvaDetailResource;
 use App\Models\CreditTvaDetail;
 use Illuminate\Http\Request;
@@ -30,7 +31,7 @@ class CreditTvaDetailController extends Controller
         return new CreditTvaDetailResource($creditTvaDetail);
     }
 
-    public function update(CreditTvaDetailUpdateRequest $request, CreditTvaDetail $creditTvaDetail): Response
+    public function update(CreditTvaDetailUpdateRequest $request, CreditTvaDetail $creditTvaDetail)
     {
         $creditTvaDetail->update($request->validated());
 

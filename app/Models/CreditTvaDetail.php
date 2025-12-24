@@ -43,6 +43,7 @@ class CreditTvaDetail extends Model
         parent::boot();
         static::creating(function ($model) {
             // Custom logic before creating a CreditTvaDetail
+            
             $creditTva = CreditTva::firstOrCreate(
                 [
                     'date' => now()->toDateString(),
@@ -51,7 +52,6 @@ class CreditTvaDetail extends Model
                     'is_actif' => true,
                     ]
                 );
-                $model->user_id = auth()->id();
                 if ($model->type === 'ADD') {
                     // Logic for ADD type
                     $creditTva->montant += $model->montant;
@@ -61,6 +61,7 @@ class CreditTvaDetail extends Model
                     $creditTva->montant -= $model->montant;
                     $creditTva->save();
                 }
+                $model->user_id = auth()->id();
             });
             
             static::updating(function ($model) {
