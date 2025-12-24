@@ -69,6 +69,11 @@ class Sale extends Model
                 'date' => now(),
                 'type' => 'SUB',
             ]);
+
+            $lastNumber = self::where('stock_id', $localSale->stock_id)
+            ->max('stock_sequence');
+
+            $localSale->stock_sequence = ($lastNumber ?? 0) + 1;
         });
         static::deleting(function ($localSale) {
             // Delete related sale items
@@ -111,8 +116,14 @@ class Sale extends Model
         return $this->hasMany(Payment::class);
     }
 
-    public function getNumeroAttribute()
-    {
-        return substr($this->stock->name, 0, 2) . '/' . str_pad($this->id, 4, '0', STR_PAD_LEFT);
-    }
+        public function getNumeroAttribute()
+        {
+            if ($this->stock_sequence === null) {
+                return '#' . str_pad($this->id, 4, '0', STR_PAD_LEFT);
+            }
+
+            return substr($this->stock->name, 0, 2)
+                . '-'
+                . str_pad($this->stock_sequence, 4, '0', STR_PAD_LEFT);
+        }
 }
