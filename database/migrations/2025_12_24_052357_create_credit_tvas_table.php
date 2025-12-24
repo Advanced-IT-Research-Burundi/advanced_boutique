@@ -17,6 +17,7 @@ return new class extends Migration
             $table->double('montant', 64,4)->nullable();
             $table->text('description')->nullable();
             $table->boolean('is_actif');
+            $table->foreignId('user_id')->constrained();
             $table->timestamps();
             $table->softDeletes();
         });
