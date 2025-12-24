@@ -35,6 +35,8 @@ class LocalSale extends Model
         ];
     }
 
+    protected $appends = ['numero'];
+
     public function client(): BelongsTo
     {
         return $this->belongsTo(Client::class);
@@ -90,5 +92,9 @@ class LocalSale extends Model
     public function payments(): HasMany
     {
         return $this->hasMany(Payment::class);
+    }
+    public function getNumeroAttribute()
+    {
+        return substr($this->stock->name, 0, 2) . '/' . str_pad($this->id, 4, '0', STR_PAD_LEFT);
     }
 }

@@ -53,6 +53,9 @@ class Sale extends Model
         ];
     }
 
+
+    protected $appends = ['numero'];
+
     public static function boot()
     {
         parent::boot();
@@ -106,5 +109,10 @@ class Sale extends Model
     public function payments(): HasMany
     {
         return $this->hasMany(Payment::class);
+    }
+
+    public function getNumeroAttribute()
+    {
+        return substr($this->stock->name, 0, 2) . '/' . str_pad($this->id, 4, '0', STR_PAD_LEFT);
     }
 }
