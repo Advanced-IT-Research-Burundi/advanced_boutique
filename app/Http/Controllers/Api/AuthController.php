@@ -88,7 +88,7 @@ class AuthController extends Controller
                 'user' => $user,
                 'token' => $token,
                 'token_type' => 'Bearer',
-                'token_expires_at' => now()->addHours(1)
+                'token_expires_at' => now()->addHours(60 * 24 * 15)
             ]
         ]);
     }
