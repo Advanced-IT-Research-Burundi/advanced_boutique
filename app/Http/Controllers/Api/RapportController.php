@@ -8,6 +8,9 @@ use App\Models\Commandes;
 use App\Models\DepenseImportationType;
 use App\Models\DepensesImportation;
 use App\Models\Product;
+use App\Models\Proforma;
+use App\Models\StockProduct;
+use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
 
@@ -49,7 +52,7 @@ class RapportController extends Controller
             $dateObj = $first && $first->date ? new Carbon($first->date) : null;
 
             $commande = Commandes::find($commandeId);
-          
+            $repport = $commande ? $commande->getRepportCommande() : null;
 
             $row = [
                 'date' => $dateObj ? $dateObj->format('d/m/Y') : null,
@@ -64,9 +67,9 @@ class RapportController extends Controller
             foreach ($columns as $colKey) {
                 $row[$colKey] = 0;
             }
-            $repport = $commande ? $commande->getRepportCommande() : null;
 
-            return $repport;
+            $row["fournisseur"] = $repport["fournisseur"] ?? 0;
+
 
             // Sum per type
             foreach ($group as $d) {
@@ -102,6 +105,7 @@ class RapportController extends Controller
         $commandesDetails = CommandeDetails::all();
 
         foreach ($commandesDetails as $commandesDetail) {
+
             $product = Product::where('code', $commandesDetail->product_code)->first();
             if (!$product) {
                 continue;
