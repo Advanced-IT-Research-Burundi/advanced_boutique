@@ -196,10 +196,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('vehicule-depenses', VehiculeDepenseController::class);
     Route::get('bon-entree', [CommandesController::class, 'bonEntre']);
     Route::get('/product/pdf', [ProductController::class, 'download'])->name('product.pdf');
-   
     Route::apiResource('produits-tmps', ProduitsTmpController::class);
     Route::apiResource('credit-tvas', CreditTvaController::class);
     Route::apiResource('credit-tva-details', CreditTvaDetailController::class);
+
+    Route::get('stock_billan', [RapportController::class, 'stock_billan']);
 });
 
 Route::apiResource('invoince-pointers', App\Http\Controllers\InvoincePointerController::class);

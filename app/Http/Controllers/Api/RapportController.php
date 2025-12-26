@@ -8,14 +8,38 @@ use App\Models\Commandes;
 use App\Models\DepenseImportationType;
 use App\Models\DepensesImportation;
 use App\Models\Product;
-use App\Models\Proforma;
+use App\Models\Stock;
 use App\Models\StockProduct;
-use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
 
 class RapportController extends Controller
 {
+    public function stock_billan()
+    {
+        // Get all products with their stock information
+
+        // group by stock_id and sum quantities * sale_price_ht
+        $stock_produits = StockProduct::with('stock')
+        ->whereHas('stock')
+        ->get()
+        ->groupBy('stock_id')
+        ->map(function ($items, $stock_id) {
+            $total_value = 0;
+            foreach ($items as $item) {
+                    $total_value += $item->quantity * ($item->sale_price_ht ?? 0);
+            }
+            return [
+                'stock_id' => $stock_id,
+                'stock_name' => Stock::where('id', $stock_id)->value('name'),
+                'total_value' => $total_value,
+            ];
+        })->values();
+
+        return sendResponse([
+            'stock_produits' => $stock_produits,
+        ], 'Stock Product'); 
+    }
     //
     public function depense_annuel()
     {
