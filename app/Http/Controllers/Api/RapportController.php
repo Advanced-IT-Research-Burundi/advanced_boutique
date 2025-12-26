@@ -20,14 +20,14 @@ class RapportController extends Controller
         // Get all products with their stock information
 
         // group by stock_id and sum quantities * sale_price_ht
-        $stock_produits = StockProduct::with('stock')
+        $stock_produits = StockProduct::with(['product', 'stock'])
         ->whereHas('stock')
         ->get()
         ->groupBy('stock_id')
         ->map(function ($items, $stock_id) {
             $total_value = 0;
             foreach ($items as $item) {
-                    $total_value += $item->quantity * ($item->sale_price_ht ?? 0);
+                    $total_value += $item->quantity * ($item->sale_price_ht ?? $item->product->sale_price_ttc ?? 0);
             }
             return [
                 'stock_id' => $stock_id,
