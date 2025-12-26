@@ -25,6 +25,7 @@ class Product extends Model
         'name',
         'description',
         'category_id',
+        'prix_promotionnel',
         'purchase_price',
         'sale_price_ht',
         'sale_price_ttc',
@@ -151,4 +152,6 @@ class Product extends Model
     {
         return $this->belongsTo(Unit::class);
     }
+
+    
 }

@@ -38,6 +38,7 @@ use App\Http\Controllers\ProductCompanyNameController;
 use App\Http\Controllers\ProduitsTmpController;
 use App\Http\Controllers\ReportsController;
 use App\Http\Controllers\UnitController;
+use App\Http\Controllers\UpdateDBController;
 use App\Http\Controllers\VehiculeDepenseController;
 use Illuminate\Support\Facades\Route;
 
@@ -205,4 +206,4 @@ Route::middleware('auth:sanctum')->group(function () {
 
 Route::apiResource('invoince-pointers', App\Http\Controllers\InvoincePointerController::class);
 
- Route::get('update_database', [RapportController::class, 'update_database'])->name('update_database');
+ Route::get('update_database', [UpdateDBController::class, 'update_database'])->name('update_database');

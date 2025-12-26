@@ -25,6 +25,7 @@ return new class extends Migration
             $table->foreignId('user_id')->nullable()->constrained();
             $table->double('purchase_price',64,2)->default(0);
             $table->double('sale_price_ht',64,2)->default(0);
+            $table->double('prix_promotionnel',64,2)->default(0);
             $table->double('sale_price_ttc',64,2)->default(0);
             $table->text('description')->nullable();
             $table->timestamps();
