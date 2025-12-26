@@ -200,7 +200,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('produits-tmps', ProduitsTmpController::class);
     Route::apiResource('credit-tvas', CreditTvaController::class);
     Route::apiResource('credit-tva-details', CreditTvaDetailController::class);
-
     Route::get('stock_billan', [RapportController::class, 'stock_billan']);
 });
 
