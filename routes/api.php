@@ -27,6 +27,7 @@ use App\Http\Controllers\Api\VehiculeController;
 use App\Http\Controllers\Api\StockProductController;
 use App\Http\Controllers\Api\StockMovementController;
 use App\Http\Controllers\Api\EntreMultipleController;
+use App\Http\Controllers\AutreElementController;
 use App\Http\Controllers\CommandeDetailsController;
 use App\Http\Controllers\CommandesController;
 use App\Http\Controllers\CreditTvaController;
@@ -200,7 +201,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('produits-tmps', ProduitsTmpController::class);
     Route::apiResource('credit-tvas', CreditTvaController::class);
     Route::apiResource('credit-tva-details', CreditTvaDetailController::class);
-    Route::get('stock_billan', [RapportController::class, 'stock_billan']);
+    Route::get('stock_billan', [RapportController::class, 'stock_billan']);Route::apiResource('autre-elements', AutreElementController::class);
+
 });
 
 Route::apiResource('invoince-pointers', App\Http\Controllers\InvoincePointerController::class);

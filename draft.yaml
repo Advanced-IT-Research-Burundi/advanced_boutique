@@ -1,10 +1,17 @@
 models:
-  InvoincePointer:
-    stock_id : integer nullable
-    invoince_number : integer nullable
-    description : text nullable
-
+  AutreElement:
+    date: date
+    libelle: string
+    emplacement: string nullable
+    quantite: decimal:10,2 default:1
+    valeur: decimal:15,2
+    devise: string:10 default:FBU
+    type_element: enum:caisse,banque,avance,credit,investissement,immobilisation,autre default:autre
+    reference: string:100 nullable
+    observation: text nullable
+    document: string nullable
+    timestamps: true
 
 controllers:
-  InvoincePointer:
+  AutreElement:
     resource: api
