@@ -77,7 +77,7 @@ class AuthController extends Controller
          $token = $user->createToken(
             'auth_token',
             ['*'], // Abilities/permissions
-            now()->addHours(1) // Expire dans 24h
+            now()->addHours(24) // Expire dans 24h
         )->plainTextToken;
 
 
@@ -88,7 +88,7 @@ class AuthController extends Controller
                 'user' => $user,
                 'token' => $token,
                 'token_type' => 'Bearer',
-                'token_expires_at' => now()->addHours(60 * 24 * 15)
+                'token_expires_at' => now()->addHours(24)
             ]
         ]);
     }

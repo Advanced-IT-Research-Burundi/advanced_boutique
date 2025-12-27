@@ -27,7 +27,7 @@ class RapportController extends Controller
         ->map(function ($items, $stock_id) {
             $total_value = 0;
             foreach ($items as $item) {
-                    $total_value += $item->quantity * ($item->sale_price_ht ?? $item->product->sale_price_ttc ?? 0);
+                    $total_value += $item->quantity * ( $item->product->sale_price_ttc ?? 0);
             }
             return [
                 'stock_id' => $stock_id,
