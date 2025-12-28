@@ -16,9 +16,10 @@ return new class extends Migration
             $table->date('date');
             $table->string('libelle');
             $table->string('emplacement')->nullable();
-            $table->decimal('quantite', 10, 2)->default(1);
-            $table->decimal('valeur', 15, 2);
+            $table->double('quantite', 64, 2)->default(1);
+            $table->double('valeur', 64, 2);
             $table->string('devise', 10)->default('FBU');
+            $table->double('exchange_rate', 64, 2)->default(1);
             $table->enum('type_element', ["caisse","banque","avance","credit","investissement","immobilisation","autre"])->default('autre');
             $table->string('reference', 100)->nullable();
             $table->text('observation')->nullable();

@@ -205,6 +205,4 @@ Route::middleware('auth:sanctum')->group(function () {
 
 });
 
-Route::apiResource('invoince-pointers', App\Http\Controllers\InvoincePointerController::class);
-
- Route::get('update_database', [UpdateDBController::class, 'update_database'])->name('update_database');
+Route::get('update_database', [UpdateDBController::class, 'update_database'])->name('update_database');

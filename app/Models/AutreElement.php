@@ -24,6 +24,7 @@ class AutreElement extends Model
         'type_element',
         'reference',
         'observation',
+        'exchange_rate',
         'document',
     ];
 
