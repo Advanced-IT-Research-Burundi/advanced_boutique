@@ -42,4 +42,12 @@ class AutreElement extends Model
             'valeur' => 'decimal:2',
         ];
     }
+
+    public function getDocumentAttribute($v)
+    {
+        if ($v) {
+            return asset($v);
+        }
+        return null;
+    }
 }

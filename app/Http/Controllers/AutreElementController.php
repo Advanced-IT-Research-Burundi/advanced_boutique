@@ -14,20 +14,22 @@ class AutreElementController extends Controller
 {
     public function index(Request $request)
     {
-        $autreElements = AutreElement::all();
+        $autreElements = AutreElement::latest()->paginate();
         
-        return new AutreElementCollection($autreElements);
+        return   sendResponse($autreElements, Response::HTTP_OK);
     }
     
     public function store(AutreElementStoreRequest $request)
     {
 
+        $pathURL  = '';
+
         // upload document if exists
         if ($request->hasFile('document')) {
             $imageName = time().'.'.$request->document->extension();
             $path = $request->file('document')->move(public_path('documents/others'), $imageName);
-            $request->merge(['document' => $path]);
-        }
+            $pathURL = 'documents/others/'.$imageName;
+        } 
 
 
         $autreElement = AutreElement::create([
@@ -41,7 +43,7 @@ class AutreElementController extends Controller
             'reference' => $request->reference,
             'observation' => $request->observation,
             'exchange_rate' => $request->exchange_rate,
-            'document' => '',
+            'document' => $pathURL ,
             
         ]);
         
@@ -55,6 +57,14 @@ class AutreElementController extends Controller
     
     public function update(AutreElementUpdateRequest $request, AutreElement $autreElement)
     {
+        $pathURL  = '';
+
+        // upload document if exists
+        if ($request->hasFile('document')) {
+            $imageName = time().'.'.$request->document->extension();
+                 $request->file('document')->move(public_path('documents/others'), $imageName);
+            $pathURL = 'documents/others/'.$imageName;
+        }
         $autreElement->update([
             'date' => $request->date,
             'libelle' => $request->libelle,
@@ -66,7 +76,7 @@ class AutreElementController extends Controller
             'reference' => $request->reference,
             'observation' => $request->observation,
             'exchange_rate' => $request->exchange_rate,
-            'document' => '',
+            'document' => $pathURL ? $pathURL : $autreElement->document,
         ]);
         
         return sendResponse(new AutreElementResource($autreElement), Response::HTTP_OK);
