@@ -61,4 +61,9 @@ class DepensesImportation extends Model
     {
         return $v == 0 ? 1 : $v;
     }
+
+    public function getAmountCurrencyAttribute($v)
+    {
+        return $v == 0 ? ($this->amount * ($this->exchange_rate ?? 1)) : $v;
+    }
 }
