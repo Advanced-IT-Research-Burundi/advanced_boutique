@@ -108,23 +108,31 @@ class StockTransferController extends Controller
                 $productIds = array_filter(explode(',', $productIds));
             }
 
+            // Les proformas stockent stock_product.id comme product_id
+            // On doit d'abord récupérer les vrais product_id depuis ces stock_product.id
+            $originalStockProducts = StockProduct::whereIn('id', $productIds)->get();
+            $realProductIds = $originalStockProducts->pluck('product_id')->unique()->toArray();
+
+            // Maintenant chercher les produits dans le stock source sélectionné
             $products = StockProduct::with('product', 'product.category')
                 ->where('stock_id', $stockId)
-                ->whereIn('id', $productIds)
-                ->get()
-            ;
+                ->whereIn('product_id', $realProductIds)
+                ->get();
 
-            if ($products->isEmpty()) {
-                $products = StockProduct::with('product', 'product.category')
-                ->where('stock_id', $stockId)
-                ->whereIn('product_id', $productIds)
-                ->get()
-            ;
+            // Créer un mapping entre l'ancien stock_product.id et le nouveau
+            $mapping = [];
+            foreach ($originalStockProducts as $origSP) {
+                $mapping[$origSP->id] = $origSP->product_id;
             }
 
-            $products = $products->map(function ($stockProduct) {
+            $products = $products->map(function ($stockProduct) use ($mapping, $productIds) {
+                // Trouver l'ancien stock_product.id qui correspond à ce product_id
+                $originalStockProductId = array_search($stockProduct->product_id, $mapping);
+
                 return [
                     "id" => $stockProduct->id,
+                    "original_id" => $originalStockProductId ?: $stockProduct->id,
+                    "product_id" => $stockProduct->product_id,
                     "name" => $stockProduct?->product?->name,
                     "code" => $stockProduct?->product?->code,
                     "description" => $stockProduct?->product?->name,
