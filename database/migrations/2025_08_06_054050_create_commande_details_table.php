@@ -27,6 +27,7 @@ return new class extends Migration
             $table->date('date_livraison')->nullable();
             $table->string('statut')->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

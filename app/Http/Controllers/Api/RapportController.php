@@ -8,11 +8,38 @@ use App\Models\Commandes;
 use App\Models\DepenseImportationType;
 use App\Models\DepensesImportation;
 use App\Models\Product;
+use App\Models\Stock;
+use App\Models\StockProduct;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
 
 class RapportController extends Controller
 {
+    public function stock_billan()
+    {
+        // Get all products with their stock information
+
+        // group by stock_id and sum quantities * sale_price_ht
+        $stock_produits = StockProduct::with(['product', 'stock'])
+        ->whereHas('stock')
+        ->get()
+        ->groupBy('stock_id')
+        ->map(function ($items, $stock_id) {
+            $total_value = 0;
+            foreach ($items as $item) {
+                    $total_value += $item->quantity * ( $item->product->sale_price_ttc ?? 0);
+            }
+            return [
+                'stock_id' => $stock_id,
+                'stock_name' => Stock::where('id', $stock_id)->value('name'),
+                'total_value' => $total_value,
+            ];
+        })->values();
+
+        return sendResponse([
+            'stock_produits' => $stock_produits,
+        ], 'Stock Product'); 
+    }
     //
     public function depense_annuel()
     {
@@ -49,7 +76,7 @@ class RapportController extends Controller
             $dateObj = $first && $first->date ? new Carbon($first->date) : null;
 
             $commande = Commandes::find($commandeId);
-          
+            $repport = $commande ? $commande->getRepportCommande() : null;
 
             $row = [
                 'date' => $dateObj ? $dateObj->format('d/m/Y') : null,
@@ -64,9 +91,9 @@ class RapportController extends Controller
             foreach ($columns as $colKey) {
                 $row[$colKey] = 0;
             }
-            $repport = $commande ? $commande->getRepportCommande() : null;
 
-            return $repport;
+            $row["fournisseur"] = $repport["fournisseur"] ?? 0;
+
 
             // Sum per type
             foreach ($group as $d) {
@@ -102,6 +129,7 @@ class RapportController extends Controller
         $commandesDetails = CommandeDetails::all();
 
         foreach ($commandesDetails as $commandesDetail) {
+
             $product = Product::where('code', $commandesDetail->product_code)->first();
             if (!$product) {
                 continue;

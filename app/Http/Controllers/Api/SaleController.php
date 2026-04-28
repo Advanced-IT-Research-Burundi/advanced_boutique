@@ -218,6 +218,7 @@ class SaleController extends Controller
                         'unit' => $p->product?->unit ?? 'Piece',
                         'category_id' => $p->product?->category_id,
                         'quantity_disponible' => $p->quantity,
+                        'prix_promotionnel' => $p->product?->prix_promotionnel,
                         'stock_id' => $p->stock_id,
                         'sale_price' => $p->product?->sale_price_ttc,
                     ];

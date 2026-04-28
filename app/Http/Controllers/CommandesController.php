@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Resources\CommandeResource;
 use App\Models\CommandeDetails;
 use App\Models\Commandes;
+use App\Models\ProductCompanyName;
 use Illuminate\Http\Request;
 use App\Models\StockProduct;
 use App\Models\Stock;
@@ -190,15 +191,31 @@ class CommandesController extends Controller
             'description' => $request->description,
         ]);
 
+        try {
+            DB::beginTransaction();
+            
         CommandeDetails::where('commande_id', $commande->id)->delete();
 
         foreach ($request->details as $detail) {
             $product = Product::where('code', $detail['product_code'])->first();
+
+   /*          // {
+  "product_code": "5027",
+  "company_code": "P2401",
+  "quantity": 1,
+  "weight_kg": 11.25,
+  "pu": 0,
+  "remise": 0
+} */
             if($product){
+                // Seach ITEM NAME 
+
+                $itemName = ProductCompanyName::where('company_code', $detail['company_code'])
+                                ->first();
             CommandeDetails::create([
                 'commande_id' => $commande->id,
                 'product_code' => $detail['product_code'],
-                'item_name' => $detail['item_name'] ?? $product->name ?? '-',
+                'item_name' => $itemName->item_name ?? $product->name ?? '-',
                 'company_code' => $detail['company_code'],
                 'quantity' => $detail['quantity'],
                 'weight_kg' => $detail['weight_kg'] ?? 0,
@@ -212,6 +229,12 @@ class CommandesController extends Controller
                 'total_price_v' => $product->sale_price_ttc * $detail['quantity'],
             ]);
             }
+        }
+        DB::commit();
+        }catch (\Throwable $e) {
+            DB::rollBack();
+            return sendError('Erreur lors de la mise à jour de la commande', 500, ['error' => $e->getMessage()]);   
+
         }
 
         return sendResponse($commande->load('details'), 'Commande updated successfully', 200);

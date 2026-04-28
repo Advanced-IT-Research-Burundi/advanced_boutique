@@ -23,7 +23,8 @@ return new class extends Migration
             $table->double('sale_price_ht')->nullable();
             $table->double('sale_price_ttc');
             $table->string('unit');
-            $table->string('tva')->nullable();
+            $table->double('tva')->nullable();
+            $table->double('prix_promotionnel')->nullable();
             $table->foreignId('unit_id')->nullable()->constrained();
             $table->float('alert_quantity');
             $table->string('image')->nullable();

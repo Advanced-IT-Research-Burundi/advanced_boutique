@@ -56,4 +56,14 @@ class DepensesImportation extends Model
     {
         return $this->belongsTo(Commandes::class, 'commande_id', 'id');
     }
+
+    public function getExchangeRateAttribute($v)
+    {
+        return $v == 0 ? 1 : $v;
+    }
+
+    public function getAmountCurrencyAttribute($v)
+    {
+        return $v == 0 ? ($this->amount * ($this->exchange_rate ?? 1)) : $v;
+    }
 }

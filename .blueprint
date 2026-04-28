@@ -1,13 +1,13 @@
 created:
-    - app/Http/Controllers/InvoincePointerController.php
-    - database/factories/InvoincePointerFactory.php
-    - database/migrations/2025_12_24_113352_create_invoince_pointers_table.php
-    - app/Models/InvoincePointer.php
-    - tests/Feature/Http/Controllers/InvoincePointerControllerTest.php
-    - app/Http/Requests/InvoincePointerStoreRequest.php
-    - app/Http/Requests/InvoincePointerUpdateRequest.php
-    - app/Http/Resources/InvoincePointerCollection.php
-    - app/Http/Resources/InvoincePointerResource.php
+    - app/Http/Controllers/AutreElementController.php
+    - database/factories/AutreElementFactory.php
+    - database/migrations/2025_12_27_081350_create_autre_elements_table.php
+    - app/Models/AutreElement.php
+    - tests/Feature/Http/Controllers/AutreElementControllerTest.php
+    - app/Http/Requests/AutreElementStoreRequest.php
+    - app/Http/Requests/AutreElementUpdateRequest.php
+    - app/Http/Resources/AutreElementCollection.php
+    - app/Http/Resources/AutreElementResource.php
 updated:
     - routes/api.php
 models:
@@ -44,3 +44,4 @@ models:
     CreditTva: { date: 'date nullable', montant: 'string nullable', description: 'float nullable', is_actif: boolean }
     CreditTvaDetail: { credit_tva_id: 'integer nullable', type: 'string nullable', montant: 'float nullable', sale_id: 'integer nullable', description: 'string nullable', date: 'date nullable' }
     InvoincePointer: { stock_id: 'integer nullable', invoince_number: 'integer nullable', description: 'text nullable' }
+    AutreElement: { date: date, libelle: string, emplacement: 'string nullable', quantite: 'decimal:10,2 default:1', valeur: 'decimal:15,2', devise: 'string:10 default:FBU', type_element: 'enum:caisse,banque,avance,credit,investissement,immobilisation,autre default:autre', reference: 'string:100 nullable', observation: 'text nullable', document: 'string nullable', timestamps: timestamps }

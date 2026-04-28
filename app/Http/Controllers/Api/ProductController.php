@@ -89,9 +89,9 @@ class ProductController extends Controller
                 'purchase_price' => 'required|numeric|min:0',
                 'sale_price_ht' => 'nullable|numeric|min:0',
                 'sale_price_ttc' => 'required|numeric|min:0',
+                'prix_promotionnel' => 'sometimes|numeric|min:0',
                 'tva' => 'nullable|numeric|min:0',
                 'unit' => 'required|string|max:50',
-                'unit' => 'required|exists:units,id',
                 'alert_quantity' => 'required|numeric|min:0',
                 // 'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             ]);
@@ -110,6 +110,7 @@ class ProductController extends Controller
             $product->purchase_price = $validated['purchase_price'];
             $product->sale_price_ht = $validated['sale_price_ht'] ?? null;
             $product->sale_price_ttc = $validated['sale_price_ttc'];
+            $product->prix_promotionnel = $validated['prix_promotionnel'];
             $product->tva = $validated['tva'] ?? null;
             $product->unit = $validated['unit'];
             $product->unit_id = $validated['unit'];
@@ -153,6 +154,7 @@ class ProductController extends Controller
             'sale_price_ht' => 'nullable|numeric|min:0',
             'sale_price_ttc' => 'required|numeric|min:0',
             'unit' => 'required|string|max:50',
+            'prix_promotionnel' => 'sometimes|numeric|min:0',
             'tva' => 'nullable|string|max:50',
        //     'unit' => 'required|exists:units,id',
             'alert_quantity' => 'required|numeric|min:0',
@@ -174,12 +176,13 @@ class ProductController extends Controller
                 'code' => $validated['code'],
                 'name' => $validated['name'],
                 'category_id' => $validated['category_id'],
-                'description' => $validated['description'] ?? null,
+                'description' => $validated['description'] ?? 0,
                 'purchase_price' => $validated['purchase_price'],
-                'sale_price_ht' => $validated['sale_price_ht'] ?? null,
+                'sale_price_ht' => $validated['sale_price_ht'] ?? 0,
                 'sale_price_ttc' => $validated['sale_price_ttc'],
+                'prix_promotionnel' => $validated['prix_promotionnel'] ?? 0,
                 'unit' => $validated['unit']  ?? 0,
-                'tva' => $validated['tva'] ?? null,
+                'tva' => $validated['tva'] ?? 0,
                 'unit_id' => $validated['unit'],
                 'alert_quantity' => $validated['alert_quantity'],
                 'image' => $imagePath,
@@ -191,8 +194,9 @@ class ProductController extends Controller
             foreach ($stocks as $stock) {
                 $stock->update([
                     'purchase_price' => $validated['purchase_price'],
-                    'sale_price_ht' => $validated['sale_price_ht'] ?? null,
+                    'sale_price_ht' => $validated['sale_price_ht'] ?? 0,
                     'sale_price_ttc' => $validated['sale_price_ttc'],
+                    'prix_promotionnel' => $validated['prix_promotionnel'] ?? 0,
                 ]);
             }
 
