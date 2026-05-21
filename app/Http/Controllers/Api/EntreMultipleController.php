@@ -93,8 +93,12 @@ class EntreMultipleController extends Controller
      */
     public function processBulkEntry(Request $request)
     {
+        // Types de mouvements d'entrée valides
+        $validMovementTypes = ['EN', 'ER', 'EI', 'EAJ', 'ET', 'EAU'];
+
         $validator = Validator::make($request->all(), [
             'stock_id' => 'required|exists:stocks,id',
+            'movement_type' => 'nullable|string|in:' . implode(',', $validMovementTypes),
             'entries' => 'required|array|min:1',
             'entries.*.product_id' => 'required|exists:stock_products,id',
             'entries.*.quantity' => 'required|numeric|min:1',
@@ -108,6 +112,7 @@ class EntreMultipleController extends Controller
             'entries.*.quantity.min' => 'La quantité doit être supérieure à 0',
             'entries.*.price.required' => 'Prix manquant',
             'entries.*.price.min' => 'Le prix doit être positif',
+            'movement_type.in' => 'Type de mouvement invalide',
         ]);
 
         if ($validator->fails()) {
@@ -122,6 +127,7 @@ class EntreMultipleController extends Controller
             DB::beginTransaction();
 
             $stockId = $request->stock_id;
+            $movementType = $request->movement_type ?? 'EN';
             $entries = $request->entries;
             $entriesCount = 0;
             $totalQuantity = 0;
@@ -142,7 +148,13 @@ class EntreMultipleController extends Controller
                 $price = (float) $entry['price'];
 
                 // Update stock product
-                $stockProduct->quantity += $quantity;
+                if ($movementType === 'EI') {
+                    // Pour l'inventaire, la quantité saisie remplace la quantité actuelle
+                    $stockProduct->quantity = $quantity;
+                } else {
+                    // Pour les autres types d'entrée, on ajoute la quantité
+                    $stockProduct->quantity += $quantity;
+                }
                 $stockProduct->user_id = Auth::id();
                 $stockProduct->agency_id = Auth::user()->agency_id ?? $stock->agency_id;
                 $stockProduct->purchase_price = $price;
@@ -151,7 +163,7 @@ class EntreMultipleController extends Controller
                 $stockProduct->save();
 
                 // Create stock movement
-                $this->createStockMovement($stockProduct, $quantity, $price, $stock);
+                $this->createStockMovement($stockProduct, $quantity, $price, $stock, $movementType);
 
                 $entriesCount++;
                 $totalQuantity += $quantity;
@@ -188,8 +200,20 @@ class EntreMultipleController extends Controller
     /**
      * Create stock movement record
      */
-    private function createStockMovement($stockProduct, $quantity, $price, $stock)
+    private function createStockMovement($stockProduct, $quantity, $price, $stock, $movementType = 'EN')
     {
+        // Labels pour les types de mouvement
+        $movementLabels = [
+            'EN' => 'Entrée Normales',
+            'ER' => 'Entrée Retour',
+            'EI' => 'Entrée Inventaire',
+            'EAJ' => 'Entrées Ajustement',
+            'ET' => 'Entrées Transfert',
+            'EAU' => 'Entrées Autres',
+        ];
+
+        $movementNote = 'Entrée multiple - ' . ($movementLabels[$movementType] ?? 'Entrée Normales');
+
         try {
             StockProductMouvement::create([
                 'agency_id' => Auth::user()->agency_id ?? $stock->agency_id,
@@ -201,9 +225,9 @@ class EntreMultipleController extends Controller
                 'item_measurement_unit' => $stockProduct->product->unit ?? 'pcs',
                 'item_purchase_or_sale_price' => $price,
                 'item_purchase_or_sale_currency' => 'FBU',
-                'item_movement_type' => 'EN',
+                'item_movement_type' => $movementType,
                 'item_movement_date' => now(),
-                'item_movement_note' => 'Entrée multiple',
+                'item_movement_note' => $movementNote,
                 'user_id' => Auth::id(),
             ]);
         } catch (\Throwable $e) {
