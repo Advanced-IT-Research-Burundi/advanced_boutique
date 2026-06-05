@@ -61,6 +61,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/reports', [ReportsController::class, 'index']);
     Route::get('/reports/export', [ReportsController::class, 'export']);
 
+    Route::post('products/import', [ProductController::class, 'import']);
     Route::apiResource('products', ProductController::class);
     Route::apiResource('units', UnitController::class);
 
@@ -127,7 +128,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('stocks/{stockId}')->group(function () {
         Route::get('categories', [EntreMultipleController::class, 'getStockCategories']);
         Route::get('entry-summary', [EntreMultipleController::class, 'getEntrySummary']);
-        Route::delete('/users/{userId}', [StockShowController::class, 'detachUser']);
+        // Route::delete('/users/{userId}', [StockShowController::class, 'detachUser']); // TODO: StockShowController not found
     });
     Route::prefix('stock-movements')->group(function () {
         Route::get('/', [StockMovementController::class, 'getMovements']);

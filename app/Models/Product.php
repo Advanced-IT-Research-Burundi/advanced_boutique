@@ -37,6 +37,7 @@ class Product extends Model
         'agency_id',
         'created_by',
         'user_id',
+        'created_by'
     ];
 
     protected $appends = ['sale_price'];

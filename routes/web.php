@@ -26,4 +26,4 @@ require __DIR__.'/auth.php';
 
 
 
-Route::get('/export/excel/{token}', [App\Http\Controllers\ExportController::class, 'exportExcel'])->name('export.excel');
+// Route::get('/export/excel/{token}', [App\Http\Controllers\ExportController::class, 'exportExcel'])->name('export.excel'); // TODO: ExportController not found

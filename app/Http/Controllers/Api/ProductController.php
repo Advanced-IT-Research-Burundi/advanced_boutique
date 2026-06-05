@@ -270,4 +270,132 @@ class ProductController extends Controller
         // return $pdf->download('product.pdf');
     }
 
+    /**
+     * Import products from Excel file data
+     */
+    public function import(Request $request)
+    {
+        // Validation basique - juste vérifier que products est un array
+        if (!$request->has('products') || !is_array($request->input('products'))) {
+            return sendError('Le champ products est requis et doit être un tableau', 422);
+        }
+
+        $products = $request->input('products');
+
+        if (count($products) === 0) {
+            return sendError('Aucun produit à importer', 422);
+        }
+
+        $imported = 0;
+        $failed = 0;
+        $errors = [];
+
+        DB::beginTransaction();
+
+        try {
+            foreach ($products as $index => $productData) {
+                try {
+                    // Normaliser les clés (lowercase, trim, remplacer espaces par underscore)
+                    $normalizedData = [];
+                    foreach ($productData as $key => $value) {
+                        $normalizedKey = strtolower(trim(str_replace(' ', '_', $key)));
+                        $normalizedData[$normalizedKey] = $value;
+                    }
+
+                    // Mapper les différentes variations de noms de colonnes
+                    $code = trim($normalizedData['code'] ?? $normalizedData['product_code'] ?? $normalizedData['code_produit'] ?? '');
+                    $name = trim($normalizedData['name'] ?? $normalizedData['nom'] ?? $normalizedData['product_name'] ?? $normalizedData['nom_produit'] ?? '');
+
+                    if (empty($code) || empty($name)) {
+                        $failed++;
+                        $errors[] = "Ligne " . ($index + 2) . ": Code ou nom manquant";
+                        continue;
+                    }
+
+                    // Chercher ou créer la catégorie si spécifiée
+                    $categoryId = null;
+                    $categoryName = $normalizedData['category'] ?? $normalizedData['categorie'] ?? $normalizedData['catégorie'] ?? null;
+                    if (!empty($categoryName)) {
+                        $category = Category::firstOrCreate(
+                            ['name' => trim($categoryName)],
+                            [
+                                'description' => '',
+                                'created_by' => auth()->user()->id ?? 1,
+                                'user_id' => auth()->user()->id ?? 1,
+
+                            ],
+                        );
+                        $categoryId = $category->id;
+                    }
+
+                    // Mapper les prix avec différentes variations
+                    $purchasePrice = floatval($normalizedData['purchase_price'] ?? $normalizedData['prix_achat'] ?? $normalizedData['prix_d\'achat'] ?? 0);
+                    $salePriceHt = floatval($normalizedData['sale_price_ht'] ?? $normalizedData['prix_vente_ht'] ?? $normalizedData['prix_ht'] ?? 0);
+                    $salePriceTtc = floatval($normalizedData['sale_price_ttc'] ?? $normalizedData['prix_vente_ttc'] ?? $normalizedData['prix_ttc'] ?? $normalizedData['prix_vente'] ?? 0);
+                    $tva = floatval($normalizedData['tva'] ?? $normalizedData['taxe'] ?? 0);
+                    $unit = $normalizedData['unit'] ?? $normalizedData['unite'] ?? $normalizedData['unité'] ?? 'Pièce';
+                    $alertQuantity = intval($normalizedData['alert_quantity'] ?? $normalizedData['seuil_alerte'] ?? $normalizedData['alerte'] ?? 0);
+                    $description = $normalizedData['description'] ?? null;
+
+                    // Si pas de prix HT mais prix TTC, calculer HT
+                    if ($salePriceHt == 0 && $salePriceTtc > 0) {
+                        $salePriceHt = $tva > 0 ? $salePriceTtc / (1 + ($tva / 100)) : $salePriceTtc;
+                    }
+
+                    // Vérifier si le produit existe déjà
+                    $existingProduct = Product::where('code', $code)->first();
+
+                    if ($existingProduct) {
+                        // Mettre à jour le produit existant
+                        $existingProduct->update([
+                            'name' => $name,
+                            'category_id' => $categoryId ?? $existingProduct->category_id,
+                            'description' => $description ?? $existingProduct->description,
+                            'purchase_price' => $purchasePrice > 0 ? $purchasePrice : $existingProduct->purchase_price,
+                            'sale_price_ht' => $salePriceHt > 0 ? $salePriceHt : $existingProduct->sale_price_ht,
+                            'sale_price_ttc' => $salePriceTtc > 0 ? $salePriceTtc : $existingProduct->sale_price_ttc,
+                            'tva' => $tva,
+                            'unit' => $unit,
+                            'alert_quantity' => $alertQuantity,
+                        ]);
+                        $imported++;
+                    } else {
+                        // Créer un nouveau produit
+                        Product::create([
+                            'code' => $code,
+                            'name' => $name,
+                            'category_id' => $categoryId,
+                            'description' => $description,
+                            'purchase_price' => $purchasePrice,
+                            'sale_price_ht' => $salePriceHt,
+                            'sale_price_ttc' => $salePriceTtc,
+                            'tva' => $tva,
+                            'unit' => $unit,
+                            'unit_id' => null,
+                            'alert_quantity' => $alertQuantity,
+                            'created_by' => auth()->user()->id ?? 1,
+                            'user_id' => auth()->user()->id ?? 1,
+                        ]);
+                        $imported++;
+                    }
+                } catch (\Exception $e) {
+                    $failed++;
+                    $errors[] = "Ligne " . ($index + 2) . ": " . $e->getMessage();
+                }
+            }
+
+            DB::commit();
+
+            return sendResponse([
+                'imported' => $imported,
+                'failed' => $failed,
+                'errors' => $errors
+            ], $imported . ' produit(s) importé(s) avec succès');
+
+        } catch (\Exception $e) {
+            DB::rollback();
+            return sendError('Erreur lors de l\'importation: ' . $e->getMessage(), 500);
+        }
+    }
+
 }
