@@ -242,32 +242,27 @@ class ProductController extends Controller
 
     public function download()
     {
-        $products = Product::with('category')
+        $products = Product::with(['category', 'stockProducts'])
             ->orderBy('category_id')
             ->orderBy('code')
-
             ->get()
             ->map(function ($product) {
+                // Prendre le premier stock associé s'il existe
+                $stockProduct = $product->stockProducts->first();
                 return [
                     'code' => $product->code,
                     'name' => $product->name,
-                    'category_id' => $product->category->name,
                     'category' => $product->category ? $product->category->name : 'N/A',
-                    'purchase_price' => number_format($product->purchase_price, 2),
-                    'sale_price_ht' => number_format($product->sale_price_ht, 2),
-                    'sale_price_ttc' => number_format($product->sale_price_ttc, 2),
+                    'stock_id' => $stockProduct ? $stockProduct->stock_id : '',
+                    'quantity' => $stockProduct ? $stockProduct->quantity : 0,
+                    'prix_vente_ttc' => $product->sale_price_ttc,
+                    'purchase_price' => $product->purchase_price,
+                    'sale_price_ht' => $product->sale_price_ht,
                     'alert_quantity' => $product->alert_quantity,
                 ];
-            })
-
-            ->groupBy('category_id');
+            });
 
         return sendResponse($products, 'Produits récupérés avec succès');
-
-        // $pdf = Pdf::loadView('product.pdf', compact('products'));
-        // $pdf->setPaper('a4', 'portrait');
-
-        // return $pdf->download('product.pdf');
     }
 
     /**
@@ -337,6 +332,10 @@ class ProductController extends Controller
                     $alertQuantity = intval($normalizedData['alert_quantity'] ?? $normalizedData['seuil_alerte'] ?? $normalizedData['alerte'] ?? 0);
                     $description = $normalizedData['description'] ?? null;
 
+                    // Mapper quantité et stock_id
+                    $quantity = floatval($normalizedData['quantity'] ?? $normalizedData['quantite'] ?? $normalizedData['quantité'] ?? $normalizedData['qte'] ?? 0);
+                    $stockId = intval($normalizedData['stock_id'] ?? $normalizedData['id_stock'] ?? 0);
+
                     // Si pas de prix HT mais prix TTC, calculer HT
                     if ($salePriceHt == 0 && $salePriceTtc > 0) {
                         $salePriceHt = $tva > 0 ? $salePriceTtc / (1 + ($tva / 100)) : $salePriceTtc;
@@ -358,10 +357,11 @@ class ProductController extends Controller
                             'unit' => $unit,
                             'alert_quantity' => $alertQuantity,
                         ]);
+                        $productId = $existingProduct->id;
                         $imported++;
                     } else {
                         // Créer un nouveau produit
-                        Product::create([
+                        $newProduct = Product::create([
                             'code' => $code,
                             'name' => $name,
                             'category_id' => $categoryId,
@@ -376,7 +376,30 @@ class ProductController extends Controller
                             'created_by' => auth()->user()->id ?? 1,
                             'user_id' => auth()->user()->id ?? 1,
                         ]);
+                        $productId = $newProduct->id;
                         $imported++;
+                    }
+
+                    // Créer ou mettre à jour le StockProduct si stock_id est fourni
+                    if ($stockId > 0) {
+                        $stock = Stock::find($stockId);
+                        if ($stock) {
+                            \App\Models\StockProduct::updateOrCreate(
+                                [
+                                    'product_id' => $productId,
+                                    'stock_id' => $stockId,
+                                ],
+                                [
+                                    'quantity' => $quantity,
+                                    'product_name' => $name,
+                                    'category_id' => $categoryId,
+                                    'agency_id' => $stock->agency_id ?? 1,
+                                    'user_id' => auth()->user()->id ?? 1,
+                                ]
+                            );
+                        } else {
+                            $errors[] = "Ligne " . ($index + 2) . ": Stock ID $stockId introuvable";
+                        }
                     }
                 } catch (\Exception $e) {
                     $failed++;
