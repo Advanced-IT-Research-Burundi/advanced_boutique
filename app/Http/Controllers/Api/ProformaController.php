@@ -24,7 +24,7 @@ class ProformaController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Proforma::with(['stock', 'stockRecevant', 'user', 'agency', 'createdBy'])
+        $query = Proforma::with(['stock', 'user', 'agency', 'createdBy'])
             ->orderBy('created_at', 'desc');
 
         if ($request->filled('search')) {
@@ -89,7 +89,7 @@ class ProformaController extends Controller
 
     public function show(Proforma $proforma)
     {
-        $proforma->load(['stock', 'stockRecevant', 'user', 'agency', 'createdBy']);
+        $proforma->load(['stock', 'user', 'agency', 'createdBy']);
 
         // Decode proforma items
         $items = json_decode($proforma->proforma_items, true) ?? [];
@@ -100,7 +100,7 @@ class ProformaController extends Controller
             $product = StockProduct::find($item['product_id']);
             return array_merge($item, [
                 'product_name' => $product->product_name ?? '-',
-              //  'product_code' => $product 
+              //  'product_code' => $product
             ]);
         }, $items);
 
@@ -704,5 +704,5 @@ class ProformaController extends Controller
             return sendError('Erreur lors de la mise à jour: ' . $e->getMessage(), 500, ['error' => $e->getMessage()]);
         }
     }
-    
+
 }

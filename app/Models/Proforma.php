@@ -41,7 +41,7 @@ class Proforma extends Model
         'sale_date'
     ];
 
-    // protected $appends 
+    // protected $appends
 
     public function stock()
     {
@@ -185,4 +185,9 @@ class Proforma extends Model
         $this->update(['due_amount' => $newDueAmount]);
         return $this->due_amount == 0;
     }
+
+    // public function isTransfer()
+    // {
+    //     return !is_null($this->transfer_code) && !is_null($this->stock_recevant_id) && $this->is_valid;
+    // }
 }
