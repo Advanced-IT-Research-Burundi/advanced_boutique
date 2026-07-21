@@ -21,7 +21,9 @@ class Proforma extends Model
         'created_by',
         'proforma_items',
         'client',
-        'is_valid'
+        'is_valid',
+        'transfer_code',
+        'stock_recevant_id'
     ];
 
     protected $casts = [
@@ -44,6 +46,11 @@ class Proforma extends Model
     public function stock()
     {
         return $this->belongsTo(Stock::class);
+    }
+
+    public function stockRecevant()
+    {
+        return $this->belongsTo(Stock::class, 'stock_recevant_id');
     }
 
     public function user()

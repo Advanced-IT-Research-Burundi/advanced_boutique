@@ -169,9 +169,9 @@ class StockTransferController extends Controller
             $toStock = Stock::find($request->to_stock_id);
             $transferCode = time();
             $proforma = null;
-             
+
             if($request->proforma_id){
-                
+
                     $proforma = Proforma::findOrFail($request->proforma_id);
                     if($proforma->transfer_code != null){
                         throw new \Exception("Le proforma a déjà été utilisé pour un transfert.");
@@ -187,7 +187,7 @@ class StockTransferController extends Controller
                         ->where('id', $item['product_id'])
                         ->where('quantity', '>=', $item['quantity'])
                         ->first();
-                       
+
                         if(!$stockProduct){
                             $product = Product::find($item['product_id']);
                             $errors[] = "Quantité insuffisante pour le produit {$product->name} # {$product->code}. Stock disponible: {$stockProduct['quantity']}, Demandé: {$item['quantity']}";
@@ -196,6 +196,7 @@ class StockTransferController extends Controller
                         }
                     }
                     if(count($errors) > 0){
+                        DB::rollBack();
                         return sendError('Erreur de validation', 500, $errors);
                     }
                     $proforma->is_valid = true;
@@ -203,8 +204,8 @@ class StockTransferController extends Controller
                     $proforma->save();
             }
 
-            
-           
+
+
             foreach ($request->products as $productData) {
                 $product =StockProduct::find($productData['product_id'])->product;
                 $quantity = $productData['quantity'];
@@ -255,7 +256,7 @@ class StockTransferController extends Controller
             }
 
 
-            DB::commit();         
+            DB::commit();
             $data =[
                 'transfer_code' => $transferCode,
             ];
@@ -289,7 +290,7 @@ class StockTransferController extends Controller
             'item_movement_note' => 'Transfert de stock',
         ]);
 
-       
+
         // Mouvement d'entrée (stock destination)
         StockProductMouvement::create([
             'agency_id' => auth()->user()->agency_id,
