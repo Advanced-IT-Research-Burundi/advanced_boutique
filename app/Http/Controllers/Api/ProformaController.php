@@ -44,6 +44,10 @@ class ProformaController extends Controller
             $query->whereDate('sale_date', '<=', $request->date_to);
         }
 
+        if ($request->filled('stock_id')) {
+            $query->where('stock_id', $request->stock_id);
+        }
+
         if ($request->filled('status')) {
             switch ($request->status) {
                 case 'paid':
@@ -59,12 +63,13 @@ class ProformaController extends Controller
             }
         }
 
+        $statsQuery = clone $query;
         $proformas = $query->paginate(15);
 
-        $totalRevenue = Proforma::sum('total_amount');
-        $paidProformas = Proforma::where('due_amount', 0)->count();
-        $totalDue = Proforma::sum('due_amount');
-        $todayProformas = Proforma::whereDate('created_at', today())->count();
+        $totalRevenue = (clone $statsQuery)->sum('total_amount');
+        $paidProformas = (clone $statsQuery)->where('due_amount', 0)->count();
+        $totalDue = (clone $statsQuery)->sum('due_amount');
+        $todayProformas = (clone $statsQuery)->whereDate('created_at', today())->count();
 
 
          $stats = [
