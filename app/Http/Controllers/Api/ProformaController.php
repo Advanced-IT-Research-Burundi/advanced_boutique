@@ -24,7 +24,7 @@ class ProformaController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Proforma::with(['stock', 'user', 'agency', 'createdBy'])
+        $query = Proforma::with(['stock', 'stockRecevant', 'user', 'agency', 'createdBy'])
             ->orderBy('created_at', 'desc');
 
         if ($request->filled('search')) {
@@ -89,7 +89,7 @@ class ProformaController extends Controller
 
     public function show(Proforma $proforma)
     {
-        $proforma->load(['stock', 'user', 'agency', 'createdBy']);
+        $proforma->load(['stock', 'stockRecevant', 'user', 'agency', 'createdBy']);
 
         // Decode proforma items
         $items = json_decode($proforma->proforma_items, true) ?? [];
