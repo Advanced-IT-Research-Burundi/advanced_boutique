@@ -89,30 +89,86 @@ class ProformaController extends Controller
 
     public function show(Proforma $proforma)
     {
+        return sendResponse(
+            $this->buildProformaDetails($proforma),
+            'Proforma retrieved successfully',
+            200
+        );
+    }
+
+    public function editData(Proforma $proforma)
+    {
+        try {
+            $details = $this->buildProformaDetails($proforma);
+            $stockId = $proforma->stock_id;
+
+            $details['stocks'] = auth()->user()->stocks()
+                ->select('stocks.id', 'stocks.name')
+                ->get();
+
+            $details['categories'] = $this->getCategoriesForStock($stockId);
+            $details['current_date'] = now()->format('Y-m-d\TH:i');
+            $details['invoice_types'] = ['FACTURE', 'PROFORMA', 'BON'];
+
+            return sendResponse($details, 'Données de modification récupérées avec succès');
+        } catch (\Throwable $e) {
+            return sendError('Erreur lors du chargement des données de modification', 500, ['error' => $e->getMessage()]);
+        }
+    }
+
+    private function buildProformaDetails(Proforma $proforma)
+    {
         $proforma->load(['stock', 'stockRecevant', 'user', 'agency', 'createdBy']);
 
-        // Decode proforma items
-        $items = json_decode($proforma->proforma_items, true) ?? [];
+        $items = $this->decodeStoredJson($proforma->proforma_items);
+        $stockProductIds = collect($items)->pluck('product_id')->filter()->unique()->values();
 
-        // Get Product with Name
+        $stockProducts = StockProduct::query()
+            ->with(['product' => function ($query) {
+                $query->select('id', 'name', 'code', 'unit', 'image', 'sale_price_ttc');
+            }])
+            ->select('id', 'product_id', 'product_name', 'quantity')
+            ->whereIn('id', $stockProductIds)
+            ->get()
+            ->keyBy('id');
 
-        $items = array_map(function ($item) {
-            $product = StockProduct::find($item['product_id']);
+        $items = array_map(function ($item) use ($stockProducts) {
+            $stockProduct = $stockProducts->get($item['product_id'] ?? null);
+            $product = $stockProduct?->product;
+
             return array_merge($item, [
-                'product_name' => $product->product_name ?? '-',
-              //  'product_code' => $product
+                'product_id' => $stockProduct?->id ?? $item['product_id'],
+                'product_name' => $stockProduct?->product_name ?? $product?->name ?? '-',
+                'name' => $stockProduct?->product_name ?? $product?->name ?? '-',
+                'code' => $product?->code ?? 'N/A',
+                'unit' => $product?->unit ?? 'pcs',
+                'image' => $product?->image,
+                'available_stock' => $stockProduct?->quantity ?? 0,
             ]);
         }, $items);
 
-        // Decode client data
-        $client = json_decode($proforma->client, true) ?? [];
+        $client = $this->decodeStoredJson($proforma->client, []);
 
-        return sendResponse([
+        return [
             'proforma' => $proforma,
             'items' => $items,
             'client' => $client,
-            'company' =>   Company::where('is_actif', true)->first()
-        ], 'Proforma retrieved successfully', 200);
+            'company' => Company::where('is_actif', true)->first()
+        ];
+    }
+
+    private function decodeStoredJson($value, $default = [])
+    {
+        if (is_array($value)) {
+            return $value;
+        }
+
+        if (is_string($value) && $value !== '') {
+            $decoded = json_decode($value, true);
+            return is_array($decoded) ? $decoded : $default;
+        }
+
+        return $default;
     }
 
 
@@ -318,17 +374,7 @@ class ProformaController extends Controller
     public function getCategories($stockId)
     {
         try {
-            $categories = Category::select('id', 'name')
-                ->withCount(['products' => function ($query) use ($stockId) {
-                    $query->whereHas('stockProducts', function ($q) use ($stockId) {
-                        // $q->where('quantity', '>', 0)
-                          $q->where('stock_id', $stockId);
-                    });
-                }])
-                ->having('products_count', '>', 0)
-                ->orderBy('name')
-                ->get()
-                ->pluck('name', 'id');
+            $categories = $this->getCategoriesForStock($stockId);
 
 
             $data = [
@@ -339,6 +385,20 @@ class ProformaController extends Controller
         } catch (\Throwable $e) {
             return sendError('Erreur lors du chargement des catégories', 500, ['error' => $e->getMessage()]);
         }
+    }
+
+    private function getCategoriesForStock($stockId)
+    {
+        return Category::select('id', 'name')
+            ->withCount(['products' => function ($query) use ($stockId) {
+                $query->whereHas('stockProducts', function ($q) use ($stockId) {
+                    $q->where('stock_id', $stockId);
+                });
+            }])
+            ->having('products_count', '>', 0)
+            ->orderBy('name')
+            ->get()
+            ->pluck('name', 'id');
     }
 
     /**

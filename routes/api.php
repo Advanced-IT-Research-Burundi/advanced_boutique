@@ -102,6 +102,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/clients/search', [ProformaController::class, 'searchClients']);
         Route::get('/products/search', [ProformaController::class, 'searchProducts']);
         Route::get('/products/{productId}/stock', [ProformaController::class, 'getProductStock']);
+        Route::get('/{proforma}/edit-data', [ProformaController::class, 'editData']);
         Route::post('/store', [ProformaController::class, 'store']);
         Route::get('/products/{productId}/stock', [ProformaController::class, 'getProductStock']);
     });
