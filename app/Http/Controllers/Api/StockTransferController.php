@@ -311,4 +311,153 @@ class StockTransferController extends Controller
             'item_movement_note' => 'Transfert de destination',
         ]);
     }
+
+    public function cancelProformaTransfer(Request $request, Proforma $proforma)
+    {
+        $request->validate([
+            'commentaire' => 'nullable|string|max:1000',
+        ]);
+
+        if (!$proforma->is_valid || !$proforma->transfer_code || !$proforma->stock_recevant_id) {
+            return sendError("Ce proforma n'est pas un transfert valide à annuler.", 400);
+        }
+
+        DB::beginTransaction();
+        try {
+            $transferCode = $proforma->transfer_code;
+            $commentaire = $request->commentaire;
+            $cancelTransferCode = 'CANCEL-' . $transferCode . '-' . time();
+
+            $transfers = StockTransfer::where('transfer_code', $transferCode)
+                ->where('from_stock_id', $proforma->stock_id)
+                ->where('to_stock_id', $proforma->stock_recevant_id)
+                ->get();
+            if ($transfers->isEmpty()) {
+                DB::rollBack();
+                return sendError("Aucun mouvement de transfert trouvé pour ce proforma.", 404);
+            }
+
+            foreach ($transfers as $transfer) {
+                $product = Product::findOrFail($transfer->product_id);
+                $quantity = $transfer->quantity;
+
+                $sourceStock = Stock::findOrFail($transfer->from_stock_id);
+                $destinationStock = Stock::findOrFail($transfer->to_stock_id);
+
+                $destinationStockProduct = StockProduct::where('stock_id', $destinationStock->id)
+                    ->where('product_id', $product->id)
+                    ->first();
+
+                if (!$destinationStockProduct || $destinationStockProduct->quantity < $quantity) {
+                    throw new \Exception("Quantité insuffisante dans le stock recevant pour annuler {$product->name}.");
+                }
+
+                $sourceStockProduct = StockProduct::firstOrCreate(
+                    [
+                        'stock_id' => $sourceStock->id,
+                        'product_id' => $product->id,
+                    ],
+                    [
+                        'category_id' => $product->category_id,
+                        'product_name' => $product->name,
+                        'quantity' => 0,
+                        'agency_id' => auth()->user()->agency_id,
+                        'user_id' => auth()->id(),
+                    ]
+                );
+
+                $destinationStockProduct->quantity -= $quantity;
+                $destinationStockProduct->save();
+
+                $sourceStockProduct->quantity += $quantity;
+                $sourceStockProduct->save();
+
+                StockTransfer::create([
+                    'from_stock_id' => $destinationStock->id,
+                    'to_stock_id' => $sourceStock->id,
+                    'product_id' => $product->id,
+                    'quantity' => $quantity,
+                    'price' => 0,
+                    'user_id' => auth()->id(),
+                    'transfer_date' => now(),
+                    'note' => $commentaire ?: "Annulation du transfert {$transferCode}",
+                    'transfer_code' => $cancelTransferCode,
+                    'product_code' => $product->code,
+                    'product_name' => $product->name,
+                    'agency_id' => auth()->user()->agency_id,
+                    'created_by' => auth()->id(),
+                ]);
+
+                $this->createCancelStockMovements(
+                    $sourceStock,
+                    $destinationStock,
+                    $product,
+                    $quantity,
+                    $transferCode,
+                    $cancelTransferCode,
+                    $sourceStockProduct,
+                    $destinationStockProduct,
+                    $commentaire
+                );
+            }
+
+            $proforma->is_valid = false;
+            $proforma->transfer_code = null;
+            $proforma->stock_recevant_id = null;
+            $proforma->status = 'CANCELLED';
+            $proforma->save();
+
+            DB::commit();
+
+            return sendResponse([
+                'cancel_transfer_code' => $cancelTransferCode,
+            ], 'Transfert annulé avec succès');
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return sendError("Erreur lors de l'annulation du transfert: " . $e->getMessage(), 500, $e);
+        }
+    }
+
+    private function createCancelStockMovements($sourceStock, $destinationStock, $product, $quantity, $transferCode, $cancelTransferCode, $sourceStockProduct, $destinationStockProduct, $commentaire = null)
+    {
+        $note = $commentaire ?: 'Annulation transfert';
+
+        StockProductMouvement::create([
+            'agency_id' => auth()->user()->agency_id,
+            'stock_id' => $destinationStock->id,
+            'stock_product_id' => $destinationStockProduct->id,
+            'item_code' => $product->code,
+            'item_designation' => $product->name,
+            'item_quantity' => $quantity,
+            'item_measurement_unit' => $product->unit ?? 'Piece',
+            'item_purchase_or_sale_price' => $product->sale_price_ttc ?? 0,
+            'item_purchase_or_sale_currency' => $product->sale_price_currency ?? 'BIF',
+            'item_movement_type' => 'ST',
+            'item_movement_invoice_ref' => $cancelTransferCode,
+            'item_movement_description' => $cancelTransferCode . " - Annulation du transfert {$transferCode} vers " . $sourceStock->name,
+            'item_movement_date' => now(),
+            'item_product_detail_id' => $product->id,
+            'user_id' => auth()->id(),
+            'item_movement_note' => $note,
+        ]);
+
+        StockProductMouvement::create([
+            'agency_id' => auth()->user()->agency_id,
+            'stock_id' => $sourceStock->id,
+            'stock_product_id' => $sourceStockProduct->id,
+            'item_code' => $product->code,
+            'item_designation' => $product->name,
+            'item_quantity' => $quantity,
+            'item_measurement_unit' => $product->unit ?? 'Piece',
+            'item_purchase_or_sale_price' => $product->sale_price_ht ?? 0,
+            'item_purchase_or_sale_currency' => $product->sale_price_currency ?? 'BIF',
+            'item_movement_type' => 'ET',
+            'item_movement_invoice_ref' => $cancelTransferCode,
+            'item_movement_description' => $cancelTransferCode . " - Retour depuis " . $destinationStock->name,
+            'item_movement_date' => now(),
+            'item_product_detail_id' => $product->id,
+            'user_id' => auth()->id(),
+            'item_movement_note' => $note,
+        ]);
+    }
 }

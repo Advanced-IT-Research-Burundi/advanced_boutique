@@ -112,6 +112,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/stocks/products', [StockTransferController::class, 'getProducts']);
         Route::get('/stocks/products/proforma', [StockTransferController::class, 'getProformaProducts']);
         Route::post('/stocks/transfer', [StockTransferController::class, 'transfer']);
+        Route::post('/proformas/{proforma}/cancel-transfer', [StockTransferController::class, 'cancelProformaTransfer']);
 
     });
     Route::prefix('stock-products')->group(function () {

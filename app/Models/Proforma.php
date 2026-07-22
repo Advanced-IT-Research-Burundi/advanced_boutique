@@ -31,7 +31,10 @@ class Proforma extends Model
         'total_amount' => 'decimal:2',
         'due_amount' => 'decimal:2',
         'proforma_items' => 'array',
-        'client' => 'array'
+        'client' => 'array',
+        'is_valid' => 'boolean',
+        'stock_id' => 'integer',
+        'stock_recevant_id' => 'integer'
     ];
 
     protected $dates = [
