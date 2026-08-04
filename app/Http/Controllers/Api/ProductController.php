@@ -8,6 +8,7 @@ use App\Models\Category;
 use App\Models\Agency;
 use App\Models\User;
 use App\Models\Stock;
+use App\Models\StockProduct;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -93,7 +94,7 @@ class ProductController extends Controller
                 'tva' => 'nullable|numeric|min:0',
                 'unit' => 'required|string|max:50',
                 'alert_quantity' => 'required|numeric|min:0',
-                // 'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+                'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             ]);
 
             DB::beginTransaction();
@@ -119,7 +120,31 @@ class ProductController extends Controller
             $product->created_by = Auth::id();
             $product->save();
 
+
+            $stock = Stock::whereNotNull('name')->first();
+
+            // Check if product already exists in stock
+            $existingStockProduct = StockProduct::where('stock_id', $stock->id)
+            ->where('product_name', $product->name)
+            ->first();
+
+            if ($existingStockProduct) {
+               DB::rollback();
+               return sendError('Ce produit est déjà dans le magasin principal', 422);
+            }
+
+            $stockProduct = new StockProduct();
+            $stockProduct->stock_id = $stock->id;
+            $stockProduct->product_id = $product->id;
+            $stockProduct->quantity = 0;
+            $stockProduct->agency_id = $stock->agency_id ?? 1;
+            $stockProduct->user_id = Auth::id();
+            $stockProduct->product_name = $product->name;
+            $stockProduct->sale_price_ttc = $product->sale_price ?? 0;
+            $stockProduct->save();
+
             DB::commit();
+
 
             return sendResponse([
                 'product' => $product
