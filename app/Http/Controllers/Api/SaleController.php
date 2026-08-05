@@ -209,6 +209,9 @@ class SaleController extends Controller
                 ->map(function($p) {
                     return [
                         'id' => $p->id,
+                        'stock_product_id' => $p->id,
+                        'product_id' => $p->product_id,
+                        'real_product_id' => $p->product_id,
                         'name' => $p->product?->name,
                         'code' => $p->product?->code,
                         'tva' => $p->product?->tva ?? 0,

@@ -25,7 +25,8 @@ class ProformaController extends Controller
     public function index(Request $request)
     {
         $query = Proforma::with(['stock', 'stockRecevant', 'user', 'agency', 'createdBy'])
-            ->orderBy('created_at', 'desc');
+            ->orderByDesc('created_at')
+            ->orderByDesc('id');
 
         if ($request->filled('search')) {
             $search = $request->search;
@@ -125,9 +126,9 @@ class ProformaController extends Controller
 
         $stockProducts = StockProduct::query()
             ->with(['product' => function ($query) {
-                $query->select('id', 'name', 'code', 'unit', 'image', 'sale_price_ttc');
+                $query->select('id', 'name', 'code', 'unit', 'image', 'sale_price_ht', 'sale_price_ttc');
             }])
-            ->select('id', 'product_id', 'product_name', 'quantity')
+            ->select('id', 'product_id', 'product_name', 'quantity', 'sale_price_ht', 'sale_price_ttc')
             ->whereIn('id', $stockProductIds)
             ->get()
             ->keyBy('id');
@@ -138,12 +139,16 @@ class ProformaController extends Controller
 
             return array_merge($item, [
                 'product_id' => $stockProduct?->id ?? $item['product_id'],
-                'product_name' => $stockProduct?->product_name ?? $product?->name ?? '-',
-                'name' => $stockProduct?->product_name ?? $product?->name ?? '-',
+                'stock_product_id' => $stockProduct?->id ?? $item['stock_product_id'] ?? $item['product_id'],
+                'real_product_id' => $stockProduct?->product_id ?? $item['real_product_id'] ?? null,
+                'product_name' => $product?->name ?? $stockProduct?->product_name ?? '-',
+                'name' => $product?->name ?? $stockProduct?->product_name ?? '-',
                 'code' => $product?->code ?? 'N/A',
                 'unit' => $product?->unit ?? 'pcs',
                 'image' => $product?->image,
                 'available_stock' => $stockProduct?->quantity ?? 0,
+                'sale_price_ht' => $product?->sale_price_ht ?? $stockProduct?->sale_price_ht ?? 0,
+                'sale_price_ttc' => $product?->sale_price_ttc ?? $stockProduct?->sale_price_ttc ?? 0,
             ]);
         }, $items);
 
@@ -453,46 +458,52 @@ class ProformaController extends Controller
                 return sendError('Stock ID requis', 400, ['error' => 'Stock ID requis']);
             }
 
-            $query = Product::with(['stockProducts' => function ($query) use ($stockId) {
-                    $query->where('stock_id', $stockId);
-                }])
-                ->select('id', 'name', 'code', 'description', 'sale_price_ttc', 'unit', 'image', 'category_id')
-                ->whereHas('stockProducts', function ($query) use ($stockId) {
-                    // $query->where('quantity', '>=', 0)
-                          $query->where('stock_id', $stockId);
-                });
+            $query = StockProduct::with('product')
+                ->where('stock_id', $stockId)
+                ->whereHas('product');
 
             // Recherche par mot-clé
             if (!empty($search)) {
-                $query->where(function ($q) use ($search) {
+                $query->whereHas('product', function ($q) use ($search) {
                     $q->where('name', 'like', "%{$search}%")
-                      ->orWhere('code', 'like', "%{$search}%")
-                      ->orWhere('description', 'like', "%{$search}%");
+                        ->orWhere('code', 'like', "%{$search}%")
+                        ->orWhere('description', 'like', "%{$search}%");
                 });
             }
 
             // Filtrage par catégorie
             if (!empty($categoryId)) {
-                $query->where('category_id', $categoryId);
+                $query->whereHas('product', function ($q) use ($categoryId) {
+                    $q->where('category_id', $categoryId);
+                });
             }
 
-            $products = $query->orderBy('name')
-                            ->limit($perPage)
-                            ->get();
+            $products = $query->join('products', 'stock_products.product_id', '=', 'products.id')
+                ->orderBy('products.name')
+                ->select('stock_products.*')
+                ->limit($perPage)
+                ->get()
+                ->map(function ($stockProduct) {
+                    $product = $stockProduct->product;
 
-            // Enrichir avec les données de stock
-            $products->each(function ($product) use ($stockId) {
-                $stockProduct = $product->stockProducts->first();
-                $product->quantity_disponible = $stockProduct ? $stockProduct->quantity : 0;
-                $product->stock_id = $stockId;
-               // $product->id = $stockProduct->id;
-                $product->product_id = $product->id;
-                unset($product->id);
-                $product->id =$stockProduct->id;
-                // Nettoyer les relations pour réduire la taille de la réponse
-                unset($product->stockProducts);
-            });
-
+                    return [
+                        'id' => $stockProduct->id,
+                        'stock_product_id' => $stockProduct->id,
+                        'product_id' => $stockProduct->product_id,
+                        'real_product_id' => $stockProduct->product_id,
+                        'name' => $product?->name ?? $stockProduct->product_name,
+                        'code' => $product?->code,
+                        'description' => $product?->description,
+                        'sale_price_ht' => $product?->sale_price_ht ?? $stockProduct->sale_price_ht ?? 0,
+                        'sale_price_ttc' => $product?->sale_price_ttc ?? $stockProduct->sale_price_ttc ?? 0,
+                        'sale_price' => $product?->sale_price_ttc ?? $stockProduct->sale_price_ttc ?? 0,
+                        'unit' => $product?->unit ?? 'pcs',
+                        'image' => $product?->image,
+                        'category_id' => $product?->category_id,
+                        'quantity_disponible' => $stockProduct->quantity,
+                        'stock_id' => $stockProduct->stock_id,
+                    ];
+                });
 
 
             $data = [
@@ -599,9 +610,13 @@ class ProformaController extends Controller
         // Get Stock , product ID for stock product ID
 
         $items = array_map(function ($item) {
+            $stockProductId = $item['stock_product_id'] ?? $item['product_id'];
+            $stockProduct = StockProduct::select('id', 'product_id')->find($stockProductId);
+
             return [
-                'product_id' => $item['product_id'],
-                'stock_product_id' => $item['product_id'],
+                'product_id' => $stockProductId,
+                'stock_product_id' => $stockProductId,
+                'real_product_id' => $stockProduct?->product_id ?? $item['real_product_id'] ?? null,
                 'quantity' => $item['quantity'],
                 'sale_price' => $item['sale_price'],
                 'discount' => $item['discount'] ?? 0,
@@ -722,8 +737,13 @@ class ProformaController extends Controller
             $totals = $this->calculateTotals($request->items);
 
             $items = array_map(function ($item) {
+                $stockProductId = $item['stock_product_id'] ?? $item['product_id'];
+                $stockProduct = StockProduct::select('id', 'product_id')->find($stockProductId);
+
                 return [
-                    'product_id' => $item['product_id'],
+                    'product_id' => $stockProductId,
+                    'stock_product_id' => $stockProductId,
+                    'real_product_id' => $stockProduct?->product_id ?? $item['real_product_id'] ?? null,
                     'quantity' => $item['quantity'],
                     'sale_price' => $item['sale_price'],
                     'discount' => $item['discount'] ?? 0,
